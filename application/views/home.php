@@ -1,6 +1,7 @@
 <div class="navbar">
     <div class="navbar_container">
         <div class="links">
+            <a class="link" href="/"><i class="material-icons">home</i> Home</a>
             <a class="link" href="/graph"><i class="material-icons">timeline</i> Graph</a>
         </div>
         <div class="title">
