@@ -94,7 +94,14 @@
             <div class="navigation_block">
                 <div class="additional_infos">
                     <h4>Additional Info</h4>
-                    {{PRECISE_STATS}}
+                    <ul class="precise_stats">
+                        <li><span>Assertion Error : </span><?php echo $details->value_expected; ?></li>
+                        <li><span>File not found : </span><?php echo $details->file_not_found; ?></li>
+                        <li><span>Timeout : </span><?php echo $details->not_visible_after_timeout; ?></li>
+                        <li><span>Object not found : </span><?php echo $details->wrong_locator; ?></li>
+                        <li><span>Invalid Session ID : </span><?php echo $details->invalid_session_id; ?></li>
+                        <li><span>Chrome not reachable : </span><?php echo $details->chrome_not_reachable; ?></li>
+                    </ul>
                 </div>
             </div>
         </div>
