@@ -12,6 +12,7 @@ class Report extends CI_Controller {
         $this->load->model('Suite');
         $this->load->model('Test');
         $this->load->helper('url');
+        $this->load->helper('my_duration_helper');
 
         //get the current execution
         if (!is_numeric($id)) {

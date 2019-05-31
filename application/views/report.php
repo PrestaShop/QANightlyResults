@@ -9,6 +9,31 @@
         </div>
         <div class="recap">
 
+                <div class="recap_block suites" title="Execution time">
+                    <i class="material-icons">timer</i> <span><?php echo duration($execution->duration / 1000); ?></span>
+                </div>
+                <div class="recap_block suites" title="Number of suites">
+                    <i class="material-icons">library_books</i> <span><?php echo $execution->suites; ?></span>
+                </div>
+                <div class="recap_block tests" title="Number of tests">
+                    <i class="material-icons">assignment</i> <span><?php echo $execution->tests; ?></span>
+                </div>
+                <div class="recap_block passed_tests" title="Number of passed tests">
+                    <i class="material-icons">check_circle_outline</i> <span><?php echo $execution->passes; ?></span>
+                </div>
+                <?php
+                if ($execution->failures > 0) {
+                    echo '<div class="recap_block failed_tests" title="Number of failed tests">
+                <i class="material-icons">highlight_off</i> <span>'.$execution->failures.'</span>
+            </div>';
+                }
+
+                if ($execution->skipped > 0) {
+                    echo '<div class="recap_block skipped_tests" title="Number of skipped tests">
+                <i class="material-icons">radio_button_checked</i> <span>'.$execution->skipped.'</span>
+            </div>';
+                }
+            ?>
         </div>
     </div>
 </div>
@@ -140,12 +165,12 @@
         });
 
         //auto loader
-        $('.file_title').click(function() {
-            let button = $(this);
-            let campaign = $(this).data('campaign');
-            let file = $(this).data('file');
+        $('.file_title h3').click(function() {
+            let button = $(this).parent('.file_title');
+            let campaign = button.data('campaign');
+            let file = button.data('file');
             let data = {'campaign': campaign, 'file': file, 'execution_id': <?php echo $execution->id ?>};
-            if ($(this).attr('data-state') === 'empty') {
+            if (button.attr('data-state') === 'empty') {
                 button.children('.container_file').hide().html('<div class="ajaxloader"><img src="/public/assets/images/ajax-loader.gif"/></div>').show();
                 $.ajax({
                     url: "/report/getSuiteData",
