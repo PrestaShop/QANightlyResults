@@ -118,7 +118,6 @@
                         if ($cur_campaign != $item->campaign) {
                             $cur_campaign = $item->campaign;
 
-                            //echo '</section>'; //closing the file container section
                             echo '</article>'; //closing the article container
                             echo '<a name="'.$cur_campaign.'"></a>';
                             echo '<div class="campaign_title" id="'.$cur_campaign.'">
@@ -139,12 +138,13 @@
                             </section>
                          </div>';
                     }
-                    //echo '</section>'; //closing the file container section
                     echo '</article>'; //closing the article container
+                } else {
+                    echo '<h4>No data found</h4>';
                 }
             ?>
         </div>
-
+        <div style="clear:both"></div>
     </div>
 </div>
 <script>
