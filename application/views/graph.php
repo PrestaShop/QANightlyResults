@@ -74,7 +74,7 @@
                 <p><span>Timeout</span>: Object not found after waiting for it to be visible.</p>
                 <p><span>Object not found</span>: Selector not valid.</p>
                 <p><span>Invalid Session ID</span>: Selenium lost the browser.</p>
-                <p><span>Generic Error</span>: other types of error (ex: <code>cannot change style of null</code>).</p>
+                <p><span>Chrome not reachable</span>: Selenium lost the browser.</p>
             </div>
         </div>
     </div>

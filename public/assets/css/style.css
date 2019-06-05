@@ -251,14 +251,6 @@ button:hover {
     color: #C6C6C6;
 }
 
-
-h3.suite_title {
-    margin: 3px 0;
-    font-weight: 100;
-    line-height: 1.1;
-    font-size: 24px;
-}
-
 .suite {
     border-top: 1px solid #e0e0e0;
     border-bottom: 1px solid #e0e0e0;
@@ -483,6 +475,15 @@ code {
 .container_file .ajaxloader {
     margin: 3px auto;
     text-align: center;
+}
+
+h3.suite_title {
+    margin: 3px 0;
+    font-weight: 100;
+    line-height: 1.1;
+    font-size: 24px;
+    font-family: 'Roboto', sans-serif;
+    color: black;
 }
 
 hr {
