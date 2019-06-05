@@ -10,6 +10,8 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" type="text/css" href="/public/assets/css/style.css">
+
+    <link rel="icon" href="/public/assets/favicon.ico" sizes="16x16">
     <?php
         if (isset($js)) {
             foreach($js as $file) {

@@ -16,11 +16,11 @@ button {
     border-radius: 3px;
     box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
     cursor: pointer;
-    color: #37474f;
+    color: #251b5b;
 }
 
 button:hover {
-    background-color: #698796;
+    background-color: #ff0076;
     color: #eee;
 }
 
@@ -125,7 +125,7 @@ button:hover {
 }
 
 #left_navigation .campaign:hover {
-    background-color: #37474f;
+    background-color: #251b5b;
     color: white;
 }
 
@@ -155,7 +155,7 @@ button:hover {
 }
 
 #left_navigation .file:hover {
-    background-color: #37474f;
+    background-color: #251b5b;
     color: white;
 }
 
@@ -174,7 +174,7 @@ button:hover {
     left: 0;
     margin-bottom: 0;
     border: none;
-    background: #37474f;
+    background: #251b5b;
     z-index: 9999;
     box-shadow: 0 2px 5px 0 rgba(0,0,0,.16), 0 2px 10px 0 rgba(0,0,0,.12);
 }
@@ -204,7 +204,7 @@ button:hover {
 }
 
 .navbar .navbar_container .links a.link:hover {
-    text-decoration: underline;
+    color: #ff0076;
 }
 
 .navbar .title {
@@ -435,7 +435,7 @@ code {
     font-size: 22px;
     line-height: 22px;
     margin: 0;
-    color: #37474f;
+    color: #251b5b;
     font-family: 'Roboto Mono', monospace;
 }
 
@@ -488,7 +488,7 @@ h3.suite_title {
 
 hr {
     width: 90%;
-    background-color: #37474f;
+    background-color: #251b5b;
     margin: 3px 0;
 }
 
@@ -538,7 +538,7 @@ hr {
     min-height: 60px;
     margin: 0;
     padding: 0;
-    background-color: #37474f;
+    background-color: #251b5b;
     color: white;
 }
 
@@ -601,7 +601,7 @@ table.table {
 }
 
 table.table thead {
-    background-color: #37474f;
+    background-color: #251b5b;
     color: white;
 }
 
@@ -669,16 +669,16 @@ span.label {
     color: white;
     margin: 5px 10px;
     cursor: pointer;
-    box-shadow: 0px 5px 8px 0px rgba(55,71,79,1);
+    box-shadow: 0px 5px 8px 0px rgba(37,27,91,1);
 }
 
 span.label[data-active=true] {
-    background-color: #37474f;
+    background-color: #ff0076;
     color: white;
 }
 
 span.label:hover {
-    background-color: #6D8C9B;/*#5B7582;*/
+    background-color: #ff0076;/*#5B7582;*/
     color:white;
 }
 
