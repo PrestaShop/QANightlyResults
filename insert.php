@@ -98,9 +98,9 @@ function loopThrough($pdo, $suite, $parent_suite_id = null) {
                     'title' => $test->title,
                     'state' => getTestState($test),
                     'duration' => $test->duration,
-                    'error_message' => isset($test->error_message) ? $test->error_message : null,
-                    'stack_trace' => isset($test->stack_trace) ? $test->stack_trace : null,
-                    'diff' => isset($test->diff) ? $test->diff : null,
+                    'error_message' => isset($test->err->message) ? sanitize($test->err->message) : null,
+                    'stack_trace' => isset($test->err->estack) ? sanitize($test->err->estack) : null,
+                    'diff' => isset($test->err->diff) ? sanitize($test->err->diff) : null,
                 ];
                 $test_id = insertTest($pdo, $data_test);
                 echo "-------- test ID $test_id\n";
