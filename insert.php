@@ -33,11 +33,84 @@ try {
 //time for stuff
 //create the execution
 $stats = getOrFail($file_contents, 'stats');
-$execution = [
+$execution_data = [
     'ref' => date('YmdHis'),
-
+    'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
+    'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
+    'duration' => $stats->duration,
+    'version' => getVersion(basename($filepath))
 ];
 
+$execution_id = insertExecution($pdo, $execution_data);
+
+/*
+ * MAIN FUNCTION
+ */
+
+$current_campaign_name = '';
+$current_file_name = '';
+function loopThrough($pdo, $suite, $parent_suite_id = null) {
+    global $execution_id;
+    global $current_campaign_name;
+    global $current_file_name;
+    if ($current_campaign_name != extractNames($suite->filename, 'campaign')) {
+        $current_campaign_name = extractNames($suite->filename, 'campaign');
+    }
+    if ($current_file_name != extractNames($suite->filename, 'file')) {
+        $current_file_name = extractNames($suite->filename, 'file');
+    }
+
+    $data_suite = [
+        'execution_id' => $execution_id,
+        'uuid' => $suite->uuid,
+        'title' => $suite->title,
+        'campaign' => $current_campaign_name,
+        'file' => $current_file_name,
+        'duration' => $suite->duration,
+        'hasSkipped' => $suite->hasSkipped,
+        'hasPasses' => $suite->hasPasses,
+        'hasFailures' => $suite->hasFailures,
+        'totalSkipped' => $suite->totalSkipped,
+        'totalPasses' => $suite->totalPasses,
+        'totalFailures' => $suite->totalFailures,
+        'hasSuites' => $suite->hasSuites,
+        'hasTests' => $suite->hasTests,
+        'parent_id' => $parent_suite_id,
+    ];
+
+
+    //inserting current suite
+    $suite_id = insertSuite($pdo, $data_suite);
+
+    if ($suite_id) {
+        //insert tests
+        if ($suite->hasTests) {
+            foreach($suite->tests as $test) {
+                $data_test = [
+                    'suite_id' => $suite_id,
+                    'uuid' => $test->uuid,
+                    'title' => $test->title,
+                    'state' => getTestState($test),
+                    'duration' => $test->duration,
+                    'error_message' => $test->error_message,
+                    'stack_trace' => $test->stack_trace,
+                    'diff' => $test->diff,
+                ];
+                insertTest($pdo, $data_test);
+            }
+        }
+        //insert children suites
+        if ($suite->hasSuites) {
+            foreach($suite->hasSuites as $s) {
+                loopThrough($pdo, $s, $suite_id);
+            }
+        }
+    } else {
+        //damn, this suite already exist...
+        //we don't want to abort, just log this
+        echo "[WARN] Suite already present in database, skipping...\n";
+    }
+}
 
 /*
  * SQL FUNCTIONS
@@ -52,7 +125,7 @@ $execution = [
 function insertExecution($pdo, $object)
 {
     $query = "INSERT INTO `execution`(`ref`, `start_date`, `end_date`, `duration`, `version`, `suites`, `tests`, `skipped`, `passes`, `failures`)
-VALUES (:ref, :start_date, :end_date, :duration, :version, :suites, :tests, :skipped, :passes, :failures);";
+VALUES (:ref, :start_date, :end_date, :duration, :version, 0, 0, 0, 0, 0);";
     $result = query($pdo, $query, $object);
     return $result->lastInsertId();
 }
@@ -157,4 +230,36 @@ function getOrFail($contents, $object)
     } else {
         return null;
     }
+}
+
+/**
+ * Get the version from the filename
+ * @param $filename
+ * @return mixed|string
+ */
+function getVersion($filename)
+{
+    $pattern = '/reports_[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*?)\.json/';
+    preg_match($pattern, $filename, $matches);
+    if (!isset($matches[1]) || $matches[1] == '') {
+        return '';
+    }
+    return $matches[1];
+}
+
+/**
+ * Get the state of a test, attribute "state" is not always set
+ * @param $test
+ * @return string
+ */
+function getTestState($test)
+{
+    if (isset($test->state)) {
+        return $test->state;
+    } else {
+        if ($test->skipped == true) {
+            return 'skipped';
+        }
+    }
+    return 'failed';
 }
