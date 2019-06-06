@@ -42,6 +42,7 @@ $execution_data = [
 ];
 
 $execution_id = insertExecution($pdo, $execution_data);
+echo "Inserted execution #$execution_id\n";
 
 /*
  * MAIN FUNCTION
@@ -53,11 +54,14 @@ function loopThrough($pdo, $suite, $parent_suite_id = null) {
     global $execution_id;
     global $current_campaign_name;
     global $current_file_name;
-    if ($current_campaign_name != extractNames($suite->filename, 'campaign')) {
-        $current_campaign_name = extractNames($suite->filename, 'campaign');
+
+    if ($current_campaign_name != extractNames($suite->file, 'campaign')) {
+        $current_campaign_name = extractNames($suite->file, 'campaign');
+        echo "\n-- Changing campaign to $current_campaign_name\n";
     }
-    if ($current_file_name != extractNames($suite->filename, 'file')) {
-        $current_file_name = extractNames($suite->filename, 'file');
+    if ($current_file_name != extractNames($suite->file, 'file')) {
+        $current_file_name = extractNames($suite->file, 'file');
+        echo "---- Changing file to $current_file_name\n";
     }
 
     $data_suite = [
@@ -67,24 +71,26 @@ function loopThrough($pdo, $suite, $parent_suite_id = null) {
         'campaign' => $current_campaign_name,
         'file' => $current_file_name,
         'duration' => $suite->duration,
-        'hasSkipped' => $suite->hasSkipped,
-        'hasPasses' => $suite->hasPasses,
-        'hasFailures' => $suite->hasFailures,
+        'hasSkipped' => $suite->hasSkipped ? 1 :0,
+        'hasPasses' => $suite->hasPasses ? 1 :0,
+        'hasFailures' => $suite->hasFailures ? 1 :0,
         'totalSkipped' => $suite->totalSkipped,
         'totalPasses' => $suite->totalPasses,
         'totalFailures' => $suite->totalFailures,
-        'hasSuites' => $suite->hasSuites,
-        'hasTests' => $suite->hasTests,
+        'hasSuites' => $suite->hasSuites ? 1 :0,
+        'hasTests' => $suite->hasTests ? 1 :0,
         'parent_id' => $parent_suite_id,
     ];
 
 
     //inserting current suite
     $suite_id = insertSuite($pdo, $data_suite);
+    echo "------ suite ID $suite_id\n";
 
     if ($suite_id) {
         //insert tests
-        if ($suite->hasTests) {
+        if (sizeof($suite->tests) > 0) {
+            echo "------ suite has tests\n";
             foreach($suite->tests as $test) {
                 $data_test = [
                     'suite_id' => $suite_id,
@@ -92,25 +98,59 @@ function loopThrough($pdo, $suite, $parent_suite_id = null) {
                     'title' => $test->title,
                     'state' => getTestState($test),
                     'duration' => $test->duration,
-                    'error_message' => $test->error_message,
-                    'stack_trace' => $test->stack_trace,
-                    'diff' => $test->diff,
+                    'error_message' => isset($test->error_message) ? $test->error_message : null,
+                    'stack_trace' => isset($test->stack_trace) ? $test->stack_trace : null,
+                    'diff' => isset($test->diff) ? $test->diff : null,
                 ];
-                insertTest($pdo, $data_test);
+                $test_id = insertTest($pdo, $data_test);
+                echo "-------- test ID $test_id\n";
             }
         }
         //insert children suites
-        if ($suite->hasSuites) {
-            foreach($suite->hasSuites as $s) {
+        if (sizeof($suite->suites) > 0) {
+            foreach($suite->suites as $s) {
                 loopThrough($pdo, $s, $suite_id);
             }
         }
     } else {
         //damn, this suite already exist...
         //we don't want to abort, just log this
-        echo "[WARN] Suite already present in database, skipping...\n";
+        echo "[ERROR] Error inserting into database...\n";
     }
 }
+
+//launching the walker
+loopThrough($pdo, getOrFail($file_contents, 'suites'));
+
+
+//update infos about the whole execution
+$query = "SELECT 
+COUNT(DISTINCT(s.id)) suites,
+COUNT(t.id) tests,
+SUM(IF(t.state='passed', 1, 0)) passed,
+SUM(IF(t.state='failed', 1, 0)) failed,
+SUM(IF(t.state='skipped', 1, 0)) skipped
+
+FROM `execution` e
+INNER JOIN `suite` s on s.execution_id = e.id
+INNER JOIN `test` t on t.suite_id = s.id
+WHERE e.id = :execution_id;";
+$stmt = $pdo->prepare($query);
+$stmt->execute(['execution_id' => $execution_id]);
+$updated_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$query = "UPDATE execution
+SET suites=:suites, tests=:tests, skipped = :skipped, passes=:passes, failures=:failures, insertion_end_date=NOW()
+WHERE id=:execution_id;";
+$stmt = $pdo->prepare($query);
+$stmt->execute([
+    'execution_id' => $execution_id,
+    'skipped' => $updated_data['skipped'],
+    'suites' => $updated_data['suites'],
+    'tests' => $updated_data['tests'],
+    'passes' => $updated_data['passed'],
+    'failures' => $updated_data['failed'],
+]);
 
 /*
  * SQL FUNCTIONS
@@ -126,8 +166,8 @@ function insertExecution($pdo, $object)
 {
     $query = "INSERT INTO `execution`(`ref`, `start_date`, `end_date`, `duration`, `version`, `suites`, `tests`, `skipped`, `passes`, `failures`)
 VALUES (:ref, :start_date, :end_date, :duration, :version, 0, 0, 0, 0, 0);";
-    $result = query($pdo, $query, $object);
-    return $result->lastInsertId();
+    query($pdo, $query, $object);
+    return $pdo->lastInsertId();
 }
 
 /**
@@ -140,8 +180,8 @@ function insertSuite($pdo, $object)
 {
     $query = "INSERT INTO `suite`(`execution_id`, `uuid`, `title`, `campaign`, `file`, `duration`, `hasSkipped`, `hasPasses`, `hasFailures`, `totalSkipped`, `totalPasses`, `totalFailures`, `hasSuites`, `hasTests`, `parent_id`) 
 VALUES (:execution_id, :uuid, :title, :campaign, :file, :duration, :hasSkipped, :hasPasses, :hasFailures, :totalSkipped, :totalPasses, :totalFailures, :hasSuites, :hasTests, :parent_id)";
-    $result = query($pdo, $query, $object);
-    return $result->lastInsertId();
+    query($pdo, $query, $object);
+    return $pdo->lastInsertId();
 }
 
 /**
@@ -154,8 +194,8 @@ function insertTest($pdo, $object)
 {
     $query = "INSERT INTO `test`(`suite_id`, `uuid`, `title`, `state`, `duration`, `error_message`, `stack_trace`, `diff`) 
 VALUES (:suite_id, :uuid, :title, :state, :duration, :error_message, :stack_trace, :diff)";
-    $result = query($pdo, $query, $object);
-    return $result->lastInsertId();
+    query($pdo, $query, $object);
+    return $pdo->lastInsertId();
 }
 
 /**
