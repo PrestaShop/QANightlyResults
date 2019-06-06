@@ -135,15 +135,14 @@ FROM `execution` e
 INNER JOIN `suite` s on s.execution_id = e.id
 INNER JOIN `test` t on t.suite_id = s.id
 WHERE e.id = :execution_id;";
-$stmt = $pdo->prepare($query);
-$stmt->execute(['execution_id' => $execution_id]);
-$updated_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$updated_data = query($pdo, $query, ['execution_id' => $execution_id])->fetch(PDO::FETCH_ASSOC);
 
 $query = "UPDATE execution
 SET suites=:suites, tests=:tests, skipped = :skipped, passes=:passes, failures=:failures, insertion_end_date=NOW()
 WHERE id=:execution_id;";
-$stmt = $pdo->prepare($query);
-$stmt->execute([
+
+query($pdo, $query, [
     'execution_id' => $execution_id,
     'skipped' => $updated_data['skipped'],
     'suites' => $updated_data['suites'],
