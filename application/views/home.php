@@ -5,7 +5,7 @@
             <a class="link" href="/graph"><i class="material-icons">timeline</i> Graph</a>
         </div>
         <div class="title">
-            <h2>Nightlies results</h2>
+            <h2>Nightlies reports</h2>
         </div>
     </div>
 </div>
