@@ -156,8 +156,8 @@ class Report extends CI_Controller {
                 $this->suites_content .= '<div id="' . $test->uuid . '" class="test"><div class="test_' . $test->state . '"> ' .$icon.' <span class="test_title" id="' . $test->uuid . '">'.$test->title . '</span></div>';
                 $this->suites_content .= '<div class="test_duration"><i class="material-icons">timer</i> '.format_duration($test->duration).'</div>';
                 if ($test->state == 'failed') {
-                    $this->suites_content .= '<div class="test_info error_message">' . $test->error_message . '</div>';
-                    $this->suites_content .= '<div class="test_info stack_trace" id="stack_'.$test->uuid.'"><code>'.str_replace('    at', "<br />&nbsp;&nbsp;&nbsp;&nbsp;at", $test->stack_trace).'</code></div>';
+                    $this->suites_content .= '<div class="test_info error_message">' . htmlentities($test->error_message) . '</div>';
+                    $this->suites_content .= '<div class="test_info stack_trace" id="stack_'.$test->uuid.'"><code>'.str_replace('    at', "<br />&nbsp;&nbsp;&nbsp;&nbsp;at", htmlentities($test->stack_trace)).'</code></div>';
                 }
 
                 $this->suites_content .= '</div>'; //uuid
