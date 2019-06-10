@@ -19,14 +19,23 @@ if ( ! function_exists('duration'))
         if ($duration < 1000) {
             return $duration.'ms';
         }
-        if ($duration < 1000*60) { //< 1 min
+        if ($duration < 5000) { //< 5 s
             return round($duration/1000, 3).'s';
         }
-        if ($duration < 1000*60*60) { // < 1h
+        if ($duration < 60000) { // < 1 min
+            return floor($duration/1000).'s';
+        }
+        $dt = new DateTime();
+        $dt->add(new DateInterval('PT'.floor($duration/1000).'S'));
+        $interval = $dt->diff(new DateTime());
+        return $interval->format('%Im %Ss');
+
+        /*if ($duration < 1000*60*60) { // < 1h
             $minutes = floor(($duration / 60000) % 60);
             $duration -= $minutes;
             $seconds = round($duration/1000, 3);
             return $minutes.':'.$seconds.'m';
-        }
+        }*/
+
     }
 }
