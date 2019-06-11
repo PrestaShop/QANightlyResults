@@ -31,7 +31,11 @@ class Execution extends CI_Model
     }
 
     function getVersions() {
-        return $this->db->query("SELECT DISTINCT(version) FROM $this->table;");
+        return $this->db->query("SELECT 
+                version, count(id) cpt
+                FROM $this->table
+                GROUP BY version
+                ORDER BY cpt DESC;");
     }
 
     function getCustomData($criteria) {
