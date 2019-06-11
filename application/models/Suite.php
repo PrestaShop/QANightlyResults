@@ -27,7 +27,7 @@ class Suite extends CI_Model
 
 
     function getCampaigns() {
-        return $this->db->query("SELECT DISTINCT(campaign) FROM $this->table WHERE campaign IS NOT NULL ORDER BY campaign;");
+        return $this->db->query("SELECT DISTINCT(campaign) FROM $this->table WHERE campaign IS NOT NULL AND campaign != '' ORDER BY campaign;");
     }
 
     function getAllSuitesByFile($execution_id, $campaign, $file)
