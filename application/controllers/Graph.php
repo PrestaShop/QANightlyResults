@@ -24,14 +24,14 @@ class Graph extends CI_Controller {
         $graph_data = $this->Execution->getCustomData([
             'version' => $selected_version,
             'start_date' => $start_date,
-            'end_date' => $end_date,
+            'end_date' => date('Y-m-d', strtotime($end_date) + 3600*24),
             'campaign' => $selected_campaign
         ])->result_array();
 
         $detailed_graph_data = $this->Execution->getPreciseStats([
             'version' => $selected_version,
             'start_date' => $start_date,
-            'end_date' => $end_date,
+            'end_date' => date('Y-m-d', strtotime($end_date) + 3600*24),
             'campaign' => $selected_campaign
         ])->result_array();
 
