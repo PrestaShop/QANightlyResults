@@ -136,7 +136,9 @@ INNER JOIN `suite` s on s.execution_id = e.id
 INNER JOIN `test` t on t.suite_id = s.id
 WHERE e.id = :execution_id;";
 
-$updated_data = query($pdo, $query, ['execution_id' => $execution_id])->fetch(PDO::FETCH_ASSOC);
+$sth = $pdo->prepare($query);
+$sth->execute(['execution_id' => $execution_id]);
+$updated_data = $sth->fetch(PDO::FETCH_ASSOC);
 
 $query = "UPDATE execution
 SET suites=:suites, tests=:tests, skipped = :skipped, passes=:passes, failures=:failures, insertion_end_date=NOW()
@@ -300,5 +302,5 @@ function getTestState($test)
             return 'skipped';
         }
     }
-    return 'failed';
+    return 'unknown';
 }
