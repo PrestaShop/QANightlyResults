@@ -123,9 +123,7 @@ INNER JOIN `suite` s on s.execution_id = e.id
 INNER JOIN `test` t on t.suite_id = s.id
 WHERE e.id = :execution_id;";
 
-$sth = $pdo->prepare($query);
-$sth->execute(['execution_id' => $execution_id]);
-$updated_data = $sth->fetch(PDO::FETCH_ASSOC);
+$updated_data = query($pdo, $query, ['execution_id' => $execution_id])->fetch(PDO::FETCH_ASSOC);
 
 $query = "UPDATE execution
 SET suites=:suites, tests=:tests, skipped = :skipped, passes=:passes, failures=:failures, insertion_end_date=NOW()
@@ -196,7 +194,8 @@ VALUES (:suite_id, :uuid, :title, :state, :duration, :error_message, :stack_trac
 function query($pdo, $query, $args)
 {
     $req = $pdo->prepare($query);
-    return $req->execute($args);
+    $req->execute($args);
+    return $req;
 }
 
 
@@ -205,7 +204,7 @@ function query($pdo, $query, $args)
  */
 
 /**
- * Extract th campaign or the filename from the full filepath of the suite
+ * Extract the campaign or the filename from the full filepath of the suite
  * @param $filename
  * @param $type
  * @return mixed|null
