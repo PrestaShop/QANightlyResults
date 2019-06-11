@@ -48,28 +48,15 @@ echo "Inserted execution #$execution_id\n";
  * MAIN FUNCTION
  */
 
-$current_campaign_name = '';
-$current_file_name = '';
 function loopThrough($pdo, $suite, $parent_suite_id = null) {
     global $execution_id;
-    global $current_campaign_name;
-    global $current_file_name;
-
-    if ($current_campaign_name != extractNames($suite->file, 'campaign')) {
-        $current_campaign_name = extractNames($suite->file, 'campaign');
-        echo "\n-- Changing campaign to $current_campaign_name\n";
-    }
-    if ($current_file_name != extractNames($suite->file, 'file')) {
-        $current_file_name = extractNames($suite->file, 'file');
-        echo "---- Changing file to $current_file_name\n";
-    }
 
     $data_suite = [
         'execution_id' => $execution_id,
         'uuid' => $suite->uuid,
         'title' => $suite->title,
-        'campaign' => $current_campaign_name,
-        'file' => $current_file_name,
+        'campaign' => extractNames($suite->file, 'campaign'),
+        'file' => extractNames($suite->file, 'file'),
         'duration' => $suite->duration,
         'hasSkipped' => $suite->hasSkipped ? 1 :0,
         'hasPasses' => $suite->hasPasses ? 1 :0,
