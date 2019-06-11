@@ -447,7 +447,7 @@ code {
     padding: 0;
 }
 
-.file_title h3 {
+.file_title>h3 {
     font-weight: normal;
     font-size: 16px;
     color: #474F37;
@@ -458,7 +458,7 @@ code {
     line-height: 16px;
 }
 
-.file_title h3:hover {
+.file_title>h3:hover {
     background-color: #eee;
 }
 
