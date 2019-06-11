@@ -15,7 +15,7 @@ CREATE TABLE `execution` (
  PRIMARY KEY (`id`),
  KEY `version` (`version`),
  KEY `execution_id` (`ref`)
-) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `suite` (
  `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -35,8 +35,10 @@ CREATE TABLE `suite` (
  `hasTests` int(11) DEFAULT NULL,
  `parent_id` int(11) DEFAULT NULL,
  `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
- PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33325 DEFAULT CHARSET=latin1;
+ PRIMARY KEY (`id`),
+ KEY `execution_id` (`execution_id`),
+ CONSTRAINT `suite_ibfk_1` FOREIGN KEY (`execution_id`) REFERENCES `execution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=46833 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `test` (
  `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -51,5 +53,7 @@ CREATE TABLE `test` (
  `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
  PRIMARY KEY (`id`),
  KEY `state` (`state`),
- KEY `id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=239362 DEFAULT CHARSET=latin1
+ KEY `id` (`id`),
+ KEY `suite_id` (`suite_id`),
+ CONSTRAINT `test_ibfk_1` FOREIGN KEY (`suite_id`) REFERENCES `suite` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=312039 DEFAULT CHARSET=latin1;
