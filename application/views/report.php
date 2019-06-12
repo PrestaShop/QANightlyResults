@@ -131,9 +131,9 @@
                             $indicators = '<span class="indicator failed" title="Tests failed">('.$item->hasFailed.')</span>';
                         }
 
-                        echo '<div class="file_title" data-state="empty" data-campaign="'.$cur_campaign.'" data-file="'.($item->file).'" title="Click to load data">
+                        echo '<div class="file_title" data-state="empty" data-campaign="'.$cur_campaign.'" data-file="'.($item->file).'" >
                         <a name="'.$item->file.'"></a>
-                            <h3><i class="material-icons">assignment</i> '.$item->file.' '.$indicators.'</h3>
+                            <h3 title="Click to load data"><i class="material-icons">assignment</i> '.$item->file.' '.$indicators.'</h3>
                             <section class="container_file">
                             </section>
                          </div>';
@@ -172,8 +172,9 @@
         });
 
         //auto loader
-        $('.file_title h3').click(function() {
+        $('.file_title>h3').click(function() {
             let button = $(this).parent('.file_title');
+            const that = $(this);
             let campaign = button.data('campaign');
             let file = button.data('file');
             let data = {'campaign': campaign, 'file': file, 'execution_id': <?php echo $execution->id ?>};
@@ -188,7 +189,7 @@
                         console.log(button.closest('.container_file'));
                         button.children('.container_file').hide().html(response).fadeIn('fast');
                         button.attr('data-state', 'loaded');
-                        button.attr('title', "Click to toggle the view");
+                        that.attr('title', "Click to toggle the view");
                     },
                     error: function(response) {
                         alert("Loading failed. Try again in a few moments.");
