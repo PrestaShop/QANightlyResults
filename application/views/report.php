@@ -5,22 +5,24 @@
             <a class="link" href="/graph"><i class="material-icons">timeline</i> Graph</a>
         </div>
         <div class="title">
-            <h2>Report</h2>
+            <h2>Report - <?php echo date('d/m/Y', strtotime($execution->start_date)); ?></h2>
         </div>
         <div class="recap">
 
-                <div class="recap_block suites" title="Execution time">
-                    <i class="material-icons">timer</i> <span><?php echo duration($execution->duration / 1000); ?></span>
-                </div>
-                <div class="recap_block suites" title="Number of suites">
-                    <i class="material-icons">library_books</i> <span><?php echo $execution->suites; ?></span>
-                </div>
-                <div class="recap_block tests" title="Number of tests">
-                    <i class="material-icons">assignment</i> <span><?php echo $execution->tests; ?></span>
-                </div>
-                <div class="recap_block passed_tests" title="Number of passed tests">
-                    <i class="material-icons">check_circle_outline</i> <span><?php echo $execution->passes; ?></span>
-                </div>
+            <div class="recap_block suites" title="Version <?php echo $execution->version; ?>">
+                <i class="material-icons">local_offer</i> <span><?php echo $execution->version; ?></span>
+            </div><div class="recap_block suites" title="Execution time">
+                <i class="material-icons">timer</i> <span><?php echo duration($execution->duration / 1000); ?></span>
+            </div>
+            <div class="recap_block suites" title="Number of suites">
+                <i class="material-icons">library_books</i> <span><?php echo $execution->suites; ?></span>
+            </div>
+            <div class="recap_block tests" title="Number of tests">
+                <i class="material-icons">assignment</i> <span><?php echo $execution->tests; ?></span>
+            </div>
+            <div class="recap_block passed_tests" title="Number of passed tests">
+                <i class="material-icons">check_circle_outline</i> <span><?php echo $execution->passes; ?></span>
+            </div>
                 <?php
                 if ($execution->failures > 0) {
                     echo '<div class="recap_block failed_tests" title="Number of failed tests">
