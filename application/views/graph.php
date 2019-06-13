@@ -145,6 +145,7 @@
         const p_wrong_locator = Array.from(precise_data, x => x.wrong_locator);
         const p_invalid_session_id = Array.from(precise_data, x => x.invalid_session_id);
         const p_chrome_not_reachable = Array.from(precise_data, x => x.chrome_not_reachable);
+        const p_other = Array.from(precise_data, x => x.failures - x.value_expected - x.file_not_found - x.not_visible_after_timeout - x.wrong_locator - x.invalid_session_id - x.chrome_not_reachable);
 
         var p_canvas = document.getElementById('chart_precise');
         var p_ctx = p_canvas.getContext('2d');
@@ -188,6 +189,12 @@
                         data: p_chrome_not_reachable,
                         backgroundColor: 'rgba(244, 151, 65, '+opacity+')',
                         fill: '-5'
+                    },
+                    {
+                        label: 'Other',
+                        data: p_other,
+                        backgroundColor: 'rgba(0, 0, 0, '+opacity+')',
+                        fill: '-6'
                     }]
             },
             options: {
