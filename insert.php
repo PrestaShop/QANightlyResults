@@ -1,11 +1,4 @@
 <?php
-/*
-$PDO_USER = 'simon';
-$PDO_PASS = 'phpmyadmin';
-$PDO_DB = 'prestashop_results';
-$PDO_HOST = 'localhost';
-
-$dsn = "mysql:host=$PDO_HOST;dbname=$PDO_DB";*/
 
 if (!is_file("application/config/database.php") || !is_readable("application/config/database.php")) {
     die("[ERROR] : application/config/database.php not found or not readable. Please set up the environment before inserting.\n");
