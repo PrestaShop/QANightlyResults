@@ -7,6 +7,11 @@ CIPSJsonParser is a small PHP script based on CodeIgniter. Its purpose is to :
 
 ## Usage
 
-Create a database following the schema provided in schema.sql at the root of the project. Be sure to update config files in CI config/ directory.
+Create a database following the schema provided in schema.sql at the root of the project.
 
-Use insert.php to insert json files. Be sure to edit connection info at the top of the file. The first argument of the script is the path to the file. The filename **must** look like this : reports_2019-06-05-1.7.6.x.json ("reports_YYYY-MM-DD-VERSION.json") to work properly.
+Remove the .dist extension for all files in application/config. For example, `database.php.dist` becomes `database.php`.
+Open them and edit them at your convenience (mainly `config.php` and `database.php`).
+
+Use `insert.php` to insert json files. This file uses the `database.php` config file in `application/config` so be sure it's set up correctly.
+ 
+The first argument of the script is the path to the file. The filename **must** look like this : `reports_2019-06-05-1.7.6.x.json` ("reports_YYYY-MM-DD-VERSION.json") to work properly.
