@@ -1,11 +1,24 @@
 <?php
-
+/*
 $PDO_USER = 'simon';
 $PDO_PASS = 'phpmyadmin';
 $PDO_DB = 'prestashop_results';
 $PDO_HOST = 'localhost';
 
-$dsn = "mysql:host=$PDO_HOST;dbname=$PDO_DB";
+$dsn = "mysql:host=$PDO_HOST;dbname=$PDO_DB";*/
+
+if (!is_file("application/config/database.php") || !is_readable("application/config/database.php")) {
+    die("[ERROR] : application/config/database.php not found or not readable. Please set up the environment before inserting.\n");
+}
+
+//bypass CI security
+define("BASEPATH", '/');
+
+$db = [];
+@require_once('application/config/database.php');
+$database_data = $db[$active_group];
+
+$dsn = sprintf("mysql:host=%s;dbname=%s", $database_data['hostname'], $database_data['database']);
 
 //arguments
 if (count($argv) != 2)
@@ -25,7 +38,7 @@ try {
 }
 
 try {
-    $pdo = new PDO($dsn, $PDO_USER, $PDO_PASS);
+    $pdo = new PDO($dsn, $database_data['username'], $database_data['password']);
 } catch(Exception $exception) {
     die("[ERROR] : Can't connect to database : $exception->getMessage()\n");
 }
@@ -72,12 +85,12 @@ function loopThrough($pdo, $suite, $parent_suite_id = null) {
 
     //inserting current suite
     $suite_id = insertSuite($pdo, $data_suite);
-    echo "------ suite ID $suite_id\n";
+    echo sprintf("------ suite ID %s\n", $suite_id);
 
     if ($suite_id) {
         //insert tests
         if (sizeof($suite->tests) > 0) {
-            echo "------ suite has tests\n";
+            echo sprintf("------ suite has %s tests\n", sizeof($suite->tests));
             foreach($suite->tests as $test) {
                 $data_test = [
                     'suite_id' => $suite_id,
@@ -89,8 +102,7 @@ function loopThrough($pdo, $suite, $parent_suite_id = null) {
                     'stack_trace' => isset($test->err->estack) ? sanitize($test->err->estack) : null,
                     'diff' => isset($test->err->diff) ? sanitize($test->err->diff) : null,
                 ];
-                $test_id = insertTest($pdo, $data_test);
-                echo "-------- test ID $test_id\n";
+                insertTest($pdo, $data_test);
             }
         }
         //insert children suites
