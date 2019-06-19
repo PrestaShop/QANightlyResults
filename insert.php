@@ -14,14 +14,19 @@ $database_data = $db[$active_group];
 $dsn = sprintf("mysql:host=%s;dbname=%s", $database_data['hostname'], $database_data['database']);
 
 //arguments
-if (count($argv) != 2)
+if (count($argv) != 3)
 {
-    die("[ERROR] : You need to pass the file as the first argument\n");
+    die("[ERROR] : You need to pass the file as the first argument and the version as the second argument\n");
 }
 
 $filepath = $argv[1];
 if (!is_file($filepath) || !is_readable($filepath)) {
     die("[ERROR] : File $filepath not found or not readable\n");
+}
+
+$version = $argv[2];
+if (strlen($version) < 2 || strlen($version) > 10) {
+    die("[ERROR] : Version $version not valid\n");
 }
 
 try {
@@ -44,7 +49,7 @@ $execution_data = [
     'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
     'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
     'duration' => $stats->duration,
-    'version' => getVersion(basename($filepath))
+    'version' => $version
 ];
 
 $execution_id = insertExecution($pdo, $execution_data);
@@ -262,21 +267,6 @@ function getOrFail($contents, $object)
     } else {
         return null;
     }
-}
-
-/**
- * Get the version from the filename
- * @param $filename
- * @return mixed|string
- */
-function getVersion($filename)
-{
-    $pattern = '/reports_[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*?)\.json/';
-    preg_match($pattern, $filename, $matches);
-    if (!isset($matches[1]) || $matches[1] == '') {
-        return '';
-    }
-    return $matches[1];
 }
 
 /**
