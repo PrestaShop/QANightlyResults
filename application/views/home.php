@@ -68,33 +68,19 @@
     </div>
 </div>
 <script>
-    window.onload = function() {
+    $(document).ready(function() {
         let labels;
-        labels = document.querySelectorAll(".filter_version");
-        for (const label of labels) {
-            label.addEventListener('click', function() {
-                let lbl = this;
-                let version = lbl.dataset.for;
-                let list_tr = document.querySelectorAll("table.table tbody tr."+version);
-                list_tr.forEach(function (tr) {
-                    if (hasClass(tr, version)) {
-                        if (lbl.dataset.active === 'true') {
-                            tr.style.display = "none";
-                        } else {
-                            tr.style.display = "";
-                        }
-                    }
-                });
-                if (lbl.dataset.active === 'true') {
-                    lbl.dataset.active = 'false';
-                } else {
-                    lbl.dataset.active = 'true';
-                }
-            })
-        }
-    };
+        $('.filter_version').click(function() {
+            let version = $(this).attr('data-for');
+            let active = $(this).attr('data-active');
+            if (active === 'true') {
+                $('table.table tbody  tr.'+version).hide();
+                $(this).attr('data-active', 'false');
+            } else {
+                $('table.table tbody tr.'+version).show();
+                $(this).attr('data-active', 'true');
+            }
 
-    function hasClass(ele,cls) {
-        return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
-    }
+        });
+    });
 </script>

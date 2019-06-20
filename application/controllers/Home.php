@@ -20,7 +20,8 @@ class Home extends CI_Controller {
         ];
 
         $header_data = [
-            'title' => "Nightlies reports"
+            'title' => "Nightlies reports",
+            'js' => ['https://code.jquery.com/jquery-3.4.1.min.js']
         ];
         $this->load->view('templates/header', $header_data);
         $this->load->view('home', $content_data);
