@@ -37,4 +37,8 @@ Set up a vhost that points to the `/public` folder:
 
 Use `insert.php` to insert json files. This file uses the `database.php` config file in `application/config` so be sure it's set up correctly.
  
-The first argument of the script is the path to the file you want to insert. The filename **must** look like this : `reports_2019-06-05-1.7.6.x.json` ("reports_YYYY-MM-DD-VERSION.json") to work properly.
+The first argument of the script is the path to the file you want to insert. The second argument is the version. Example:
+
+```
+php insert.php application/files/reports_2019-06-18_dfevelop.json develop
+```
