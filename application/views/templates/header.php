@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
 
-    <link rel="icon" href="/public/assets/favicon.ico" sizes="16x16">
+    <link rel="icon" href="/assets/favicon.ico" sizes="16x16">
     <?php
         if (isset($js)) {
             foreach($js as $file) {
