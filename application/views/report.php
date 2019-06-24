@@ -173,6 +173,16 @@
             }
         });
 
+        $('body').on('click', '#campaign_list a', function(e) {
+            e.preventDefault();
+            let target = $(this).attr('href');
+            $('html, body').animate({
+                scrollTop: $('a[name="'+target.substring(1)+'"]').offset().top - 60
+            }, 300);
+        });
+
+
+
         //auto loader
         $('.file_title>h3').click(function() {
             let button = $(this).parent('.file_title');
@@ -181,7 +191,7 @@
             let file = button.data('file');
             let data = {'campaign': campaign, 'file': file, 'execution_id': <?php echo $execution->id ?>};
             if (button.attr('data-state') === 'empty') {
-                button.children('.container_file').hide().html('<div class="ajaxloader"><img src="/public/assets/images/ajax-loader.gif"/></div>').show();
+                button.children('.container_file').hide().html('<div class="ajaxloader"><img src="/assets/images/ajax-loader.gif"/></div>').show();
                 $.ajax({
                     url: "/report/getSuiteData",
                     dataType: "JSON",
