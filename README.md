@@ -40,5 +40,5 @@ Use `insert.php` to insert json files. This file uses the `database.php` config 
 The first argument of the script is the path to the file you want to insert. The second argument is the version. Example:
 
 ```
-php insert.php application/files/reports_2019-06-18_dfevelop.json develop
+php insert.php application/files/reports_2019-06-18_develop.json develop
 ```
