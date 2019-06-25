@@ -15,7 +15,7 @@ CREATE TABLE `execution` (
  PRIMARY KEY (`id`),
  KEY `version` (`version`),
  KEY `execution_id` (`ref`)
-) ENGINE=InnoDB AUTO_INCREMENT=62 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `suite` (
  `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -38,7 +38,7 @@ CREATE TABLE `suite` (
  PRIMARY KEY (`id`),
  KEY `execution_id` (`execution_id`),
  CONSTRAINT `suite_ibfk_1` FOREIGN KEY (`execution_id`) REFERENCES `execution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=46833 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `test` (
  `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -56,4 +56,4 @@ CREATE TABLE `test` (
  KEY `id` (`id`),
  KEY `suite_id` (`suite_id`),
  CONSTRAINT `test_ibfk_1` FOREIGN KEY (`suite_id`) REFERENCES `suite` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=312039 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
