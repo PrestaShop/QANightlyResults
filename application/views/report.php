@@ -197,17 +197,14 @@
                     dataType: "JSON",
                     data: data,
                     method: 'GET',
+                    timeout: 3000,
                     success: function(response) {
-                        console.log(button.closest('.container_file'));
                         button.children('.container_file').hide().html(response).fadeIn('fast');
                         button.attr('data-state', 'loaded');
                         that.attr('title', "Click to toggle the view");
                     },
-                    error: function(response) {
+                    error: function() {
                         alert("Loading failed. Try again in a few moments.");
-                    },
-                    timeout: function(response) {
-                        alert("Timeout. Server might be overloaded. Contact an administrator.");
                     }
                 });
             } else {
