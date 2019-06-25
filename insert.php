@@ -38,7 +38,7 @@ try {
 try {
     $pdo = new PDO($dsn, $database_data['username'], $database_data['password']);
 } catch(Exception $exception) {
-    die("[ERROR] : Can't connect to database : $exception->getMessage()\n");
+    die('[ERROR] : Can\'t connect to database: '. $exception->getMessage() . PHP_EOL);
 }
 
 //time for stuff
@@ -87,8 +87,8 @@ function loopThrough($pdo, $suite, $parent_suite_id = null) {
 
     if ($suite_id) {
         //insert tests
-        if (sizeof($suite->tests) > 0) {
-            echo sprintf("------ suite has %s tests\n", sizeof($suite->tests));
+        if (count($suite->tests) > 0) {
+            echo sprintf("------ suite has %s tests\n", count($suite->tests));
             foreach($suite->tests as $test) {
                 $data_test = [
                     'suite_id' => $suite_id,
@@ -104,7 +104,7 @@ function loopThrough($pdo, $suite, $parent_suite_id = null) {
             }
         }
         //insert children suites
-        if (sizeof($suite->suites) > 0) {
+        if (count($suite->suites) > 0) {
             foreach($suite->suites as $s) {
                 loopThrough($pdo, $s, $suite_id);
             }
@@ -121,7 +121,7 @@ loopThrough($pdo, getOrFail($file_contents, 'suites'));
 
 
 //update infos about the whole execution
-$query = "SELECT 
+$query = "SELECT
 COUNT(DISTINCT(s.id)) suites,
 COUNT(t.id) tests,
 SUM(IF(t.state='passed', 1, 0)) passed,
@@ -174,7 +174,7 @@ VALUES (:ref, :start_date, :end_date, :duration, :version, 0, 0, 0, 0, 0);";
  */
 function insertSuite($pdo, $object)
 {
-    $query = "INSERT INTO `suite`(`execution_id`, `uuid`, `title`, `campaign`, `file`, `duration`, `hasSkipped`, `hasPasses`, `hasFailures`, `totalSkipped`, `totalPasses`, `totalFailures`, `hasSuites`, `hasTests`, `parent_id`) 
+    $query = "INSERT INTO `suite`(`execution_id`, `uuid`, `title`, `campaign`, `file`, `duration`, `hasSkipped`, `hasPasses`, `hasFailures`, `totalSkipped`, `totalPasses`, `totalFailures`, `hasSuites`, `hasTests`, `parent_id`)
 VALUES (:execution_id, :uuid, :title, :campaign, :file, :duration, :hasSkipped, :hasPasses, :hasFailures, :totalSkipped, :totalPasses, :totalFailures, :hasSuites, :hasTests, :parent_id)";
     query($pdo, $query, $object);
     return $pdo->lastInsertId();
@@ -188,7 +188,7 @@ VALUES (:execution_id, :uuid, :title, :campaign, :file, :duration, :hasSkipped, 
  */
 function insertTest($pdo, $object)
 {
-    $query = "INSERT INTO `test`(`suite_id`, `uuid`, `title`, `state`, `duration`, `error_message`, `stack_trace`, `diff`) 
+    $query = "INSERT INTO `test`(`suite_id`, `uuid`, `title`, `state`, `duration`, `error_message`, `stack_trace`, `diff`)
 VALUES (:suite_id, :uuid, :title, :state, :duration, :error_message, :stack_trace, :diff)";
     query($pdo, $query, $object);
     return $pdo->lastInsertId();
@@ -227,12 +227,13 @@ function extractNames($filename, $type)
         if ($type == 'campaign') {
             return isset($matches[1]) ? $matches[1] : null;
         }
+
         if ($type == 'file') {
             return isset($matches[2]) ? $matches[2] : null;
         }
-    } else {
-        return null;
     }
+
+    return null;
 }
 
 /**
@@ -264,9 +265,9 @@ function getOrFail($contents, $object)
 {
     if (isset($contents->$object)) {
         return $contents->$object;
-    } else {
-        return null;
     }
+
+    return null;
 }
 
 /**
@@ -278,10 +279,11 @@ function getTestState($test)
 {
     if (isset($test->state)) {
         return $test->state;
-    } else {
-        if ($test->skipped == true) {
-            return 'skipped';
-        }
     }
+
+    if ($test->skipped == true) {
+        return 'skipped';
+    }
+
     return 'unknown';
 }
