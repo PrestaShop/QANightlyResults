@@ -83,12 +83,14 @@ function loopThrough($pdo, $suite, $parent_suite_id = null) {
 
     //inserting current suite
     $suite_id = insertSuite($pdo, $data_suite);
-    echo sprintf("------ suite ID %s\n", $suite_id);
+    //this script is way too verbose...
+    //echo sprintf("------ suite ID %s\n", $suite_id);
 
     if ($suite_id) {
         //insert tests
         if (count($suite->tests) > 0) {
-            echo sprintf("------ suite has %s tests\n", count($suite->tests));
+            //this script is way too verbose...
+            //echo sprintf("------ suite has %s tests\n", count($suite->tests));
             foreach($suite->tests as $test) {
                 $data_test = [
                     'suite_id' => $suite_id,
