@@ -9,8 +9,16 @@ CIPSJsonParser is a small PHP script based on CodeIgniter. Its purpose is to :
 
 Create a database following the schema provided in schema.sql at the root of the project.
 
-Remove the .dist extension for all files in application/config. For example, `database.php.dist` becomes `database.php`.
-Open them and edit them at your convenience (mainly `config.php` and `database.php`).
+You can then edit the `config.php` and `database.php` files in the `config/` folder. You can also pass the values via environment variables. Here are the main ones:
+
+|Variable           |   |
+|-------------------|---|
+| QANB_BASEURL      | Base URL of the application, eg https://qaboard.xxx.com |
+| QANB_DB_HOST      | Database host address  |
+| QANB_DB_USERNAME  | Database username  |
+| QANB_DB_PASSWORD  | Database password  |
+| QANB_DB_NAME      | Database name  |
+
 
 ## Web server configuration
 
