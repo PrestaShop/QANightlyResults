@@ -63,5 +63,5 @@ And you should have the application running locally.
 
 Though, we're not providing any DB at this time, so you'll have to:
 
-- Have you DB running 
+- Have your DB running 
 - Edit the compose credentials about your DB
