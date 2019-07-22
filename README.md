@@ -50,3 +50,18 @@ The first argument of the script is the path to the file you want to insert. The
 ```
 php insert.php application/files/reports_2019-06-18_develop.json develop
 ```
+
+## Containers
+
+If you're working with docker, we have you covered.
+
+```
+docker-compose up -d
+```
+
+And you should have the application running locally.
+
+Though, we're not providing any DB at this time, so you'll have to:
+
+- Have you DB running 
+- Edit the compose credentials about your DB
