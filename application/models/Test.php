@@ -21,6 +21,12 @@ class Test extends CI_Model
         return $this->db->query("SELECT * FROM $this->table WHERE suite_id = :suite_id ORDER BY id ASC", [':suite_id' => $suite_id]);
     }
 
+    public function insert($data)
+    {
+        $this->db->insert($this->table, $data);
+        return $this->db->insert_id();
+    }
+
     function getAllTestsByFile($execution_id, $campaign, $file)
     {
         return $this->db->query("SELECT t.* FROM test t INNER JOIN suite s ON s.id=t.suite_id WHERE s.campaign=? AND s.file=? AND s.execution_id=?;", [$campaign, $file, $execution_id]);

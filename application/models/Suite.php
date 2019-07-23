@@ -30,6 +30,12 @@ class Suite extends CI_Model
         return $this->db->query("SELECT DISTINCT(campaign) FROM $this->table WHERE campaign IS NOT NULL AND campaign != '' ORDER BY campaign;");
     }
 
+    public function insert($data)
+    {
+        $this->db->insert($this->table, $data);
+        return $this->db->insert_id();
+    }
+
     function getAllSuitesByFile($execution_id, $campaign, $file)
     {
         return $this->db->query("SELECT * FROM suite WHERE campaign=? AND file=? AND execution_id=? ORDER BY id", [$campaign, $file, $execution_id]);

@@ -23,6 +23,16 @@ class Execution extends CI_Model
         return $this->db->query("SELECT * FROM $this->table WHERE id = ?;", [$id])->row();
     }
 
+    public function insert($data)
+    {
+        $this->db->insert($this->table, $data);
+        return $this->db->insert_id();
+    }
+
+    public function update($data, $id)
+    {
+        return $this->db->update($this->table, $data, "id = $id");
+    }
 
     function getAllInformation()
     {
@@ -103,6 +113,23 @@ class Execution extends CI_Model
         WHERE 1=1
         AND execution_id = ?
         GROUP BY e.id";
+        return $this->db->query($req, [$execution_id])->row();
+    }
+
+    function getSummaryData($execution_id)
+    {
+        $req = "SELECT
+            COUNT(DISTINCT(s.id)) suites,
+            COUNT(t.id) tests,
+            SUM(IF(t.state='passed', 1, 0)) passed,
+            SUM(IF(t.state='failed', 1, 0)) failed,
+            SUM(IF(t.state='skipped', 1, 0)) skipped
+            
+            FROM `execution` e
+            INNER JOIN `suite` s on s.execution_id = e.id
+            INNER JOIN `test` t on t.suite_id = s.id
+            WHERE e.id = :execution_id;";
+
         return $this->db->query($req, [$execution_id])->row();
     }
 }
