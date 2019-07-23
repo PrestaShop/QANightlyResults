@@ -1,6 +1,6 @@
 {
-	"description": "CIPSJsonParser description",
-	"name": "SimonGrn/CIPSJsonParser",
+	"description": "QA Nightly board - displays useful information from the nightly test execution",
+	"name": "Prestashop/QANightlyBoard",
 	"type": "project",
 	"require": {
 		"php": ">=5.3.7"
