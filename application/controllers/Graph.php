@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Graph extends CI_Controller {
+class Graph extends MY_Base {
 
     public function index()
     {
