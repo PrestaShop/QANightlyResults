@@ -12,22 +12,27 @@ class Hook extends MY_Base {
         $this->load->model('Suite');
         $this->load->model('Test');
 
+        //is there a GCP URL in environment variable ?
+    if (getenv('QANB_GCPURL') !== false && strpos(getenv('QANB_GCPURL'), 'http') !== false) {
+            $this->GCPURL = getenv('QANB_GCPURL');
+        }
+
         log_message('info', '"verifying data');
         if (!$this->input->get('token') || !$this->input->get('filename')) {
-            setHeaders(400);
+            $this->setHeaders(400);
             exit(json_encode(['error' => 'no enough parameters']));
         }
 
         log_message('info', '"verifying name of file');
         preg_match($this->pattern, $this->input->get('filename'), $matches);
         if (!isset($matches[1])) {
-            setHeaders(400);
+            $this->setHeaders(400);
             exit(json_encode(['error' => 'filename is invalid']));
         }
 
         log_message('info', 'verifying token is valid');
         if (!$this->checkToken($this->input->get('token'))) {
-            setHeaders(400);
+            $this->setHeaders(400);
             exit(json_encode(['error' => 'invalid token']));
         }
 
@@ -45,7 +50,7 @@ class Hook extends MY_Base {
         }
         $version = $matches[1];
         if (strlen($matches[1]) < 1) {
-            setHeaders(400);
+            $this->setHeaders(400);
             exit(json_encode(['error' => sprintf("version found not correct (%s) from filename %s", $version, $filename)]));
         }
 
@@ -59,21 +64,21 @@ class Hook extends MY_Base {
             $contents = file_get_contents($url);
         } catch(Exception $e) {
             log_message('error', 'Could not retrieve content from '.$url);
-            setHeaders(400);
+            $this->setHeaders(400);
             exit(json_encode(['error' => 'unable to retrieve content from GCP URL']));
         }
 
         log_message('info', "decoding JSON...");
         try {
-            $file_contents = json_decode($contents, false, 512, JSON_THROW_ON_ERROR);
+            $file_contents = json_decode($contents);
         } catch(Exception $e) {
             log_message('error', "Could not decode JSON data from the file");
-            setHeaders(400);
+            $this->setHeaders(400);
             exit(json_encode(['error' => 'unable to decode JSON data']));
         }
 
         if ($file_contents == NULL) {
-            setHeaders(400);
+            $this->setHeaders(400);
             exit(json_encode(['error' => 'unable to decode JSON data']));
         }
 
@@ -94,7 +99,7 @@ class Hook extends MY_Base {
         if ($similar !== NULL) {
             if (!$this->force) {
                 log_message('error', 'A similar entry was found (criteria: version '.$version.' and date '.$entry_date);
-                setHeaders(409);
+                $this->setHeaders(409);
                 exit(json_encode(['error' => sprintf("A similar entry was found (criteria: version %s and date %s). Use the force parameter to force insert", $version, $entry_date)]));
             } else {
                 log_message('warning', 'A similar entry was found (criteria: version '.$version.' and date '.$entry_date.') but FORCING insert anyway');
@@ -105,7 +110,7 @@ class Hook extends MY_Base {
             log_message('info', "Inserting Execution");
             $this->execution_id = $this->Execution->insert($execution_data);
         } catch(Exception $e) {
-            setHeaders(500);
+            $this->setHeaders(500);
             exit(json_encode(['error' => 'failed to insert execution']));
         }
 
@@ -125,7 +130,7 @@ class Hook extends MY_Base {
         ];
         //update the execution row with updated data
         $this->Execution->update($update_data, $this->execution_id);
-        setHeaders(200);
+        $this->setHeaders(200);
         echo json_encode(['status' => 'ok']);
 
     }
