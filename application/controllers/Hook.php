@@ -5,6 +5,7 @@ class Hook extends MY_Base {
 
     private $execution_id = null;
     private $pattern = '/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/';
+    private $force = false;
 
     public function add()
     {
@@ -20,12 +21,16 @@ class Hook extends MY_Base {
         log_message('info', "verifying name of file (".$this->input->get('filename').")");
         preg_match($this->pattern, $this->input->get('filename'), $matches);
         if (!isset($matches[1])) {
-            exit("filename ".$this->input->get('filename')." is invalid");
+            exit("filename '".$this->input->get('filename')."' is invalid");
         }
 
         log_message('info', "verifying token is here");
         if (!$this->checkToken($this->input->get('token'))) {
             exit("invalid token");
+        }
+
+        if ($this->input->get('force') !== NULL) {
+            $this->force = true;
         }
 
         //get the file from the GCP API
@@ -54,24 +59,37 @@ class Hook extends MY_Base {
         //retrieving version number
         preg_match($this->pattern, $filename, $matches);
         if (!isset($matches[1])) {
-            exit("could not retrieve version from filename $filename");
+            exit("could not retrieve version from filename '$filename'");
         }
         $version = $matches[1];
         if (strlen($matches[1]) < 1) {
-            exit("version found not correct ($version) from filename $filename");
+            exit("version found not correct ('$version') from filename '$filename'");
         }
 
         //starting real stuff
         //create the execution
+        $stats = $file_contents->stats;
+        $execution_data = [
+            'ref' => date('YmdHis'),
+            'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
+            'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
+            'duration' => $stats->duration,
+            'version' => $version
+        ];
+        //let's check if there's not a similar entry...
+        $entry_date = date('Y-m-d', strtotime($stats->start));
+        $similar = $this->Execution->findSimilarEntries($entry_date, $version);
+
+        if ($similar !== NULL) {
+            if (!$this->force) {
+                log_message('error', "A similar entry was found (criteria: version $version and date $entry_date)");
+                exit("A similar entry was found (criteria: version '$version' and date '$entry_date'). Use the 'force' parameter to force insert");
+            } else {
+                log_message('warning', "A similar entry was found (criteria: version $version and date $entry_date) but FORCING insert anyway");
+            }
+        }
+
         try {
-            $stats = $file_contents->stats;
-            $execution_data = [
-                'ref' => date('YmdHis'),
-                'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
-                'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
-                'duration' => $stats->duration,
-                'version' => $version
-            ];
             log_message('info', "Inserting Execution");
             $this->execution_id = $this->Execution->insert($execution_data);
         } catch(Exception $e) {
@@ -85,15 +103,16 @@ class Hook extends MY_Base {
         $updated_data = $this->Execution->getSummaryData($this->execution_id);
 
         $update_data = [
-            'skipped' => $updated_data['skipped'],
-            'suites' => $updated_data['suites'],
-            'tests' => $updated_data['tests'],
-            'passes' => $updated_data['passed'],
-            'failures' => $updated_data['failed'],
+            'skipped' => $updated_data->skipped,
+            'suites' => $updated_data->suites,
+            'tests' => $updated_data->tests,
+            'passes' => $updated_data->passed,
+            'failures' => $updated_data->failed,
             'insertion_end_date' => "NOW()"
         ];
         //update the execution row with updated data
         $this->Execution->update($update_data, $this->execution_id);
+        echo json_encode(['status' => 'ok']);
 
     }
 
