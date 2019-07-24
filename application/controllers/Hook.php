@@ -15,17 +15,20 @@ class Hook extends MY_Base {
 
         log_message('info', "verifying data");
         if (!$this->input->get('token') || !$this->input->get('filename')) {
+            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
             exit("no enough parameters");
         }
 
         log_message('info', "verifying name of file (".$this->input->get('filename').")");
         preg_match($this->pattern, $this->input->get('filename'), $matches);
         if (!isset($matches[1])) {
+            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
             exit("filename '".$this->input->get('filename')."' is invalid");
         }
 
         log_message('info', "verifying token is here");
         if (!$this->checkToken($this->input->get('token'))) {
+            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
             exit("invalid token");
         }
 
@@ -45,6 +48,7 @@ class Hook extends MY_Base {
             $contents = file_get_contents($url);
         } catch(Exception $e) {
             log_message('error', "Could not retrieve content from $url");
+            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
             exit("unable to decode JSON data");
         }
 
@@ -53,6 +57,7 @@ class Hook extends MY_Base {
             $file_contents = json_decode($contents);
         } catch(Exception $e) {
             log_message('error', "Could not decode JSON data from the file");
+            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
             exit("unable to decode JSON data");
         }
 
@@ -63,6 +68,7 @@ class Hook extends MY_Base {
         }
         $version = $matches[1];
         if (strlen($matches[1]) < 1) {
+            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
             exit("version found not correct ('$version') from filename '$filename'");
         }
 
@@ -83,6 +89,7 @@ class Hook extends MY_Base {
         if ($similar !== NULL) {
             if (!$this->force) {
                 log_message('error', "A similar entry was found (criteria: version $version and date $entry_date)");
+                header($_SERVER['SERVER_PROTOCOL'] . ' 409 Conflict', true, 409);
                 exit("A similar entry was found (criteria: version '$version' and date '$entry_date'). Use the 'force' parameter to force insert");
             } else {
                 log_message('warning', "A similar entry was found (criteria: version $version and date $entry_date) but FORCING insert anyway");
@@ -93,6 +100,7 @@ class Hook extends MY_Base {
             log_message('info', "Inserting Execution");
             $this->execution_id = $this->Execution->insert($execution_data);
         } catch(Exception $e) {
+            header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
             exit("could not insert execution");
         }
 
@@ -112,6 +120,7 @@ class Hook extends MY_Base {
         ];
         //update the execution row with updated data
         $this->Execution->update($update_data, $this->execution_id);
+        header($_SERVER['SERVER_PROTOCOL'] . ' 200 OK', true, 200);
         echo json_encode(['status' => 'ok']);
 
     }
