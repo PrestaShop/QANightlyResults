@@ -45,7 +45,7 @@ Set up a vhost that points to the `/public` folder:
 ## Inserting new data
 
 
-Use the hook provided in the `Hook` controller. You need to call this URL: `BASE_URL/hook/add` with the following parameters:
+Use the hook provided in the `Hook` controller. You need to call this URL: `BASE_URL/hook/add` with the following GET parameters:
 - `token`: the token set in the environment variable `QANB_TOKEN` (e.g.: `IpBzOmwXQUrW5Hn`)
 - `filename` : the complete filename to look for in the Google Cloud Storage (e.g.: `2019-07-22-develop.json`). The name must follow this pattern: `/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/`
 Optional:
