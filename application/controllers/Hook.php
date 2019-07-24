@@ -1,6 +1,4 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
-
 class Hook extends MY_Base {
 
     private $execution_id = null;
