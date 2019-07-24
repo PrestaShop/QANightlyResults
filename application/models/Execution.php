@@ -128,8 +128,19 @@ class Execution extends CI_Model
             FROM `execution` e
             INNER JOIN `suite` s on s.execution_id = e.id
             INNER JOIN `test` t on t.suite_id = s.id
-            WHERE e.id = :execution_id;";
+            WHERE e.id = ?;";
 
         return $this->db->query($req, [$execution_id])->row();
+    }
+
+    function findSimilarEntries($date, $version)
+    {
+        $req = "SELECT id            
+            FROM `execution` e
+            WHERE version = ?
+            AND DATE(start_date) = ?
+            ;";
+
+        return $this->db->query($req, [$version, $date])->row();
     }
 }
