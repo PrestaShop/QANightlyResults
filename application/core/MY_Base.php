@@ -14,7 +14,7 @@ class MY_Base extends CI_Controller
             }
         } catch(Exception $e) {
             header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
-            exit('Unable to connect with database with given db details : '.$e->getMessage());
+            exit('Unable to connect with database with given db details');
         }
     }
 }

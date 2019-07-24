@@ -6,6 +6,7 @@ class Hook extends MY_Base {
     private $execution_id = null;
     private $pattern = '/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/';
     private $force = false;
+    private $GCPURL = 'https://storage.googleapis.com/prestashop-core-nightly/reports/';
 
     public function add()
     {
@@ -13,63 +14,69 @@ class Hook extends MY_Base {
         $this->load->model('Suite');
         $this->load->model('Test');
 
-        log_message('info', "verifying data");
+        log_message('info', '"verifying data');
         if (!$this->input->get('token') || !$this->input->get('filename')) {
-            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
-            exit("no enough parameters");
+            setHeaders(400);
+            exit(json_encode(['error' => 'no enough parameters']));
         }
 
-        log_message('info', "verifying name of file (".$this->input->get('filename').")");
+        log_message('info', '"verifying name of file');
         preg_match($this->pattern, $this->input->get('filename'), $matches);
         if (!isset($matches[1])) {
-            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
-            exit("filename '".$this->input->get('filename')."' is invalid");
+            setHeaders(400);
+            exit(json_encode(['error' => 'filename is invalid']));
         }
 
-        log_message('info', "verifying token is here");
+        log_message('info', 'verifying token is valid');
         if (!$this->checkToken($this->input->get('token'))) {
-            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
-            exit("invalid token");
+            setHeaders(400);
+            exit(json_encode(['error' => 'invalid token']));
         }
 
-        if ($this->input->get('force') !== NULL) {
+        if ($this->input->get('force') && ($this->input->get('force') !== 'false')) {
             $this->force = true;
         }
 
-        //get the file from the GCP API
+        //store filename
         $filename = $this->input->get('filename');
-        log_message('info', "receiving filename $filename");
-        //create URL
-        $url = sprintf("https://storage.googleapis.com/prestashop-core-nightly/reports/%s", $filename);
-        log_message('info', "creating url $url");
-        //retrieve content
-        log_message('info', "retrieving content...");
-        try {
-            $contents = file_get_contents($url);
-        } catch(Exception $e) {
-            log_message('error', "Could not retrieve content from $url");
-            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
-            exit("unable to decode JSON data");
-        }
-
-        log_message('info', "decoding JSON...");
-        try {
-            $file_contents = json_decode($contents);
-        } catch(Exception $e) {
-            log_message('error', "Could not decode JSON data from the file");
-            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
-            exit("unable to decode JSON data");
-        }
 
         //retrieving version number
         preg_match($this->pattern, $filename, $matches);
         if (!isset($matches[1])) {
-            exit("could not retrieve version from filename '$filename'");
+            exit(json_encode(['error' => 'could not retrieve version from filename']));
         }
         $version = $matches[1];
         if (strlen($matches[1]) < 1) {
-            header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400);
-            exit("version found not correct ('$version') from filename '$filename'");
+            setHeaders(400);
+            exit(json_encode(['error' => sprintf("version found not correct (%s) from filename %s", $version, $filename)]));
+        }
+
+        //get the file from the GCP API
+        log_message('info', 'receiving filename '.$filename);
+        //create URL
+        $url = $this->GCPURL.$filename;
+        //retrieve content
+        log_message('info', 'retrieving content from '.$url);
+        try {
+            $contents = file_get_contents($url);
+        } catch(Exception $e) {
+            log_message('error', 'Could not retrieve content from '.$url);
+            setHeaders(400);
+            exit(json_encode(['error' => 'unable to retrieve content from GCP URL']));
+        }
+
+        log_message('info', "decoding JSON...");
+        try {
+            $file_contents = json_decode($contents, false, 512, JSON_THROW_ON_ERROR);
+        } catch(Exception $e) {
+            log_message('error', "Could not decode JSON data from the file");
+            setHeaders(400);
+            exit(json_encode(['error' => 'unable to decode JSON data']));
+        }
+
+        if ($file_contents == NULL) {
+            setHeaders(400);
+            exit(json_encode(['error' => 'unable to decode JSON data']));
         }
 
         //starting real stuff
@@ -88,11 +95,11 @@ class Hook extends MY_Base {
 
         if ($similar !== NULL) {
             if (!$this->force) {
-                log_message('error', "A similar entry was found (criteria: version $version and date $entry_date)");
-                header($_SERVER['SERVER_PROTOCOL'] . ' 409 Conflict', true, 409);
-                exit("A similar entry was found (criteria: version '$version' and date '$entry_date'). Use the 'force' parameter to force insert");
+                log_message('error', 'A similar entry was found (criteria: version '.$version.' and date '.$entry_date);
+                setHeaders(409);
+                exit(json_encode(['error' => sprintf("A similar entry was found (criteria: version %s and date %s). Use the force parameter to force insert", $version, $entry_date)]));
             } else {
-                log_message('warning', "A similar entry was found (criteria: version $version and date $entry_date) but FORCING insert anyway");
+                log_message('warning', 'A similar entry was found (criteria: version '.$version.' and date '.$entry_date.') but FORCING insert anyway');
             }
         }
 
@@ -100,8 +107,8 @@ class Hook extends MY_Base {
             log_message('info', "Inserting Execution");
             $this->execution_id = $this->Execution->insert($execution_data);
         } catch(Exception $e) {
-            header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
-            exit("could not insert execution");
+            setHeaders(500);
+            exit(json_encode(['error' => 'failed to insert execution']));
         }
 
         //launching into orbit
@@ -116,11 +123,11 @@ class Hook extends MY_Base {
             'tests' => $updated_data->tests,
             'passes' => $updated_data->passed,
             'failures' => $updated_data->failed,
-            'insertion_end_date' => "NOW()"
+            'insertion_end_date' => 'NOW()'
         ];
         //update the execution row with updated data
         $this->Execution->update($update_data, $this->execution_id);
-        header($_SERVER['SERVER_PROTOCOL'] . ' 200 OK', true, 200);
+        setHeaders(200);
         echo json_encode(['status' => 'ok']);
 
     }
@@ -250,5 +257,22 @@ class Hook extends MY_Base {
         }
 
         return 'unknown';
+    }
+
+    /**
+     * Set headers to change http status code
+     * @param $code
+     */
+    private function setHeaders($code)
+    {
+        $headersCodes = [
+            200 => 'OK',
+            400 => 'Bad Request',
+            409 => 'Conflict',
+            500 => 'Internal Server Error'
+        ];
+        if (in_array($code, array_keys($headersCodes))) {
+            header($_SERVER['SERVER_PROTOCOL'] . ' '.$code.' '.$headersCodes[$code], true, $code);
+        }
     }
 }

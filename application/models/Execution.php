@@ -18,28 +18,54 @@ class Execution extends CI_Model
     public $passes;
     public $failures;
 
+    /**
+     * Find an execution with its ID
+     * @param $id
+     * @return mixed
+     */
     function find($id)
     {
         return $this->db->query("SELECT * FROM $this->table WHERE id = ?;", [$id])->row();
     }
 
+    /**
+     * Insert an execution row
+     * @param $data
+     * @return mixed
+     */
     public function insert($data)
     {
         $this->db->insert($this->table, $data);
+
         return $this->db->insert_id();
     }
 
+    /**
+     * Update a given execution
+     * @param $data
+     * @param $id
+     * @return mixed
+     */
     public function update($data, $id)
     {
         return $this->db->update($this->table, $data, "id = $id");
     }
 
+    /**
+     * Get all fields from an execution
+     * @return mixed
+     */
     function getAllInformation()
     {
         $sql = "SELECT id, ref, start_date, end_date, duration, version, suites, tests, skipped, passes, failures FROM $this->table ORDER BY DATE(start_date) DESC LIMIT 50";
+
         return $this->db->query($sql);
     }
 
+    /**
+     * Get all versions in database
+     * @return mixed
+     */
     function getVersions() {
         return $this->db->query("SELECT 
                 version, count(id) cpt
@@ -48,6 +74,11 @@ class Execution extends CI_Model
                 ORDER BY cpt DESC;");
     }
 
+    /**
+     * Get data to display in graphs
+     * @param $criteria
+     * @return mixed
+     */
     function getCustomData($criteria) {
         $req = "SELECT e.id, e.ref, e.start_date, DATE(e.start_date) custom_start_date,e.end_date, e.skipped, e.passes, e.failures,
             SUM(IF(t.state = 'skipped', 1, 0)) totalSkipped, SUM(IF(t.state = 'passed', 1, 0)) totalPasses, SUM(IF(t.state = 'failed', 1, 0)) totalFailures
@@ -67,9 +98,16 @@ class Execution extends CI_Model
         }
         $req .= "
             GROUP BY e.id, e.start_date, e.end_date, e.skipped, e.passes, e.failures";
+
         return $this->db->query($req, $criteria);
     }
 
+    /**
+     * Get precise stats from an execution (to display in graphs)
+     * @param $criteria
+     * @return mixed
+     *
+     */
     function getPreciseStats($criteria)
     {
         $req = "SELECT e.id, e.ref, e.start_date, DATE(e.start_date) custom_start_date,e.end_date, e.failures,
@@ -95,9 +133,15 @@ class Execution extends CI_Model
         }
         $req .= "
         GROUP BY e.id, e.ref, e.start_date,e.end_date";
+
         return $this->db->query($req, $criteria);
     }
 
+    /**
+     * Get precise stats from an execution
+     * @param $execution_id
+     * @return mixed
+     */
     function getExecutionPreciseStats($execution_id)
     {
         $req = "SELECT e.id,
@@ -113,9 +157,15 @@ class Execution extends CI_Model
         WHERE 1=1
         AND execution_id = ?
         GROUP BY e.id";
+
         return $this->db->query($req, [$execution_id])->row();
     }
 
+    /**
+     * Get all informations from an execution
+     * @param $execution_id
+     * @return mixed
+     */
     function getSummaryData($execution_id)
     {
         $req = "SELECT
@@ -133,6 +183,12 @@ class Execution extends CI_Model
         return $this->db->query($req, [$execution_id])->row();
     }
 
+    /**
+     * Find similar entries in db
+     * @param $date
+     * @param $version
+     * @return mixed
+     */
     function findSimilarEntries($date, $version)
     {
         $req = "SELECT id            

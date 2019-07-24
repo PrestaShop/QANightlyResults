@@ -25,22 +25,43 @@ class Suite extends CI_Model
     public $hasTests;
     public $parent_id = null;
 
-
+    /**
+     * Get all campaigns in suites
+     * @return mixed
+     */
     function getCampaigns() {
         return $this->db->query("SELECT DISTINCT(campaign) FROM $this->table WHERE campaign IS NOT NULL AND campaign != '' ORDER BY campaign;");
     }
 
+    /**
+     * Insert a row
+     * @param $data
+     * @return mixed
+     */
     public function insert($data)
     {
         $this->db->insert($this->table, $data);
+
         return $this->db->insert_id();
     }
 
+    /**
+     * Get all suites in an execution
+     * @param $execution_id
+     * @param $campaign
+     * @param $file
+     * @return mixed
+     */
     function getAllSuitesByFile($execution_id, $campaign, $file)
     {
         return $this->db->query("SELECT * FROM suite WHERE campaign=? AND file=? AND execution_id=? ORDER BY id", [$campaign, $file, $execution_id]);
     }
 
+    /**
+     * Get all Campaigns et Filename to display in the report
+     * @param $execution_id
+     * @return mixed
+     */
     function getAllCampaignsAndFilesByExecutionId($execution_id)
     {
         return $this->db->query(" 
