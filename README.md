@@ -11,13 +11,14 @@ Create a database following the schema provided in schema.sql at the root of the
 
 You can then edit the `config.php` and `database.php` files in the `config/` folder. You can also pass the values via environment variables. Here are the main ones:
 
-|Variable           |   |
+|Variables           |   |
 |-------------------|---|
 | QANB_BASEURL      | Base URL of the application, eg https://qaboard.xxx.com |
 | QANB_DB_HOST      | Database host address  |
 | QANB_DB_USERNAME  | Database username  |
 | QANB_DB_PASSWORD  | Database password  |
 | QANB_DB_NAME      | Database name  |
+| QANB_TOKEN        | Token to add JSON data through the Hook  |
 
 
 ## Web server configuration
@@ -40,16 +41,20 @@ Set up a vhost that points to the `/public` folder:
 </VirtualHost>
 ```
 
-
 ## Inserting new data
 
-Use `insert.php` to insert json files. This file uses the `database.php` config file in `application/config` so be sure it's set up correctly.
- 
-The first argument of the script is the path to the file you want to insert. The second argument is the version. Example:
+Use the hook provided in the `Hook` controller. You need to call this URL: `BASE_URL/hook/add` with the following GET parameters:
+- `token`: the token set in the environment variable `QANB_TOKEN` (e.g.: `IpBzOmwXQUrW5Hn`)
+- `filename` : the complete filename to look for in the Google Cloud Storage (e.g.: `2019-07-22-develop.json`). The name must follow this pattern: `/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/`
+Optional:
+- `force`: a special parameter used to force insert when a similar entry is found (criterias are date and version)
 
-```
-php insert.php application/files/reports_2019-06-18_develop.json develop
-```
+EG : `mysite.com/hook/add?token=IpBzOmwXQUrW5Hn&filename=2019-07-22-develop.json`
+
+The files in the Google Cloud Storage might be huge, so be sure your server is properly configured to handle large files (~ 10Mio).
+
+Files will be taken from https://storage.googleapis.com/prestashop-core-nightly/reports/ (unless specified otherwise in the config section at the top of the controller).
+
 
 ## Containers
 

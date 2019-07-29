@@ -1,6 +1,4 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
-
 class Report extends MY_Base {
 
     private $suites_content = '';
