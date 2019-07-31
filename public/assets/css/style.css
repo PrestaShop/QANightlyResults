@@ -27,7 +27,7 @@ button:hover {
 .container {
     max-width: 1170px;
     margin: 0 auto;
-    padding: 80px 0 0 0;
+    padding: 80px 0 20px 0;
     max-height: 100%;
 }
 
@@ -579,9 +579,8 @@ form .form_block label {
 
 form .form_block label input, form .form_block label select {
     width: 150px;
+    border-radius: 0;
     float: right;
-    height: 30px;
-    line-height: 30px;
 }
 
 form .form_block button {
@@ -608,8 +607,8 @@ table.table thead {
 table.table thead tr th {
     color: white;
     font-weight: bold;
-    text-align: center;
-    padding: 15px 0;
+    text-align: left;
+    padding: 15px 0 15px 10px;
 }
 
 table.table tbody  {
@@ -621,8 +620,8 @@ table.table tbody tr:nth-child(even) {
 }
 
 table.table tbody tr td {
-    padding: 5px 0;
-    text-align: center;
+    padding: 5px 0 5px 20px;
+    text-align: left;
     border-bottom: 1px solid #d8d8d8;
     line-height: 30px;
 }
