@@ -87,6 +87,7 @@ class Hook extends MY_Base {
         $stats = $file_contents->stats;
         $execution_data = [
             'ref' => date('YmdHis'),
+            'filename' => $filename,
             'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
             'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
             'duration' => $stats->duration,
