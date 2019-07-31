@@ -8,7 +8,7 @@ class Home extends MY_Base {
 
         //get all data from GCP
         $GCP_files_list = [];
-        $url = 'https://storage.googleapis.com/prestashop-core-nightly/';
+        $url = getenv('QANB_GCPURL') !== false ? getenv('QANB_GCPURL') : 'https://storage.googleapis.com/prestashop-core-nightly/';
         try {
             $t = file_get_contents($url);
             $xml = new SimpleXMLElement($t);
@@ -17,7 +17,6 @@ class Home extends MY_Base {
                     $GCP_files_list[] = (string)$content->Key;
                 }
             }
-            //var_dump($GCP_files_list);
 
         } catch(Exception $e) {
             log_message('warning', "couldn't fetch files from GCP");
