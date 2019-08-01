@@ -67,7 +67,6 @@
                                             }
                                         }
                                     }
-                                    unset($matches_filename);
                                 }
 
                                 echo '<tr class="version_'.str_replace('.', '', $execution->version).'">';
