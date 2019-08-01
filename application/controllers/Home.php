@@ -8,7 +8,7 @@ class Home extends MY_Base {
 
         //get all data from GCP
         $GCP_files_list = [];
-        $url = getenv('QANB_GCPURL') !== false ? getenv('QANB_GCPURL') : 'https://storage.googleapis.com/prestashop-core-nightly/';
+        $url = getenv('QANB_GCPURL') ?: 'https://storage.googleapis.com/prestashop-core-nightly/';
         try {
             $t = file_get_contents($url);
             $xml = new SimpleXMLElement($t);
@@ -37,8 +37,7 @@ class Home extends MY_Base {
             'title' => "Nightlies reports",
             'js' => ['https://code.jquery.com/jquery-3.4.1.min.js']
         ];
-        $this->load->view('templates/header', $header_data);
-        $this->load->view('home', $content_data);
-        $this->load->view('templates/footer');
+
+        $this->display('home', $content_data, $header_data);
     }
 }

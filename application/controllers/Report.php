@@ -35,9 +35,7 @@ class Report extends MY_Base {
             'title' => "Report",
             'js' => ['https://code.jquery.com/jquery-3.4.1.min.js']
         ];
-        $this->load->view('templates/header', $header_data);
-        $this->load->view('report', $content_data);
-        $this->load->view('templates/footer');
+        $this->display('report', $content_data, $header_data);
     }
 
     public function getSuiteData()
