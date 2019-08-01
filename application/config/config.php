@@ -504,6 +504,8 @@ $config['time_reference'] = 'local';
 */
 $config['rewrite_short_tags'] = FALSE;
 
+$config['GA_key'] = getenv('QANB_GA_KEY');
+
 /*
 |--------------------------------------------------------------------------
 | Reverse Proxy IPs
