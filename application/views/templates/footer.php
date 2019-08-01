@@ -1,11 +1,21 @@
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-2753771-46"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+<?php
+    if ($GA_key !== false && $GA_key != '') {
+        ?>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo $GA_key; ?>"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
 
-  gtag('config', 'UA-2753771-46');
-</script>
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+
+          gtag('js', new Date());
+
+          gtag('config', <?php echo $GA_key; ?>);
+        </script>
+
+        <?php
+    }
+ ?>
 </body>
 </html>
