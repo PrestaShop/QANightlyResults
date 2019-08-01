@@ -62,7 +62,7 @@
                                             preg_match($pattern, $gcp_file, $matches);
                                             if (isset($matches[1]) && $matches[1] != '') {
                                                 $branch = $matches[1];
-                                                $download_link = '<a href="https://storage.googleapis.com/prestashop-core-nightly/'.$gcp_file.'"><i class="material-icons">cloud_download</i> Download</a>';
+                                                $download_link = '<a href="https://storage.googleapis.com/prestashop-core-nightly/'.$gcp_file.'"><i class="material-icons">cloud_download</i> Download build</a>';
                                                 break;
                                             }
                                         }
