@@ -13,7 +13,7 @@ class Hook extends MY_Base {
         $this->load->model('Test');
 
         //is there a GCP URL in environment variable ?
-        $this->GCPURL = getenv('QANB_GCPURL') !== false ? getenv('QANB_GCPURL').'reports/' : 'https://storage.googleapis.com/prestashop-core-nightly/reports/';
+        $this->GCPURL = $this->config->item('GCP_URL');
 
         log_message('info', '"verifying data');
         if (!$this->input->get('token') || !$this->input->get('filename')) {

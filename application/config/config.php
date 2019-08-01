@@ -506,6 +506,8 @@ $config['rewrite_short_tags'] = FALSE;
 
 $config['GA_key'] = getenv('QANB_GA_KEY');
 
+$config['GCP_URL'] = getenv('QANB_GCPURL') ?: 'https://storage.googleapis.com/prestashop-core-nightly/';
+
 /*
 |--------------------------------------------------------------------------
 | Reverse Proxy IPs

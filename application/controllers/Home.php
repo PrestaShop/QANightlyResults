@@ -8,7 +8,7 @@ class Home extends MY_Base {
 
         //get all data from GCP
         $GCP_files_list = [];
-        $url = getenv('QANB_GCPURL') ?: 'https://storage.googleapis.com/prestashop-core-nightly/';
+        $url = $this->config->item('GCP_URL');
         try {
             $t = file_get_contents($url);
             $xml = new SimpleXMLElement($t);
