@@ -50,8 +50,7 @@ class Graph extends MY_Base {
             'title'     => "Nightlies reports stats",
             'js'        => ['https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js']
         ];
-        $this->load->view('templates/header', $header_data);
-        $this->load->view('graph', $content_data);
-        $this->load->view('templates/footer');
+
+        $this->display('graph', $content_data, $header_data);
     }
 }

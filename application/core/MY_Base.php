@@ -17,4 +17,12 @@ class MY_Base extends CI_Controller
             exit('Unable to connect with database with given db details');
         }
     }
+
+    function display($template, $content_data = [], $header_data = [], $footer_data = [])
+    {
+        $footer_data['GA_key'] = $this->config->item('GA_key');
+        $this->load->view('templates/header', $header_data);
+        $this->load->view($template, $content_data);
+        $this->load->view('templates/footer', $footer_data);
+    }
 }

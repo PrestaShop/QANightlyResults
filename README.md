@@ -18,6 +18,7 @@ You can then edit the `config.php` and `database.php` files in the `config/` fol
 | QANB_DB_USERNAME  | Database username  |
 | QANB_DB_PASSWORD  | Database password  |
 | QANB_DB_NAME      | Database name  |
+| QANB_GA_KEY       | Google Analytics Key (optional)  |
 | QANB_TOKEN        | Token to add JSON data through the Hook  |
 
 

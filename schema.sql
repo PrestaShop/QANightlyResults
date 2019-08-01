@@ -1,6 +1,7 @@
 CREATE TABLE `execution` (
  `id` int NOT NULL AUTO_INCREMENT,
  `ref` bigint(11) NOT NULL,
+ `filename` VARCHAR(50) NOT NULL,
  `start_date` timestamp NULL DEFAULT NULL,
  `end_date` timestamp NULL DEFAULT NULL,
  `duration` int(11) NOT NULL,

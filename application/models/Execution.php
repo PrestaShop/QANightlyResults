@@ -7,6 +7,7 @@ class Execution extends CI_Model
 
     public $id;
     public $ref;
+    public $filename;
     public $stats;
     public $start_date;
     public $end_date;
@@ -57,7 +58,7 @@ class Execution extends CI_Model
      */
     function getAllInformation()
     {
-        $sql = "SELECT id, ref, start_date, end_date, duration, version, suites, tests, skipped, passes, failures FROM $this->table ORDER BY DATE(start_date) DESC LIMIT 50";
+        $sql = "SELECT id, filename, ref, start_date, end_date, duration, version, suites, tests, skipped, passes, failures FROM $this->table ORDER BY DATE(start_date) DESC LIMIT 20";
 
         return $this->db->query($sql);
     }
@@ -70,6 +71,7 @@ class Execution extends CI_Model
         return $this->db->query("SELECT 
                 version, count(id) cpt
                 FROM $this->table
+                WHERE start_date > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 day)
                 GROUP BY version
                 ORDER BY cpt DESC;");
     }

@@ -4,7 +4,7 @@ class Hook extends MY_Base {
     private $execution_id = null;
     private $pattern = '/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/';
     private $force = false;
-    private $GCPURL = 'https://storage.googleapis.com/prestashop-core-nightly/reports/';
+    private $GCPURL = '';
 
     public function add()
     {
@@ -13,9 +13,7 @@ class Hook extends MY_Base {
         $this->load->model('Test');
 
         //is there a GCP URL in environment variable ?
-    if (getenv('QANB_GCPURL') !== false && strpos(getenv('QANB_GCPURL'), 'http') !== false) {
-            $this->GCPURL = getenv('QANB_GCPURL');
-        }
+        $this->GCPURL = $this->config->item('GCP_URL').'reports/';
 
         log_message('info', '"verifying data');
         if (!$this->input->get('token') || !$this->input->get('filename')) {
@@ -87,6 +85,7 @@ class Hook extends MY_Base {
         $stats = $file_contents->stats;
         $execution_data = [
             'ref' => date('YmdHis'),
+            'filename' => $filename,
             'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
             'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
             'duration' => $stats->duration,

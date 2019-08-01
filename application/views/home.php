@@ -34,6 +34,7 @@
                     <th>Version</th>
                     <th>Duration</th>
                     <th>Content</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -51,13 +52,30 @@
                                     $content .= '<div class="content_block count_skipped" title="Tests skipped"><i class="material-icons">radio_button_checked</i> '.$execution->skipped.'</div>';
                                 }
 
+                                $download_link = '';
+                                if (count($gcp_files_list) > 0) {
+                                    preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-[A-z0-9\.]*?\.json/', $execution->filename, $matches_filename);
+                                    if (isset($matches_filename[1])) {
+                                        $date_from_filename = $matches_filename[1];
+                                        $pattern = '/'.$date_from_filename.'-'.$execution->version.'-prestashop_([A-z0-9\.?]*)\.zip/';
+                                        foreach($gcp_files_list as $gcp_file) {
+                                            preg_match($pattern, $gcp_file, $matches);
+                                            if (isset($matches[1]) && $matches[1] != '') {
+                                                $branch = $matches[1];
+                                                $download_link = '<a href="https://storage.googleapis.com/prestashop-core-nightly/'.$gcp_file.'"><i class="material-icons">cloud_download</i> Download build</a>';
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
 
                                 echo '<tr class="version_'.str_replace('.', '', $execution->version).'">';
                                 echo '<td><a href="/report/'.$execution->id.'" target="_blank"><i class="material-icons">visibility</i> Show report</a></td>';
                                 echo '<td>'.date('d/m/Y', strtotime($execution->start_date)).'</td>';
                                 echo '<td>'.$execution->version.'</td>';
-                                echo '<td>'.date('H:i', strtotime($execution->start_date)).' - '.date('H:i', strtotime($execution->end_date)).' ('.duration($execution->duration/1000).')</td>';
-                                echo '<td>'.$content.'</td>';
+                                echo '<td class="align-left">'.date('H:i', strtotime($execution->start_date)).' - '.date('H:i', strtotime($execution->end_date)).' ('.duration($execution->duration/1000).')</td>';
+                                echo '<td class="align-left">'.$content.'</td>';
+                                echo '<td>'.$download_link.'</td>';
                                 echo '</tr>';
                             }
                         }
