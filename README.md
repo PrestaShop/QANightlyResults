@@ -20,6 +20,7 @@ You can then edit the `config.php` and `database.php` files in the `config/` fol
 | QANB_DB_NAME      | Database name  |
 | QANB_GA_KEY       | Google Analytics Key (optional)  |
 | QANB_TOKEN        | Token to add JSON data through the Hook  |
+| QANB_GCPURL       | URL the the GCP repository (must ends with a `/`)  |
 
 
 ## Web server configuration
@@ -54,7 +55,7 @@ EG : `mysite.com/hook/add?token=IpBzOmwXQUrW5Hn&filename=2019-07-22-develop.json
 
 The files in the Google Cloud Storage might be huge, so be sure your server is properly configured to handle large files (~ 10Mio).
 
-Files will be taken from https://storage.googleapis.com/prestashop-core-nightly/reports/ (unless specified otherwise in the config section at the top of the controller).
+Files will be taken from https://storage.googleapis.com/prestashop-core-nightly/reports/ (unless specified otherwise in the environment variable `QANB_GCPURL`).
 
 
 ## Containers
