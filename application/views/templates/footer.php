@@ -11,7 +11,7 @@
 
           gtag('js', new Date());
 
-          gtag('config', <?php echo $GA_key; ?>);
+          gtag('config', '<?php echo $GA_key; ?>');
         </script>
 
         <?php
