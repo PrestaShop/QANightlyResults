@@ -34,6 +34,6 @@ if ( ! function_exists('duration'))
     function compare_date_keys($dt1, $dt2) {
         $tm1 = strtotime($dt1);
         $tm2 = strtotime($dt2);
-        return ($tm1 < $tm2) ? -1 : (($tm1 > $tm2) ? 1 : 0);
+        return ($tm1 < $tm2) ? 1 : (($tm1 > $tm2) ? -1 : 0);
     }
 }
