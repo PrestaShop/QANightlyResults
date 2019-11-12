@@ -29,13 +29,11 @@ if ( ! function_exists('duration'))
         $dt->add(new DateInterval('PT'.floor($duration/1000).'S'));
         $interval = $dt->diff(new DateTime());
         return $interval->format('%Im %Ss');
+    }
 
-        /*if ($duration < 1000*60*60) { // < 1h
-            $minutes = floor(($duration / 60000) % 60);
-            $duration -= $minutes;
-            $seconds = round($duration/1000, 3);
-            return $minutes.':'.$seconds.'m';
-        }*/
-
+    function compare_date_keys($dt1, $dt2) {
+        $tm1 = strtotime($dt1);
+        $tm2 = strtotime($dt2);
+        return ($tm1 < $tm2) ? -1 : (($tm1 > $tm2) ? 1 : 0);
     }
 }
