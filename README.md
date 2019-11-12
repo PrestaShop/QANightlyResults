@@ -1,6 +1,6 @@
-# CIPSJsonParser
+# QANightlyResults
 
-CIPSJsonParser is a small PHP script based on CodeIgniter. Its purpose is to :
+QANightlyResults is a small PHP script based on CodeIgniter. Its purpose is to :
 1. store results of tests in a database
 2. let people browse a report of a test execution
 3. display some statistics about test failures

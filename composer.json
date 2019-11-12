@@ -3,7 +3,7 @@
 	"name": "Prestashop/QANightlyBoard",
 	"type": "project",
 	"require": {
-		"php": ">=5.3.7"
+		"php": ">=5.4"
 	},
 	"require-dev": {
 		"mikey179/vfsStream": "1.1.*",

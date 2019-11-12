@@ -70,8 +70,7 @@ class Execution extends CI_Model
     function getVersions() {
         return $this->db->query("SELECT 
                 version, count(id) cpt
-                FROM $this->table
-                WHERE start_date > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 day)
+                FROM (SELECT * FROM $this->table ORDER BY DATE(start_date) DESC LIMIT 20) a
                 GROUP BY version
                 ORDER BY cpt DESC;");
     }
