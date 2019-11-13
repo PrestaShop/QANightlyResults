@@ -23,16 +23,9 @@ class Home extends MY_Base {
         }
         //get all data from executions
         $execution_list = $this->Execution->getAllInformation();
-        //get all versions
-        $versions_list = [];
-        if (count($execution_list) > 0) {
-            foreach($execution_list as $ex) {
-                if (!isset($versions_list[$ex['version']])) {
-                    $versions_list[] = $ex['version'];
-                }
-            }
-        }
 
+        //get all versions
+        $versions_list = $this->Execution->getVersions();
 
         $full_list = [];
         foreach($execution_list->result() as $execution) {
@@ -53,7 +46,7 @@ class Home extends MY_Base {
 
         $header_data = [
             'title' => "Nightlies reports",
-            'js' => 'https://code.jquery.com/jquery-3.4.1.min.js'
+            'js' => ['/assets/js/jquery-3.4.1.min.js']
         ];
 
         $this->display('home', $content_data, $header_data);
