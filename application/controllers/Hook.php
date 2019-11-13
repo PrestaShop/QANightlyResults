@@ -14,6 +14,8 @@ class Hook extends MY_Base {
 
         //is there a GCP URL in environment variable ?
         $this->GCPURL = $this->config->item('GCP_URL').'reports/';
+        //TODO
+        $this->GCPURL = '/home/sgarny/Bureau/';
 
         log_message('info', '"verifying data');
         if (!$this->input->get('token') || !$this->input->get('filename')) {
@@ -58,6 +60,7 @@ class Hook extends MY_Base {
         $url = $this->GCPURL.$filename;
         //retrieve content
         log_message('info', 'retrieving content from '.$url);
+
         try {
             $contents = file_get_contents($url);
         } catch(Exception $e) {

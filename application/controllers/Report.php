@@ -33,7 +33,7 @@ class Report extends MY_Base {
 
         $header_data = [
             'title' => "Report",
-            'js' => ['https://code.jquery.com/jquery-3.4.1.min.js']
+            'js' => ['/assets/js/jquery-3.4.1.min.js']
         ];
         $this->display('report', $content_data, $header_data);
     }
