@@ -14,9 +14,6 @@ class Hook extends MY_Base {
 
         //is there a GCP URL in environment variable ?
         $this->GCPURL = $this->config->item('GCP_URL').'reports/';
-        //TODO
-        //$this->GCPURL = '/home/sgarny/Bureau/';
-
         log_message('info', '"verifying data');
         if (!$this->input->get('token') || !$this->input->get('filename')) {
             $this->setHeaders(400);
@@ -231,7 +228,11 @@ class Hook extends MY_Base {
      */
     private function extractNames($filename, $type)
     {
-        if (strlen($filename) > 0) {
+        if (strlen($filename) == 0) {
+            return null;
+        }
+        if (strpos($filename, '/full/') !== false) {
+            //selenium
             $pattern = '/\/full\/(.*?)\/(.*)/';
             preg_match($pattern, $filename, $matches);
             if ($type == 'campaign') {
@@ -241,9 +242,18 @@ class Hook extends MY_Base {
             if ($type == 'file') {
                 return isset($matches[2]) ? $matches[2] : null;
             }
-        }
+        } else {
+            //puppeteer
+            $pattern = '/\/campaigns\/(.*?)\/(.*?)\/(.*)/';
+            preg_match($pattern, $filename, $matches);
+            if ($type == 'campaign') {
+                return isset($matches[2]) ? $matches[2] : null;
+            }
 
-        return null;
+            if ($type == 'file') {
+                return isset($matches[3]) ? $matches[3] : null;
+            }
+        }
     }
 
     /**
