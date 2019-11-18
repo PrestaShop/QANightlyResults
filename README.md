@@ -11,7 +11,7 @@ Create a database following the schema provided in schema.sql at the root of the
 
 You can then edit the `config.php` and `database.php` files in the `config/` folder. You can also pass the values via environment variables. Here are the main ones:
 
-|Variables           |   |
+|Variables          |   |
 |-------------------|---|
 | QANB_BASEURL      | Base URL of the application, eg https://qaboard.xxx.com |
 | QANB_DB_HOST      | Database host address  |
@@ -20,7 +20,7 @@ You can then edit the `config.php` and `database.php` files in the `config/` fol
 | QANB_DB_NAME      | Database name  |
 | QANB_GA_KEY       | Google Analytics Key (optional)  |
 | QANB_TOKEN        | Token to add JSON data through the Hook  |
-| QANB_GCPURL       | URL the the GCP repository (must ends with a `/`)  |
+| QANB_GCPURL       | URL to the GCP repository (must ends with a `/`)  |
 
 
 ## Web server configuration
@@ -48,6 +48,7 @@ Set up a vhost that points to the `/public` folder:
 Use the hook provided in the `Hook` controller. You need to call this URL: `BASE_URL/hook/add` with the following GET parameters:
 - `token`: the token set in the environment variable `QANB_TOKEN` (e.g.: `IpBzOmwXQUrW5Hn`)
 - `filename` : the complete filename to look for in the Google Cloud Storage (e.g.: `2019-07-22-develop.json`). The name must follow this pattern: `/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/`
+
 Optional:
 - `force`: a special parameter used to force insert when a similar entry is found (criterias are date and version)
 
