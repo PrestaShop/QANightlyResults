@@ -39,7 +39,6 @@
                 </thead>
                 <tbody>
                 <?php
-var_dump($execution_list);
                     if (sizeof($execution_list) > 0) {
                     foreach($execution_list as $date => $executions) {
                         foreach($executions as $execution) {
