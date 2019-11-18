@@ -39,7 +39,7 @@
                 </thead>
                 <tbody>
                 <?php
-
+var_dump($execution_list);
                     if (sizeof($execution_list) > 0) {
                     foreach($execution_list as $date => $executions) {
                         foreach($executions as $execution) {
@@ -81,10 +81,11 @@
                                 echo '</tr>';
                             } else {
                                 //no object, just a link to GCP
+                                preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-([A-z0-9\.]*)-prestashop_(.*)\.zip/', $execution, $matches_filename);
                                 echo '<tr>';
                                 echo '<td>No tests found</td>';
                                 echo '<td>' . date('d/m/Y', strtotime($date)) . '</td>';
-                                echo '<td>-</td>';
+                                echo '<td>'.$matches_filename[2].'</td>';
                                 echo '<td>-</td>';
                                 echo '<td>-</td>';
                                 echo '<td><a href="' . $gcp_url . $execution .'"><i class="material-icons">cloud_download</i> Download build</a></td>';

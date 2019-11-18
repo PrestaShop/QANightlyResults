@@ -33,7 +33,21 @@ class Home extends MY_Base {
         }
         foreach($GCP_files_list as $item) {
             preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-.*\.zip/', $item, $matches_filename);
-            $full_list[$matches_filename[1]][] = $item;
+            if (isset($full_list[$matches_filename[1]])) {
+                //already stuff for this date, let's check it's not already in here
+                foreach($full_list[$matches_filename[1]] as $element) {
+                    if (is_object($element)) {
+                        //get the filename
+                        $filename = basename($element->filename, '.json');
+
+                        if (strpos($item, $filename) === false) {
+                            $full_list[$matches_filename[1]][] = $item;
+                        }
+                    }
+                }
+            } else {
+                $full_list[$matches_filename[1]][] = $item;
+            }
         }
         uksort($full_list, "compare_date_keys");
 
