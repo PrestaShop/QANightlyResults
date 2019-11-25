@@ -24,9 +24,6 @@ class Home extends MY_Base {
         //get all data from executions
         $execution_list = $this->Execution->getAllInformation();
 
-        //get all versions
-        $versions_list = $this->Execution->getVersions();
-
         $full_list = [];
         foreach($execution_list->result() as $execution) {
             $full_list[date('Y-m-d', strtotime($execution->start_date))][] = $execution;
@@ -53,7 +50,6 @@ class Home extends MY_Base {
 
         $content_data = [
             'execution_list' => $full_list,
-            'versions_list' => $versions_list,
             'gcp_files_list' => $GCP_files_list,
             'gcp_url' => $gcp_url
         ];

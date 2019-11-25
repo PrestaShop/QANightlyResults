@@ -11,20 +11,6 @@
 </div>
 <div class="container">
     <div class="details">
-        <div class="options">
-            <div class="blocks_container">
-                <div class="block">
-                    Filters :
-                    <?php
-                    if ($versions_list->num_rows() > 0) {
-                        foreach($versions_list->result() as $version) {
-                            echo '<span class="label filter_version active" data-for="version_'.str_replace('.', '', $version->version).'" data-active="true">'.$version->version.'</span>';
-                        }
-                    }
-                    ?>
-                </div>
-            </div>
-        </div>
         <div class="table_container">
             <table class="table">
                 <thead>
@@ -39,7 +25,6 @@
                 </thead>
                 <tbody>
                 <?php
-var_dump($execution_list);
                     if (sizeof($execution_list) > 0) {
                     foreach($execution_list as $date => $executions) {
                         foreach($executions as $execution) {
@@ -100,18 +85,3 @@ var_dump($execution_list);
         </div>
     </div>
 </div>
-<script>
-    $(document).ready(function() {
-        $('.filter_version').click(function() {
-            let version = $(this).attr('data-for');
-            let active = $(this).attr('data-active');
-            if (active === 'true') {
-                $('table.table tbody  tr.'+version).hide();
-                $(this).attr('data-active', 'false');
-            } else {
-                $('table.table tbody tr.'+version).show();
-                $(this).attr('data-active', 'true');
-            }
-        });
-    });
-</script>
