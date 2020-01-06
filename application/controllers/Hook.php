@@ -121,6 +121,7 @@ class Hook extends MY_Base {
 
         $update_data = [
             'skipped' => $updated_data->skipped,
+            'pending' => $updated_data->pending,
             'suites' => $updated_data->suites,
             'tests' => $updated_data->tests,
             'passes' => $updated_data->passed,
@@ -158,9 +159,11 @@ class Hook extends MY_Base {
             'file' => $this->extractNames($suite->file, 'file'),
             'duration' => $suite->duration,
             'hasSkipped' => $suite->hasSkipped ? 1 :0,
+            'hasPending' => $suite->hasPending ? 1 :0,
             'hasPasses' => $suite->hasPasses ? 1 :0,
             'hasFailures' => $suite->hasFailures ? 1 :0,
             'totalSkipped' => $suite->totalSkipped,
+            'totalPending' => $suite->totalPending,
             'totalPasses' => $suite->totalPasses,
             'totalFailures' => $suite->totalFailures,
             'hasSuites' => $suite->hasSuites ? 1 :0,
@@ -269,6 +272,10 @@ class Hook extends MY_Base {
 
         if ($test->skipped == true) {
             return 'skipped';
+        }
+
+        if ($test->pending == true) {
+            return 'pending';
         }
 
         return 'unknown';

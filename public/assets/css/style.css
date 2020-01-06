@@ -81,6 +81,7 @@ button:hover {
 
 #content {
     margin-left: 255px;
+    margin-bottom: 15px;
 }
 
 #left_navigation .campaign, #left_navigation .file {
@@ -137,6 +138,10 @@ button:hover {
 
 #left_navigation .file.passed {
     color: rgb(0, 50, 0);
+}
+
+#left_navigation .file.pending {
+    color: rgb(30, 160, 255);
 }
 
 #left_navigation .file.failed {
@@ -463,13 +468,24 @@ code {
 }
 
 .file_title h3 span.indicator {
-    color: rgba(80, 0, 0, 0.5);
     display: inline-block;
     font-size: 12px;
 }
 
-.file_title h3:hover span.indicator {
+.file_title h3 span.indicator.failed {
+    color: rgba(80, 0, 0, 0.5);
+}
+
+.file_title h3:hover span.indicator.failed {
     color: rgba(80, 0, 0, 1);
+}
+
+.file_title h3 span.indicator.pending {
+    color: rgba(30, 160, 255, 0.5);
+}
+
+.file_title h3:hover span.indicator.pending {
+    color: rgba(30, 160, 255, 1);
 }
 
 .container_file .ajaxloader {

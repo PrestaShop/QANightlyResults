@@ -1,60 +1,108 @@
+--
+-- Table structure for table `execution`
+--
+
 CREATE TABLE `execution` (
- `id` int NOT NULL AUTO_INCREMENT,
- `ref` bigint(11) NOT NULL,
- `filename` VARCHAR(50) NOT NULL,
- `start_date` timestamp NULL DEFAULT NULL,
- `end_date` timestamp NULL DEFAULT NULL,
- `duration` int(11) NOT NULL,
- `version` varchar(20) NOT NULL,
- `suites` int(11) DEFAULT NULL,
- `tests` int(11) DEFAULT NULL,
- `skipped` int(11) DEFAULT NULL,
- `passes` int(11) DEFAULT NULL,
- `failures` int(11) DEFAULT NULL,
- `insertion_start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
- `insertion_end_date` timestamp NULL DEFAULT NULL,
- PRIMARY KEY (`id`),
- KEY `version` (`version`),
- KEY `execution_id` (`ref`)
+  `id` int(11) NOT NULL,
+  `ref` bigint(11) NOT NULL,
+  `filename` varchar(50) NOT NULL,
+  `start_date` timestamp NULL DEFAULT NULL,
+  `end_date` timestamp NULL DEFAULT NULL,
+  `duration` int(11) NOT NULL,
+  `version` varchar(20) NOT NULL,
+  `suites` int(11) DEFAULT NULL,
+  `tests` int(11) DEFAULT NULL,
+  `skipped` int(11) DEFAULT NULL,
+  `pending` int(11) DEFAULT NULL,
+  `passes` int(11) DEFAULT NULL,
+  `failures` int(11) DEFAULT NULL,
+  `insertion_start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `insertion_end_date` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `suite`
+--
 
 CREATE TABLE `suite` (
- `id` int NOT NULL AUTO_INCREMENT,
- `execution_id` int(11) NOT NULL,
- `uuid` varchar(50) NOT NULL,
- `title` TEXT NOT NULL,
- `campaign` varchar(40) DEFAULT NULL,
- `file` varchar(200) DEFAULT NULL,
- `duration` int(11) DEFAULT NULL,
- `hasSkipped` tinyint(1) DEFAULT NULL,
- `hasPasses` tinyint(1) DEFAULT NULL,
- `hasFailures` tinyint(1) DEFAULT NULL,
- `totalSkipped` int(11) DEFAULT NULL,
- `totalPasses` int(11) DEFAULT NULL,
- `totalFailures` int(11) DEFAULT NULL,
- `hasSuites` int(11) DEFAULT NULL,
- `hasTests` int(11) DEFAULT NULL,
- `parent_id` int(11) DEFAULT NULL,
- `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
- PRIMARY KEY (`id`),
- KEY `execution_id` (`execution_id`),
- CONSTRAINT `suite_ibfk_1` FOREIGN KEY (`execution_id`) REFERENCES `execution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `id` int(11) NOT NULL,
+  `execution_id` int(11) NOT NULL,
+  `uuid` varchar(50) NOT NULL,
+  `title` text NOT NULL,
+  `campaign` varchar(40) DEFAULT NULL,
+  `file` varchar(200) DEFAULT NULL,
+  `duration` int(11) DEFAULT NULL,
+  `hasSkipped` tinyint(1) DEFAULT NULL,
+  `hasPending` tinyint(1) DEFAULT NULL,
+  `hasPasses` tinyint(1) DEFAULT NULL,
+  `hasFailures` tinyint(1) DEFAULT NULL,
+  `totalSkipped` int(11) DEFAULT NULL,
+  `totalPending` tinyint(1) DEFAULT NULL,
+  `totalPasses` int(11) DEFAULT NULL,
+  `totalFailures` int(11) DEFAULT NULL,
+  `hasSuites` int(11) DEFAULT NULL,
+  `hasTests` int(11) DEFAULT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `test`
+--
+
 CREATE TABLE `test` (
- `id` int NOT NULL AUTO_INCREMENT,
- `suite_id` int(11) NOT NULL,
- `uuid` varchar(50) NOT NULL,
- `title` TEXT NOT NULL,
- `state` varchar(20) DEFAULT NULL,
- `duration` int(11) NOT NULL,
- `error_message` TEXT DEFAULT NULL,
- `stack_trace` text,
- `diff` text,
- `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
- PRIMARY KEY (`id`),
- KEY `state` (`state`),
- KEY `id` (`id`),
- KEY `suite_id` (`suite_id`),
- CONSTRAINT `test_ibfk_1` FOREIGN KEY (`suite_id`) REFERENCES `suite` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `id` int(11) NOT NULL,
+  `suite_id` int(11) NOT NULL,
+  `uuid` varchar(50) NOT NULL,
+  `title` text NOT NULL,
+  `state` varchar(20) DEFAULT NULL,
+  `duration` int(11) NOT NULL,
+  `error_message` text,
+  `stack_trace` text,
+  `diff` text,
+  `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `execution`
+--
+ALTER TABLE `execution`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `version` (`version`),
+  ADD KEY `execution_id` (`ref`);
+
+--
+-- Indexes for table `suite`
+--
+ALTER TABLE `suite`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `execution_id` (`execution_id`);
+
+--
+-- Indexes for table `test`
+--
+ALTER TABLE `test`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `state` (`state`),
+  ADD KEY `id` (`id`),
+  ADD KEY `suite_id` (`suite_id`);
+
+--
+-- Constraints for table `suite`
+--
+ALTER TABLE `suite`
+  ADD CONSTRAINT `suite_ibfk_1` FOREIGN KEY (`execution_id`) REFERENCES `execution` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `test`
+--
+ALTER TABLE `test`
+  ADD CONSTRAINT `test_ibfk_1` FOREIGN KEY (`suite_id`) REFERENCES `suite` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
