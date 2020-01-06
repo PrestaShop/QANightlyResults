@@ -73,8 +73,6 @@
                 <p><span>File not found</span>: Test didn't find the file it was looking for.</p>
                 <p><span>Timeout</span>: Object not found after waiting for it to be visible.</p>
                 <p><span>Object not found</span>: Selector not valid.</p>
-                <p><span>Invalid Session ID</span>: Selenium lost the browser.</p>
-                <p><span>Chrome not reachable</span>: Selenium lost the browser.</p>
             </div>
         </div>
     </div>
@@ -88,9 +86,10 @@
         const data = <?php echo json_encode($graph_data); ?>;
 
         const labels = Array.from(data, x => x.custom_start_date);
-        const passed_percent = Array.from(data, x => Math.floor((parseFloat(x.totalPasses)*10000 / (parseFloat(x.totalPasses) + parseFloat(x.totalSkipped) + parseFloat(x.totalFailures))))/100 );
-        const failed_percent = Array.from(data, x => Math.floor((parseFloat(x.totalFailures)*10000 / (parseFloat(x.totalPasses) + parseFloat(x.totalSkipped) + parseFloat(x.totalFailures))))/100 );
-        const skipped_percent = Array.from(data, x => Math.floor((parseFloat(x.totalSkipped)*10000 / (parseFloat(x.totalPasses) + parseFloat(x.totalSkipped) + parseFloat(x.totalFailures))))/100 );
+        const passed_percent = Array.from(data, x => Math.floor((parseFloat(x.totalPasses)*10000 / (parseFloat(x.totalPending) + parseFloat(x.totalPasses) + parseFloat(x.totalSkipped) + parseFloat(x.totalFailures))))/100 );
+        const failed_percent = Array.from(data, x => Math.floor((parseFloat(x.totalFailures)*10000 / (parseFloat(x.totalPending) + parseFloat(x.totalPasses) + parseFloat(x.totalSkipped) + parseFloat(x.totalFailures))))/100 );
+        const skipped_percent = Array.from(data, x => Math.floor((parseFloat(x.totalSkipped)*10000 / (parseFloat(x.totalPending) + parseFloat(x.totalPasses) + parseFloat(x.totalSkipped) + parseFloat(x.totalFailures))))/100 );
+        const pending_percent = Array.from(data, x => Math.floor((parseFloat(x.totalPending)*10000 / (parseFloat(x.totalPending) + parseFloat(x.totalPasses) + parseFloat(x.totalPending) + parseFloat(x.totalFailures))))/100 );
 
         let canvas = document.getElementById('chart');
         let ctx = canvas.getContext('2d');
@@ -111,12 +110,18 @@
                         backgroundColor: 'rgba(178, 44, 44, '+opacity+')',
                         fill: '-1'
                     },
-                    {
-                        label: '% skipped',
-                        data: skipped_percent,
-                        backgroundColor: 'rgba(209, 209, 209, '+opacity+')',
-                        fill: '-2'
-                    }]
+                  {
+                    label: '% pending',
+                    data: pending_percent,
+                    backgroundColor: 'rgba(30, 160, 255, '+opacity+')',
+                    fill: '-2'
+                  },
+                  {
+                    label: '% skipped',
+                    data: skipped_percent,
+                    backgroundColor: 'rgba(209, 209, 209, '+opacity+')',
+                    fill: '-2'
+                  }]
             },
             options: {
                 scales: {
@@ -143,9 +148,7 @@
         const p_file_not_found = Array.from(precise_data, x => x.file_not_found);
         const p_not_visible_after_timeout = Array.from(precise_data, x => x.not_visible_after_timeout);
         const p_wrong_locator = Array.from(precise_data, x => x.wrong_locator);
-        const p_invalid_session_id = Array.from(precise_data, x => x.invalid_session_id);
-        const p_chrome_not_reachable = Array.from(precise_data, x => x.chrome_not_reachable);
-        const p_other = Array.from(precise_data, x => x.failures - x.value_expected - x.file_not_found - x.not_visible_after_timeout - x.wrong_locator - x.invalid_session_id - x.chrome_not_reachable);
+        const p_other = Array.from(precise_data, x => x.failures - x.value_expected - x.file_not_found - x.not_visible_after_timeout - x.wrong_locator);
 
         var p_canvas = document.getElementById('chart_precise');
         var p_ctx = p_canvas.getContext('2d');
@@ -177,18 +180,6 @@
                         data: p_wrong_locator,
                         backgroundColor: 'rgba(153, 102, 255, '+opacity+')',
                         fill: '-3'
-                    },
-                    {
-                        label: 'Invalid Session ID',
-                        data: p_invalid_session_id,
-                        backgroundColor: 'rgba(255, 63, 24, '+opacity+')',
-                        fill: '-4'
-                    },
-                    {
-                        label: 'Chome not reachable',
-                        data: p_chrome_not_reachable,
-                        backgroundColor: 'rgba(244, 151, 65, '+opacity+')',
-                        fill: '-5'
                     },
                     {
                         label: 'Other',

@@ -29,10 +29,14 @@
                 <i class="material-icons">highlight_off</i> <span>'.$execution->failures.'</span>
             </div>';
                 }
-
                 if ($execution->skipped > 0) {
                     echo '<div class="recap_block skipped_tests" title="Number of skipped tests">
                 <i class="material-icons">radio_button_checked</i> <span>'.$execution->skipped.'</span>
+            </div>';
+                }
+                if ($execution->pending > 0) {
+                    echo '<div class="recap_block pending_tests" title="Number of pending tests  (skipped on purpose)">
+                <i class="material-icons">double_arrow</i> <span>'.$execution->pending.'</span>
             </div>';
                 }
             ?>
@@ -79,6 +83,9 @@
                                 echo '<div class="file_list">';
                             }
                             $class = 'passed';
+                            if ($item->hasPending > 0) {
+                                $class = 'pending';
+                            }
                             if ($item->hasFailed > 0) {
                                 $class = 'failed';
                             }
@@ -101,8 +108,6 @@
                         <li><span>File not found : </span><?php echo $details->file_not_found; ?></li>
                         <li><span>Timeout : </span><?php echo $details->not_visible_after_timeout; ?></li>
                         <li><span>Object not found : </span><?php echo $details->wrong_locator; ?></li>
-                        <li><span>Invalid Session ID : </span><?php echo $details->invalid_session_id; ?></li>
-                        <li><span>Chrome not reachable : </span><?php echo $details->chrome_not_reachable; ?></li>
                     </ul>
                 </div>
             </div>
@@ -130,7 +135,10 @@
                         //file part
                         $indicators = '';
                         if ($item->hasFailed > 0) {
-                            $indicators = '<span class="indicator failed" title="Tests failed">('.$item->hasFailed.')</span>';
+                            $indicators .= '<span class="indicator failed" title="Tests failed">('.$item->hasFailed.')</span>';
+                        }
+                        if ($item->hasPending > 0) {
+                            $indicators .= '<span class="indicator pending" title="Tests Pending">('.$item->hasPending.')</span>';
                         }
 
                         echo '<div class="file_title" data-state="empty" data-campaign="'.$cur_campaign.'" data-file="'.($item->file).'" >

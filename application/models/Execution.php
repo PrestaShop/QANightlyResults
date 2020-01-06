@@ -18,6 +18,7 @@ class Execution extends CI_Model
     public $skipped;
     public $passes;
     public $failures;
+    public $pending;
 
     /**
      * Find an execution with its ID
@@ -58,7 +59,7 @@ class Execution extends CI_Model
      */
     function getAllInformation()
     {
-        $sql = "SELECT id, filename, ref, start_date, end_date, duration, version, suites, tests, skipped, passes, failures 
+        $sql = "SELECT id, filename, ref, start_date, end_date, duration, version, suites, tests, skipped, passes, failures, pending 
 FROM $this->table 
 ORDER BY DATE(start_date) 
 DESC LIMIT 20";
@@ -84,8 +85,12 @@ DESC LIMIT 20";
      * @return mixed
      */
     function getCustomData($criteria) {
-        $req = "SELECT e.id, e.ref, e.start_date, DATE(e.start_date) custom_start_date,e.end_date, e.skipped, e.passes, e.failures,
-            SUM(IF(t.state = 'skipped', 1, 0)) totalSkipped, SUM(IF(t.state = 'passed', 1, 0)) totalPasses, SUM(IF(t.state = 'failed', 1, 0)) totalFailures
+        $req = "SELECT 
+                e.id, e.ref, e.start_date, DATE(e.start_date) custom_start_date,e.end_date, e.skipped, e.passes, e.failures, e.pending,
+                SUM(IF(t.state = 'skipped', 1, 0)) totalSkipped, 
+                SUM(IF(t.state = 'pending', 1, 0)) totalPending, 
+                SUM(IF(t.state = 'passed', 1, 0)) totalPasses, 
+                SUM(IF(t.state = 'failed', 1, 0)) totalFailures
             FROM $this->table e
             INNER JOIN suite s ON e.id=s.execution_id
             INNER JOIN test t ON s.id = t.suite_id
@@ -101,7 +106,7 @@ DESC LIMIT 20";
             unset($criteria['campaign']);
         }
         $req .= "
-            GROUP BY e.id, e.start_date, e.end_date, e.skipped, e.passes, e.failures";
+            GROUP BY e.id, e.start_date, e.end_date, e.skipped, e.passes, e.failures, e.pending";
 
         return $this->db->query($req, $criteria);
     }
@@ -118,9 +123,7 @@ DESC LIMIT 20";
             SUM(IF(t.error_message LIKE BINARY 'AssertionError: Expected File%', 1, 0)) file_not_found,
             SUM(IF(t.error_message LIKE 'AssertionError:%' AND t.error_message NOT LIKE 'AssertionError: Expected File%', 1, 0)) value_expected,
             SUM(IF(t.error_message REGEXP 'element(.*) still not existing', 1, 0)) not_visible_after_timeout,
-            SUM(IF(t.error_message LIKE '%An element could not%', 1, 0)) wrong_locator,
-            SUM(IF(t.error_message LIKE '%invalid session id%', 1, 0)) invalid_session_id,
-            SUM(IF(t.error_message LIKE '%chrome not reachable%', 1, 0)) chrome_not_reachable
+            SUM(IF(t.error_message LIKE '%An element could not%', 1, 0)) wrong_locator
         FROM $this->table e
         INNER JOIN suite s ON s.execution_id = e.id
         INNER JOIN test t ON t.suite_id = s.id
@@ -152,9 +155,7 @@ DESC LIMIT 20";
             SUM(IF(t.error_message LIKE 'AssertionError: Expected File%', 1, 0)) file_not_found, e.failures,
             SUM(IF(t.error_message LIKE 'AssertionError:%' AND t.error_message NOT LIKE 'AssertionError: Expected File%', 1, 0)) value_expected,
             SUM(IF(t.error_message REGEXP 'element(.*) still not existing', 1, 0)) not_visible_after_timeout,
-            SUM(IF(t.error_message LIKE '%An element could not%', 1, 0)) wrong_locator,
-            SUM(IF(t.error_message LIKE '%invalid session id%', 1, 0)) invalid_session_id,
-            SUM(IF(t.error_message LIKE '%chrome not reachable%', 1, 0)) chrome_not_reachable
+            SUM(IF(t.error_message LIKE '%An element could not%', 1, 0)) wrong_locator
         FROM execution e
         INNER JOIN suite s ON s.execution_id = e.id
         INNER JOIN test t ON t.suite_id = s.id
@@ -177,7 +178,8 @@ DESC LIMIT 20";
             COUNT(t.id) tests,
             SUM(IF(t.state='passed', 1, 0)) passed,
             SUM(IF(t.state='failed', 1, 0)) failed,
-            SUM(IF(t.state='skipped', 1, 0)) skipped
+            SUM(IF(t.state='skipped', 1, 0)) skipped,
+            SUM(IF(t.state='pending', 1, 0)) pending
             
             FROM `execution` e
             INNER JOIN `suite` s on s.execution_id = e.id

@@ -124,7 +124,10 @@ class Report extends MY_Base {
                     $this->suites_content .= '<div class="block_info tests_failed"><i class="material-icons">close</i> <div class="info ">'.$suite->totalFailures.'</div></div>';
                 }
                 if ($suite->totalSkipped> 0) {
-                    $this->suites_content .= '<div class="block_info tests_skipped"><i class="material-icons">skip_next</i> <div class="info ">'.$suite->totalSkipped.'</div></div>';
+                    $this->suites_content .= '<div class="block_info tests_skipped"><i class="material-icons">double_arrow</i> <div class="info ">'.$suite->totalSkipped.'</div></div>';
+                }
+                if ($suite->totalPending> 0) {
+                    $this->suites_content .= '<div class="block_info tests_pending"><i class="material-icons">skip_next</i> <div class="info ">'.$suite->totalPending.'</div></div>';
                 }
                 $this->suites_content .= '<div class="metric_container">';
                 $this->suites_content .= '<div class="metric">';
@@ -145,6 +148,9 @@ class Report extends MY_Base {
                     }
                     if ($test->state == 'failed') {
                         $icon = '<i class="icon material-icons">remove_circle</i>';
+                    }
+                    if ($test->state == 'pending') {
+                        $icon = '<i class="icon material-icons">double_arrow</i>';
                     }
                     if ($test->state == 'skipped') {
                         $icon = '<i class="icon material-icons">error</i>';

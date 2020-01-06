@@ -16,9 +16,11 @@ class Suite extends CI_Model
     public $file;
     public $duration;
     public $hasSkipped;
+    public $hasPending;
     public $hasPasses;
     public $hasFailures;
     public $totalSkipped;
+    public $totalPending;
     public $totalPasses;
     public $totalFailures;
     public $hasSuites;
@@ -68,6 +70,7 @@ class Suite extends CI_Model
             SELECT
                 s.campaign, 
                 SUM(IF(t.state = 'skipped', 1, 0)) hasSkipped, 
+                SUM(IF(t.state = 'pending', 1, 0)) hasPending, 
                 SUM(IF(t.state = 'failed', 1, 0)) hasFailed, 
                 SUM(IF(t.state = 'passed', 1, 0)) hasPassed, 
                 file 
