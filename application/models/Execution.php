@@ -122,8 +122,8 @@ DESC LIMIT 20";
         $req = "SELECT e.id, e.ref, e.start_date, DATE(e.start_date) custom_start_date,e.end_date, e.failures,
             SUM(IF(t.error_message LIKE BINARY 'AssertionError: Expected File%', 1, 0)) file_not_found,
             SUM(IF(t.error_message LIKE 'AssertionError:%' AND t.error_message NOT LIKE 'AssertionError: Expected File%', 1, 0)) value_expected,
-            SUM(IF(t.error_message REGEXP 'element(.*) still not existing', 1, 0)) not_visible_after_timeout,
-            SUM(IF(t.error_message LIKE '%An element could not%', 1, 0)) wrong_locator
+            SUM(IF((t.error_message REGEXP 'element(.*) still not existing' OR t.error_message REGEXP 'TimeoutError:*'), 1, 0)) not_visible_after_timeout,
+            SUM(IF((t.error_message LIKE '%An element could not%' OR t.error_message LIKE 'Error: No node found for selector*'), 1, 0)) wrong_locator
         FROM $this->table e
         INNER JOIN suite s ON s.execution_id = e.id
         INNER JOIN test t ON t.suite_id = s.id
@@ -151,11 +151,11 @@ DESC LIMIT 20";
      */
     function getExecutionPreciseStats($execution_id)
     {
-        $req = "SELECT e.id,
-            SUM(IF(t.error_message LIKE 'AssertionError: Expected File%', 1, 0)) file_not_found, e.failures,
+        $req = "SELECT e.id, e.ref, e.start_date, DATE(e.start_date) custom_start_date,e.end_date, e.failures,
+            SUM(IF(t.error_message LIKE BINARY 'AssertionError: Expected File%', 1, 0)) file_not_found,
             SUM(IF(t.error_message LIKE 'AssertionError:%' AND t.error_message NOT LIKE 'AssertionError: Expected File%', 1, 0)) value_expected,
-            SUM(IF(t.error_message REGEXP 'element(.*) still not existing', 1, 0)) not_visible_after_timeout,
-            SUM(IF(t.error_message LIKE '%An element could not%', 1, 0)) wrong_locator
+            SUM(IF((t.error_message REGEXP 'element(.*) still not existing' OR t.error_message REGEXP 'TimeoutError:*'), 1, 0)) not_visible_after_timeout,
+            SUM(IF((t.error_message LIKE '%An element could not%' OR t.error_message LIKE 'Error: No node found for selector*'), 1, 0)) wrong_locator
         FROM execution e
         INNER JOIN suite s ON s.execution_id = e.id
         INNER JOIN test t ON t.suite_id = s.id

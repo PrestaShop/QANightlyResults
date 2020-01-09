@@ -21,22 +21,22 @@
                 <i class="material-icons">assignment</i> <span><?php echo $execution->tests; ?></span>
             </div>
             <div class="recap_block passed_tests" title="Number of passed tests">
-                <i class="material-icons">check_circle_outline</i> <span><?php echo $execution->passes; ?></span>
+                <i class="material-icons">check</i> <span><?php echo $execution->passes; ?></span>
             </div>
                 <?php
                 if ($execution->failures > 0) {
                     echo '<div class="recap_block failed_tests" title="Number of failed tests">
-                <i class="material-icons">highlight_off</i> <span>'.$execution->failures.'</span>
+                <i class="material-icons">clear</i> <span>'.$execution->failures.'</span>
             </div>';
                 }
                 if ($execution->skipped > 0) {
                     echo '<div class="recap_block skipped_tests" title="Number of skipped tests">
-                <i class="material-icons">radio_button_checked</i> <span>'.$execution->skipped.'</span>
+                <i class="material-icons">pause</i> <span>'.$execution->skipped.'</span>
             </div>';
                 }
                 if ($execution->pending > 0) {
                     echo '<div class="recap_block pending_tests" title="Number of pending tests  (skipped on purpose)">
-                <i class="material-icons">double_arrow</i> <span>'.$execution->pending.'</span>
+                <i class="material-icons">pause</i> <span>'.$execution->pending.'</span>
             </div>';
                 }
             ?>

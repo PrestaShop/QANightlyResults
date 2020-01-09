@@ -31,13 +31,13 @@
                             $content = '';
                             if (is_object($execution)) {
                                 if ($execution->passes > 0) {
-                                    $content .= '<div class="content_block count_passed" title="Tests passed"><i class="material-icons">check_circle_outline</i> ' . $execution->passes . '</div>';
+                                    $content .= '<div class="content_block count_passed" title="Tests passed"><i class="material-icons icon icon-passed">check</i> ' . $execution->passes . '</div>';
                                 }
                                 if ($execution->failures > 0) {
-                                    $content .= '<div class="content_block count_failed" title="Tests failed"><i class="material-icons">highlight_off</i> ' . $execution->failures . '</div>';
+                                    $content .= '<div class="content_block count_failed" title="Tests failed"><i class="material-icons icon icon-failed">clear</i> ' . $execution->failures . '</div>';
                                 }
-                                if ($execution->skipped > 0) {
-                                    $content .= '<div class="content_block count_skipped" title="Tests skipped"><i class="material-icons">radio_button_checked</i> ' . $execution->skipped . '</div>';
+                                if ($execution->pending > 0) {
+                                    $content .= '<div class="content_block count_pending" title="Tests pending"><i class="material-icons icon icon-pending">pause</i> ' . $execution->pending . '</div>';
                                 }
                                 $download_link = '';
                                 if (count($gcp_files_list) > 0) {
