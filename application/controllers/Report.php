@@ -121,17 +121,21 @@ class Report extends MY_Base {
                     $this->suites_content .= '<div class="block_info tests_passed"><i class="material-icons">check</i> <div class="info ">'.$suite->totalPasses.'</div></div>';
                 }
                 if ($suite->totalFailures > 0) {
-                    $this->suites_content .= '<div class="block_info tests_failed"><i class="material-icons">close</i> <div class="info ">'.$suite->totalFailures.'</div></div>';
+                    $this->suites_content .= '<div class="block_info tests_failed"><i class="material-icons">clear</i> <div class="info ">'.$suite->totalFailures.'</div></div>';
                 }
                 if ($suite->totalSkipped> 0) {
-                    $this->suites_content .= '<div class="block_info tests_skipped"><i class="material-icons">double_arrow</i> <div class="info ">'.$suite->totalSkipped.'</div></div>';
+                    $this->suites_content .= '<div class="block_info tests_skipped"><i class="material-icons">pause</i> <div class="info ">'.$suite->totalSkipped.'</div></div>';
                 }
                 if ($suite->totalPending> 0) {
-                    $this->suites_content .= '<div class="block_info tests_pending"><i class="material-icons">skip_next</i> <div class="info ">'.$suite->totalPending.'</div></div>';
+                    $this->suites_content .= '<div class="block_info tests_pending"><i class="material-icons">pause</i> <div class="info ">'.$suite->totalPending.'</div></div>';
                 }
                 $this->suites_content .= '<div class="metric_container">';
                 $this->suites_content .= '<div class="metric">';
-                $this->suites_content .= '<div class="background"><div class="metric_number">'.(round($suite->totalPasses/count($suite->tests), 3) * 100).'%</div><div class="advancement" style="width:'.(round($suite->totalPasses/count($suite->tests), 3) * 100).'%"></div></div>';
+                $this->suites_content .= '
+                    <div class="background"><div class="metric_number">'.(round($suite->totalPasses/count($suite->tests), 3) * 100).'%</div>
+                        <div class="advancement advancement_pending" style="width:'.(round(($suite->totalPending+$suite->totalSkipped)/count($suite->tests), 3) * 100).'%"></div>
+                        <div class="advancement advancement_passed" style="width:'.(round($suite->totalPasses/count($suite->tests), 3) * 100).'%"></div>
+                    </div>';
                 $this->suites_content .= '</div>';
                 $this->suites_content .= '</div>';
 
@@ -144,20 +148,20 @@ class Report extends MY_Base {
                 foreach ($suite->tests as $test) {
                     $icon = '';
                     if ($test->state == 'passed') {
-                        $icon = '<i class="icon material-icons">check_circle</i>';
+                        $icon = '<i class="icon material-icons">check</i>';
                     }
                     if ($test->state == 'failed') {
-                        $icon = '<i class="icon material-icons">remove_circle</i>';
+                        $icon = '<i class="icon material-icons">clear</i>';
                     }
                     if ($test->state == 'pending') {
-                        $icon = '<i class="icon material-icons">double_arrow</i>';
+                        $icon = '<i class="icon material-icons">pause</i>';
                     }
                     if ($test->state == 'skipped') {
-                        $icon = '<i class="icon material-icons">error</i>';
+                        $icon = '<i class="icon material-icons">pause</i>';
                     }
                     $this->suites_content .= '<section class="test_component '.$test->state.'">';
                     $this->suites_content .= '<div class="block_test">';
-                    $this->suites_content .= '<div id="' . $test->uuid . '" class="test"><div class="test_' . $test->state . '"> ' .$icon.' <span class="test_title" id="' . $test->uuid . '">'.$test->title . '</span></div>';
+                    $this->suites_content .= '<div id="' . $test->uuid . '" class="test"><div class="test_' . $test->state . '"> ' .$icon.' <div class="test_title" id="' . $test->uuid . '">'.$test->title . '</div></div>';
                     $this->suites_content .= '<div class="test_duration"><i class="material-icons">timer</i> '.format_duration($test->duration).'</div>';
                     if ($test->state == 'failed') {
                         $this->suites_content .= '<div class="test_info error_message">' . htmlentities($test->error_message) . '</div>';

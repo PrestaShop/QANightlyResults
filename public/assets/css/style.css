@@ -252,8 +252,8 @@ button:hover {
     color: #E54848;
 }
 
-.recap_block.skipped_tests {
-    color: #C6C6C6;
+.recap_block.skipped_tests, .recap_block.pending_tests {
+    color: #b3e5fc;
 }
 
 .suite {
@@ -321,13 +321,13 @@ button:hover {
 }
 
 .informations .block_info.tests_passed {
-    color: green;
+    color: #388e3c;
 }
 .informations .block_info.tests_failed {
-    color: red;
+    color: #d32f2f;
 }
-.informations .block_info.tests_skipped {
-    color: #a3a3a3;
+.informations .block_info.tests_skipped, .informations .block_info.tests_pending {
+    color: #0288d1;
 }
 
 .test_container {
@@ -348,11 +348,15 @@ button:hover {
 }
 
 .test_component.passed:hover {
-    border-left: 3px solid green;
+    border-left: 3px solid #388e3c;
 }
 
 .test_component.failed:hover {
-    border-left: 3px solid red;
+    border-left: 3px solid #d32f2f;
+}
+
+.test_component.skipped:hover, .test_component.pending:hover {
+    border-left: 3px solid #0288d1;
 }
 
 .block_test {
@@ -363,6 +367,7 @@ button:hover {
 .test {
     position: relative;
     line-height: 24px;
+    margin: 5px 0 2px 0;
 }
 
 .test i.icon {
@@ -372,7 +377,8 @@ button:hover {
 }
 
 .test_passed>.icon {
-    color: green;
+    color: #c8e6c9;
+    background-color: #4caf50;
 }
 
 .test_failed {
@@ -380,11 +386,22 @@ button:hover {
 }
 
 .test_failed>.icon {
-    color: red;
+    color: #ffcdd2;
+    background-color: #d32f2f;
+}
+
+.test_pending, .test_skipped {
+    cursor: pointer;
+}
+
+.test_pending>.icon, .test_skipped>.icon {
+    color: #b3e5fc;
+    background-color: #0288d1;
 }
 
 .test_title {
     margin-left: 30px;
+    margin-right: 80px;
     font-size: 14px;
 }
 
@@ -405,7 +422,7 @@ button:hover {
 }
 
 .test_info.error_message {
-    color: red;
+    color: #d32f2f;
 }
 
 .test .test_duration {
@@ -415,6 +432,7 @@ button:hover {
     color: grey;
     font-size: 14px;
     line-height: 14px;
+    width: 80px;
 }
 
 .test .test_duration .material-icons {
@@ -524,10 +542,10 @@ hr {
 .metric .background {
     width: 150px;
     height: 30px;
-    background-color: red;
+    background-color: #d32f2f;
     position: relative;
+    border-radius: 5px;
 }
-
 
 .metric .background .metric_number  {
     position: absolute;
@@ -543,11 +561,18 @@ hr {
 }
 
 .metric .background .advancement {
-    background-color: green;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
+    margin: 0;
+    height: 30px;
+}
+
+.metric .background .advancement_passed {
+    float: left;
+    background-color: #4caf50;
+}
+
+.metric .background .advancement_pending {
+    float: right;
+    background-color: #0288d1;
 }
 
 .options {
@@ -651,19 +676,35 @@ tr td .content_block {
     margin: 2px 5px;
 }
 
-tr td .content_block i {
-    line-height: 30px;
+.material-icons.icon {
+    vertical-align: middle;
+    border-radius: 50%;
+    padding: 2px;
+    font-size: 15px;
 }
 
-tr td .content_block.count_passed {
-    color: rgba(0, 128, 0, 0.8);
+.content_block.count_passed {
+    color: #388e3c;
 }
 
-tr td .content_block.count_failed {
-    color: rgba(128, 0, 0, 0.8);
+.material-icons.icon-passed {
+    background-color: #c8e6c9;
 }
 
-tr td .content_block.count_skipped {
+.content_block.count_failed {
+    color: #d32f2f;
+}
+
+.material-icons.icon-failed {
+    background-color: #ffcdd2;
+}
+
+.content_block.count_pending {
+    color: #0288d1;
+}
+
+.material-icons.icon-pending {
+    background-color: #b3e5fc;
 }
 
 tr td a {
