@@ -17,7 +17,6 @@ class Home extends MY_Base {
                     $GCP_files_list[] = (string)$content->Key;
                 }
             }
-
         } catch(Exception $e) {
             log_message('warning', "couldn't fetch files from GCP");
         }
@@ -28,26 +27,32 @@ class Home extends MY_Base {
         foreach($execution_list->result() as $execution) {
             $full_list[date('Y-m-d', strtotime($execution->start_date))][] = $execution;
         }
+
         foreach($GCP_files_list as $item) {
             preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-.*\.zip/', $item, $matches_filename);
             if (isset($full_list[$matches_filename[1]])) {
+                $date = $matches_filename[1];
                 //already stuff for this date, let's check it's not already in here
-                foreach($full_list[$matches_filename[1]] as $element) {
-                    if (is_object($element)) {
-                        //get the filename
+                $got_it = false;
+                foreach($full_list[$date] as $element) {
+                    //let's go through all elements in this date
+                    if (is_object($element) && !$got_it) {
+                        //we have a database entry, get the filename
                         $filename = basename($element->filename, '.json');
-
                         if (strpos($item, $filename) === false) {
-                            $full_list[$matches_filename[1]][] = $item;
+                            //we don't have this entry in database
+                            $got_it = true;
                         }
                     }
+                }
+                if (!$got_it) {
+                    $full_list[$date][] = $item;
                 }
             } else {
                 $full_list[$matches_filename[1]][] = $item;
             }
         }
         uksort($full_list, "compare_date_keys");
-
         $content_data = [
             'execution_list' => $full_list,
             'gcp_files_list' => $GCP_files_list,
