@@ -61,8 +61,8 @@ class Execution extends CI_Model
     {
         $sql = "SELECT id, filename, ref, start_date, end_date, duration, version, suites, tests, skipped, passes, failures, pending 
 FROM $this->table 
-ORDER BY start_date 
-DESC LIMIT 20";
+WHERE start_date > DATE_SUB(NOW(), INTERVAL 20 DAY)
+ORDER BY start_date;";
 
         return $this->db->query($sql);
     }
