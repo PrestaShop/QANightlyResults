@@ -105,10 +105,10 @@ class Report extends MY_Base {
                 if ($line['old_test_state'] == 'failed' && $line['current_test_state'] == 'failed') {
                     $results['equal'] += 1;
                 }
-                if ($line['old_test_state'] != 'failed' && $line['current_test_state'] == 'failed') {
+                if ($line['old_test_state'] == 'passed' && $line['current_test_state'] == 'failed') {
                     $results['broken'] += 1;
                 }
-                if ($line['old_test_state'] == 'failed' && $line['current_test_state'] != 'failed') {
+                if ($line['old_test_state'] == 'failed' && $line['current_test_state'] == 'passed') {
                     $results['fixed'] += 1;
                 }
             }
