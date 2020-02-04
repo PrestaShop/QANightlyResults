@@ -128,11 +128,57 @@ class Hook extends MY_Base {
             'failures' => $updated_data->failed,
             'insertion_end_date' => 'NOW()'
         ];
+
+        //get comparison data
+        $comparison = $this->compareReportData($this->execution_id);
+        if ($comparison) {
+            $update_data['broken_since_last'] = $comparison['broken'];
+            $update_data['fixed_since_last'] = $comparison['fixed'];
+            $update_data['equal_since_last'] = $comparison['equal'];
+        }
+
         //update the execution row with updated data
         $this->Execution->update($update_data, $this->execution_id);
         $this->setHeaders(200);
         echo json_encode(['status' => 'ok']);
 
+    }
+
+    /**
+     * Get comparison of failed tests with last execution
+     *
+     * @param $id
+     * @return bool
+     */
+    public function compareReportData($id) {
+        $this->load->model('Execution');
+        //get data for the precedent report
+        $precedentReport = $this->Execution->getPrecedentReport($id);
+        if (!$precedentReport) {
+            return false;
+        }
+        $data = $this->Execution->compareDataWithPrecedentReport($id, $precedentReport->id);
+        if (count($data) > 0) {
+            $results = [
+                'fixed' => 0,
+                'broken' => 0,
+                'equal' => 0,
+            ];
+            foreach($data as $line) {
+                if ($line['old_test_state'] == 'failed' && $line['current_test_state'] == 'failed') {
+                    $results['equal'] += 1;
+                }
+                if ($line['old_test_state'] == 'passed' && $line['current_test_state'] == 'failed') {
+                    $results['broken'] += 1;
+                }
+                if ($line['old_test_state'] == 'failed' && $line['current_test_state'] == 'passed') {
+                    $results['fixed'] += 1;
+                }
+            }
+        } else {
+            return false;
+        }
+        return $results;
     }
 
     /**
