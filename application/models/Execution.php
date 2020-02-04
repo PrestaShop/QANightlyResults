@@ -105,18 +105,20 @@ LIMIT 1;";
     t2.identifier current_test_identifier,
     t2.state current_test_state
 FROM `test` t1
-INNER JOIN `suite` s1 ON s1.id = t1.suite_id AND s1.execution_id = ?
+INNER JOIN `suite` s1 ON s1.id = t1.suite_id 
 
 CROSS JOIN `test` t2 ON t2.identifier = t1.identifier AND t2.identifier != '' 
-INNER JOIN `suite` s2 ON s2.id = t2.suite_id AND s2.execution_id = ?
+INNER JOIN `suite` s2 ON s2.id = t2.suite_id 
 
-WHERE t1.identifier != 'loginBO' 
+WHERE s1.execution_id = ?
+AND s2.execution_id = ?
+AND t1.identifier != 'loginBO' 
 AND t1.identifier != 'logoutBO'
 AND (
     t1.state = 'failed' OR t2.state = 'failed'
     );";
 
-        return $this->db->query($sql, [$report, $reportToCompareWith])->result_array();
+        return $this->db->query($sql, [$reportToCompareWith, $report])->result_array();
     }
 
     /**
