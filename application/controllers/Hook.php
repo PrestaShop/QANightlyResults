@@ -171,7 +171,6 @@ class Hook extends MY_Base {
             'parent_id' => $parent_suite_id,
         ];
 
-
         //inserting current suite
         $suite_id = $this->Suite->insert($data_suite);
 
@@ -179,9 +178,15 @@ class Hook extends MY_Base {
             //insert tests
             if (count($suite->tests) > 0) {
                 foreach($suite->tests as $test) {
+                    $identifier = '';
+                    if (isset($test->context)) {
+                        $identifier_data = json_decode($test->context);
+                        $identifier = $identifier_data->value;
+                    }
                     $data_test = [
                         'suite_id' => $suite_id,
                         'uuid' => $test->uuid,
+                        'identifier' => $identifier,
                         'title' => $test->title,
                         'state' => $this->getTestState($test),
                         'duration' => $test->duration,

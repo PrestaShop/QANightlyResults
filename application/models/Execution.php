@@ -61,10 +61,64 @@ class Execution extends CI_Model
     {
         $sql = "SELECT id, filename, ref, start_date, end_date, duration, version, suites, tests, skipped, passes, failures, pending 
 FROM $this->table 
-ORDER BY start_date 
-DESC LIMIT 20";
+WHERE start_date > DATE_SUB(NOW(), INTERVAL 20 DAY)
+ORDER BY start_date;";
 
         return $this->db->query($sql);
+    }
+
+    /**
+     * Get precedent report
+     *
+     * @param $id
+     * @return mixed
+     */
+    function getPrecedentReport($id)
+    {
+        $sql = "select e.id
+from execution e
+where version = (select version from execution et where et.id = ?)
+and start_date < (select start_date from execution et where et.id = ?)
+ORDER BY start_date DESC
+LIMIT 1;";
+
+        return $this->db->query($sql, [$id, $id])->row();
+    }
+
+    /**
+     * Get data comparaison with another report
+     *
+     * @param $id
+     * @return mixed
+     */
+    function compareDataWithPrecedentReport($report, $reportToCompareWith)
+    {
+        $sql = "SELECT 
+	s1.execution_id old_execution_id,
+	t1.id old_test_id,
+	t1.title old_test_title,
+    t1.identifier old_test_identifier,
+    t1.state old_test_state,
+	s2.execution_id current_execution_id,
+    t2.id current_test_id,
+    t2.title current_test_title,
+    t2.identifier current_test_identifier,
+    t2.state current_test_state
+FROM `test` t1
+INNER JOIN `suite` s1 ON s1.id = t1.suite_id 
+
+CROSS JOIN `test` t2 ON t2.identifier = t1.identifier AND t2.identifier != '' 
+INNER JOIN `suite` s2 ON s2.id = t2.suite_id 
+
+WHERE s1.execution_id = ?
+AND s2.execution_id = ?
+AND t1.identifier != 'loginBO' 
+AND t1.identifier != 'logoutBO'
+AND (
+    t1.state = 'failed' OR t2.state = 'failed'
+    );";
+
+        return $this->db->query($sql, [$reportToCompareWith, $report])->result_array();
     }
 
     /**

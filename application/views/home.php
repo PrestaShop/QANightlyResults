@@ -61,7 +61,9 @@
                                 echo '<td>' . date('d/m/Y', strtotime($execution->start_date)) . '</td>';
                                 echo '<td>' . $execution->version . '</td>';
                                 echo '<td class="align-left">' . date('H:i', strtotime($execution->start_date)) . ' - ' . date('H:i', strtotime($execution->end_date)) . ' (' . duration($execution->duration / 1000) . ')</td>';
-                                echo '<td class="align-left">' . $content . '</td>';
+                                echo '<td class="align-left">' . $content . '<div class="compare" id="compare_' . $execution->id . '" data-id="' . $execution->id . '">
+                                        <img src="/assets/images/ajax-loader.gif" />
+                                        </div></td>';
                                 echo '<td>' . $download_link . '</td>';
                                 echo '</tr>';
                             } else {
@@ -85,3 +87,33 @@
         </div>
     </div>
 </div>
+<script>
+    $(document).ready(function() {
+        $('.compare').each(function (i) {
+            let id = $(this).attr('data-id');
+            $.ajax({
+                url: '/report/compareReportData/'+id,
+                dataType: 'json',
+                success: function(message) {
+                  if (message != null) {
+                    let plural = '';
+                    plural = (message.equal == 1 ? ' test is ' : ' tests are ');
+                    let equal = "<span class=\"comparison equal\" title=\"Since the last report, "+message.equal+plural+"still failing\">" +
+                      "<i class=\"material-icons icon\">trending_flat</i> "+message.equal+"</span>";
+
+                    plural = (message.fixed == 1 ? ' test is ' : ' tests are ');
+                    let fixed = "<span class=\"comparison fixed\" title=\"Since the last report, "+message.fixed+plural+"fixed\">" +
+                      "<i class=\"material-icons icon\">trending_up</i> "+message.fixed+"</span>";
+
+                    plural = (message.broken == 1 ? ' test has ' : ' tests have ');
+                    let broken = "<span class=\"comparison broken\" title=\"Since the last report, "+message.broken+plural+"broken\">" +
+                      "<i class=\"material-icons icon\">trending_down</i> "+message.broken+"</span>";
+                    $('#compare_'+id).empty().hide().html(equal+fixed+broken).fadeIn();
+                  } else {
+                    $('#compare_'+id).remove();
+                  }
+                }
+            });
+        })
+    });
+</script>

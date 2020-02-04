@@ -683,6 +683,14 @@ tr td .content_block {
     font-size: 15px;
 }
 
+.compare {
+    color: grey;
+}
+
+.compare .comparison {
+    margin-right: 10px;
+}
+
 .content_block.count_passed {
     color: #388e3c;
 }

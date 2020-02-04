@@ -85,6 +85,41 @@ class Report extends MY_Base {
         }
     }
 
+    public function compareReportData($id) {
+        $this->load->model('Execution');
+        //get data for the precedent report
+        $precedentReport = $this->Execution->getPrecedentReport($id);
+        if (!$precedentReport) {
+            http_response_code(200);
+            echo json_encode(null);
+            return false;
+        }
+        $data = $this->Execution->compareDataWithPrecedentReport($id, $precedentReport->id);
+        if (count($data) > 0) {
+            $results = [
+                'fixed' => 0,
+                'broken' => 0,
+                'equal' => 0,
+            ];
+            foreach($data as $line) {
+                if ($line['old_test_state'] == 'failed' && $line['current_test_state'] == 'failed') {
+                    $results['equal'] += 1;
+                }
+                if ($line['old_test_state'] == 'passed' && $line['current_test_state'] == 'failed') {
+                    $results['broken'] += 1;
+                }
+                if ($line['old_test_state'] == 'failed' && $line['current_test_state'] == 'passed') {
+                    $results['fixed'] += 1;
+                }
+            }
+        } else {
+            http_response_code(200);
+            echo json_encode(null);
+            return false;
+        }
+        $this->load->view('ajax_suite_data', ['content' => $results]);
+    }
+
     private function buildTree($parentId = null) {
         $branch = array();
         foreach ($this->suites->result() as &$suite) {

@@ -23,6 +23,25 @@ CREATE TABLE `execution` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `settings`
+--
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL,
+  `name` varchar(30) NOT NULL,
+  `value` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `settings`
+--
+
+INSERT INTO `settings` (`id`, `name`, `value`) VALUES
+(1, 'version', '1');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `suite`
 --
 
@@ -39,7 +58,7 @@ CREATE TABLE `suite` (
   `hasPasses` tinyint(1) DEFAULT NULL,
   `hasFailures` tinyint(1) DEFAULT NULL,
   `totalSkipped` int(11) DEFAULT NULL,
-  `totalPending` tinyint(1) DEFAULT NULL,
+  `totalPending` int(11) DEFAULT NULL,
   `totalPasses` int(11) DEFAULT NULL,
   `totalFailures` int(11) DEFAULT NULL,
   `hasSuites` int(11) DEFAULT NULL,
@@ -58,6 +77,7 @@ CREATE TABLE `test` (
   `id` int(11) NOT NULL,
   `suite_id` int(11) NOT NULL,
   `uuid` varchar(50) NOT NULL,
+  `identifier` varchar(200) NOT NULL DEFAULT '',
   `title` text NOT NULL,
   `state` varchar(20) DEFAULT NULL,
   `duration` int(11) NOT NULL,
@@ -68,16 +88,17 @@ CREATE TABLE `test` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Indexes for dumped tables
---
-
---
 -- Indexes for table `execution`
 --
 ALTER TABLE `execution`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `version` (`version`),
-  ADD KEY `execution_id` (`ref`);
+  ADD KEY `version` (`version`);
+
+--
+-- Indexes for table `settings`
+--
+ALTER TABLE `settings`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `suite`
