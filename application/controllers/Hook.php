@@ -131,7 +131,7 @@ class Hook extends MY_Base {
 
         //get comparison data
         $comparison = $this->compareReportData($this->execution_id);
-        if ($comparison) {
+        if (count($comparison) > 0) {
             $update_data['broken_since_last'] = $comparison['broken'];
             $update_data['fixed_since_last'] = $comparison['fixed'];
             $update_data['equal_since_last'] = $comparison['equal'];
@@ -141,21 +141,20 @@ class Hook extends MY_Base {
         $this->Execution->update($update_data, $this->execution_id);
         $this->setHeaders(200);
         echo json_encode(['status' => 'ok']);
-
     }
 
     /**
      * Get comparison of failed tests with last execution
      *
      * @param $id
-     * @return bool
+     * @return array
      */
     public function compareReportData($id) {
         $this->load->model('Execution');
         //get data for the precedent report
         $precedentReport = $this->Execution->getPrecedentReport($id);
         if (!$precedentReport) {
-            return false;
+            return [];
         }
         $data = $this->Execution->compareDataWithPrecedentReport($id, $precedentReport->id);
         if (count($data) > 0) {
@@ -176,7 +175,7 @@ class Hook extends MY_Base {
                 }
             }
         } else {
-            return false;
+            return [];
         }
         return $results;
     }
