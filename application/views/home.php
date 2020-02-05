@@ -53,11 +53,11 @@
                             $comparison = '';
                             if ($execution['broken_since_last'] != '') {
                                 $comparison = '
-                                    <span class="comparison equal" title="Since the last report, '.$execution['equal_since_last'].' reports are still failing">
+                                    <span class="comparison equal" title="'.$execution['equal_since_last'].' reports are still failing">
                                     <i class="material-icons icon">trending_flat</i>'.$execution['equal_since_last'].'</span>
-                                    <span class="comparison fixed" title="Since the last report, '.$execution['fixed_since_last'].' reports are fixed">
+                                    <span class="comparison fixed" title="'.$execution['fixed_since_last'].' reports are fixed">
                                     <i class="material-icons icon">trending_up</i>'.$execution['fixed_since_last'].'</span>
-                                    <span class="comparison broken" title="Since the last report, '.$execution['broken_since_last'].' reports are now broken">
+                                    <span class="comparison broken" title="'.$execution['broken_since_last'].' reports are now broken">
                                     <i class="material-icons icon">trending_down</i>'.$execution['broken_since_last'].'</span>
                                 ';
                             }
