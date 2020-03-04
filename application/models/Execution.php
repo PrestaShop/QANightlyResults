@@ -59,10 +59,10 @@ class Execution extends CI_Model
      */
     function getAllInformation()
     {
-        $sql = "SELECT id, filename, ref, start_date, end_date, duration, version, suites, tests, skipped, passes, failures, pending 
+        $sql = "SELECT *
 FROM $this->table 
 WHERE start_date > DATE_SUB(NOW(), INTERVAL 20 DAY)
-ORDER BY start_date;";
+ORDER BY start_date DESC;";
 
         return $this->db->query($sql);
     }
