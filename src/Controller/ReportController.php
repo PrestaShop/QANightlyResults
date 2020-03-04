@@ -250,15 +250,6 @@ class ReportController extends BaseController
     }
 
     /**
-     * @param \stdClass $test
-     * @return bool
-     */
-    private function filterTestsFilter(\stdClass $test): bool
-    {
-        return in_array($test->state, $this->paramsReport['filter_state']);
-    }
-
-    /**
      * Display a single suite information
      * @param Request $request
      * @param Response $response
