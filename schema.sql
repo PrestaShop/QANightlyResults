@@ -10,6 +10,8 @@ CREATE TABLE `execution` (
   `end_date` timestamp NULL DEFAULT NULL,
   `duration` int(11) NOT NULL,
   `version` varchar(20) NOT NULL,
+  `browser` varchar(30) NOT NULL DEFAULT 'chromium',
+  `campaign` varchar(30) NOT NULL DEFAULT 'functional',
   `suites` int(11) DEFAULT NULL,
   `tests` int(11) DEFAULT NULL,
   `skipped` int(11) DEFAULT NULL,
@@ -77,7 +79,6 @@ CREATE TABLE `test` (
   `id` int(11) NOT NULL,
   `suite_id` int(11) NOT NULL,
   `uuid` varchar(50) NOT NULL,
-  `identifier` varchar(200) NOT NULL DEFAULT '',
   `title` text NOT NULL,
   `state` varchar(20) DEFAULT NULL,
   `duration` int(11) NOT NULL,
@@ -86,6 +87,10 @@ CREATE TABLE `test` (
   `diff` text,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Indexes for dumped tables
+--
 
 --
 -- Indexes for table `execution`
