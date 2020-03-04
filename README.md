@@ -1,7 +1,9 @@
-# QANightlyResults2
+# QANightlyResults
 
-QANightlyResults2 is an interface to browse tests reports. It has a backend based on Slim Framework and a SPA in Vue as
-a frontend.
+QANightlyResults is an Slim Framewok app, acting as a backend (via a JSON API) to handle
+and browse tests reports records.
+
+You can use any frontend app you want to consume this API. We use a [Vue app](https://github.com/PrestaShop/nightly-board).
 
 Its purpose is to :
 1. store results of tests in a database
