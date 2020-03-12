@@ -25,7 +25,6 @@ You can edit the `settings.php` file in the `src/` folder (no recommended). You 
 | QANB_DB_USERNAME  | Database username  |
 | QANB_DB_PASSWORD  | Database password  |
 | QANB_DB_NAME      | Database name  |
-| QANB_GA_KEY       | Google Analytics Key (optional)  |
 | QANB_TOKEN        | Token to add JSON data through the Hook  |
 | QANB_GCPURL       | URL to the GCP repository (must ends with a `/`)  |
 
@@ -37,7 +36,7 @@ Set up a vhost that points to the `/public` folder:
 ```
 <VirtualHost *:80>
     DocumentRoot "/PATH/TO/PUBLIC/FOLDER"
-    ServerName www.url.dev
+    ServerName api.url.dev
     ServerAlias url.dev
 
    <Directory "/PATH/TO/PUBLIC/FOLDER/">
@@ -60,7 +59,7 @@ name must follow this pattern: `/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/`
 Optional:
 - `force`: a special parameter used to force insert when a similar entry is found (criterias are date and version)
 
-EG : `mysite.com/hook/add?token=IpBzOmwXQUrW5Hn&filename=2019-07-22-develop.json`
+EG : `api.mysite.com/hook/add?token=IpBzOmwXQUrW5Hn&filename=2019-07-22-develop.json`
 
 The files in the Google Cloud Storage might be huge, so be sure your server is properly configured to handle large files.
 
