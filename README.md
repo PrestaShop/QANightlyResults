@@ -31,22 +31,7 @@ You can edit the `settings.php` file in the `src/` folder (no recommended). You 
 
 ## Web server configuration
 
-Set up a vhost that points to the `/public` folder:
-
-```
-<VirtualHost *:80>
-    DocumentRoot "/PATH/TO/PUBLIC/FOLDER"
-    ServerName api.url.dev
-    ServerAlias url.dev
-
-   <Directory "/PATH/TO/PUBLIC/FOLDER/">
-        Options FollowSymLinks Indexes MultiViews
-        AllowOverride All
-        Order allow,deny
-        Allow from all
-   </Directory>
-</VirtualHost>
-```
+Set up a vhost that points to the `/public` folder (example in the `vhost.conf` file).
 
 ## Inserting new data
 
