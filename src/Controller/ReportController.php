@@ -263,7 +263,9 @@ class ReportController extends BaseController
      * @return Response
      */
     public function suite(Request $request, Response $response):Response {
-        $route = $request->getAttribute('route');
+        $routeContext = RouteContext::fromRequest($request);
+        $route = $routeContext->getRoute();
+
         $report_id = $route->getArgument('report');
         $suite_id = $route->getArgument('suite');
 
