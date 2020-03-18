@@ -15,6 +15,7 @@ class ReportController extends BaseController
 {
     private const FILTER_STATE_FAILED = 'failed';
     private const FILTER_STATE_PASSED = 'passed';
+    private const FILTER_STATE_SKIPPED = 'skipped';
     private const FILTER_STATE_PENDING = 'pending';
 
     private $main_suite_id = null;
@@ -30,6 +31,7 @@ class ReportController extends BaseController
         'filter_state' => [
             self::FILTER_STATE_FAILED,
             self::FILTER_STATE_PASSED,
+            self::FILTER_STATE_SKIPPED,
             self::FILTER_STATE_PENDING,
         ]
     ];
@@ -176,11 +178,16 @@ class ReportController extends BaseController
             if (in_array('pending', $paramsFilter) && $root_suite->childrenData['totalPending'] > 0) {
                 continue;
             }
+            //when the "skipped" toggle is turned on
+            if (in_array('skipped', $paramsFilter) && $root_suite->childrenData['totalSkipped'] > 0) {
+                continue;
+            }
             //when the "passed" toggle is turned on and we didn't accept this suite, it must only be shown if
             //it hasn't any pending or failed test
             //this prevents showing a suite with passed and failed test when we hide failed tests for example
             if (in_array('passed', $paramsFilter) && $root_suite->childrenData['totalPasses'] > 0
                 && $root_suite->childrenData['totalFailures'] == 0
+                && $root_suite->childrenData['totalSkipped'] == 0
                 && $root_suite->childrenData['totalPending'] == 0) {
                 continue;
             }
