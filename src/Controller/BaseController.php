@@ -13,7 +13,6 @@ class BaseController {
     function __construct() {
         $environment_variables = [
             'QANB_TOKEN',
-            'QANB_GCPURL',
         ];
         //verify each required environment variable is set
         foreach($environment_variables as $var) {
