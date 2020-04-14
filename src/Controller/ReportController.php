@@ -45,8 +45,7 @@ class ReportController extends BaseController
      */
     public function index(Request $request, Response $response):Response {
         //get all data from GCP
-        $gcp_url = getenv('QANB_GCPURL');
-        $GCP_files_list = $this->getDataFromGCP($gcp_url);
+        $GCP_files_list = $this->getDataFromGCP(QANB_GCPURL);
 
         //get all data from executions
         $executions = Manager::table('execution')->orderBy('start_date', 'desc')->get();
@@ -56,7 +55,7 @@ class ReportController extends BaseController
         foreach($executions as $execution) {
             $download = null;
             if (isset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version])) {
-                $download = $gcp_url.$GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version];
+                $download = QANB_GCPURL.$GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version];
                 unset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version]);
             }
             $full_list[] = [
@@ -86,7 +85,7 @@ class ReportController extends BaseController
                         [
                             'date' => $matches_filename[1],
                             'version' => $matches_filename[2],
-                            'download' => $gcp_url.$build
+                            'download' => QANB_GCPURL.$build
                         ];
                 }
             }
@@ -326,7 +325,7 @@ class ReportController extends BaseController
         if (strlen($matches[1]) < 1) {
             throw new HttpBadRequestException($request, sprintf("version found not correct (%s) from filename %s", $version, $filename));
         }
-        $url = getenv('QANB_GCPURL').'reports/'.$filename;
+        $url = QANB_GCPURL.'reports/'.$filename;
         $contents = file_get_contents($url);
         if (!$contents) {
             throw new HttpBadRequestException($request, "unable to retrieve content from GCP URL");
