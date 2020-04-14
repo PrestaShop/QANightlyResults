@@ -14,6 +14,8 @@ Its purpose is to :
 
 Create a database following the schema provided in schema.sql at the root of the project.
 
+Don't forget to launch `composer install` to install all dependencies.
+
 ### Configuration
 
 You can edit the `settings.php` file in the `src/` folder (no recommended). You can also pass the values via environment variables. Here are the main ones:
