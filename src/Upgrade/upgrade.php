@@ -3,8 +3,8 @@
 use Illuminate\Database\Capsule\Manager;
 
 require __DIR__ . '/../../vendor/autoload.php';
-require('../settings.php');
-require('../database.php');
+require __DIR__ . '/../settings.php';
+require __DIR__ . '/../database.php';
 
 //folders
 $upgrade_folders_path = __DIR__.'/versions/';
@@ -32,7 +32,7 @@ for ($i=$version->value; $i < QANB_VERSION; $i++) {
         echo "\t- file $filename found, executing...\n";
         $return = include($upgrade_folders_path.$filename);
         if (!$return) {
-            exit("Upgrading to version $j failed.");
+            exit("Upgrading to version $j failed.\n");
         }
     }
     echo "\n";

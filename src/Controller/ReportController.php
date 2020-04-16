@@ -62,6 +62,8 @@ class ReportController extends BaseController
                 'id' => $execution->id,
                 'date' => date('Y-m-d', strtotime($execution->start_date)),
                 'version' => $execution->version,
+                'campaign' => $execution->campaign,
+                'browser' => $execution->browser,
                 'start_date' => $execution->start_date,
                 'end_date' => $execution->end_date,
                 'duration' => $execution->duration,
