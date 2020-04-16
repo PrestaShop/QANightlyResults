@@ -62,6 +62,8 @@ class ReportController extends BaseController
                 'id' => $execution->id,
                 'date' => date('Y-m-d', strtotime($execution->start_date)),
                 'version' => $execution->version,
+                'campaign' => $execution->campaign,
+                'browser' => $execution->browser,
                 'start_date' => $execution->start_date,
                 'end_date' => $execution->end_date,
                 'duration' => $execution->duration,
@@ -73,6 +75,9 @@ class ReportController extends BaseController
                     'pending' => $execution->pending,
                     'skipped' => $execution->skipped,
                 ],
+                'broken_since_last' => $execution->broken_since_last,
+                'fixed_since_last' => $execution->fixed_since_last,
+                'equal_since_last' => $execution->equal_since_last,
                 'download' => $download
             ];
         }
