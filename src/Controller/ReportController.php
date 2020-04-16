@@ -73,6 +73,9 @@ class ReportController extends BaseController
                     'pending' => $execution->pending,
                     'skipped' => $execution->skipped,
                 ],
+                'broken_since_last' => $execution->broken_since_last,
+                'fixed_since_last' => $execution->fixed_since_last,
+                'equal_since_last' => $execution->equal_since_last,
                 'download' => $download
             ];
         }
