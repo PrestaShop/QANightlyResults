@@ -2,9 +2,9 @@
 namespace App\Controller;
 
 use DI\NotFoundException;
+use Exception;
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Support\Collection;
-use SimpleXMLElement;
 use Slim\Exception\HttpBadRequestException;
 use Slim\Exception\HttpForbiddenException;
 use Slim\Psr7\Request;
@@ -25,6 +25,21 @@ class ReportController extends BaseController
         'totalPending' => 0,
         'totalSkipped' => 0,
     ];
+
+    private $browsers = [
+        'chromium',
+        'firefox',
+        'edge'
+    ];
+    private $defaultBrowser = 'chromium';
+
+    private $campaigns = [
+        'functional',
+        'sanity',
+        'e2e',
+        'regression'
+    ];
+    private $defaultCampaign = 'functional';
 
     private $paramsReportDefault = [
         'search' => null,
@@ -135,11 +150,16 @@ class ReportController extends BaseController
             'id' => $execution->id,
             'date' => date('Y-m-d', strtotime($execution->start_date)),
             'version' => $execution->version,
+            'campaign' => $execution->campaign,
+            'browser' => $execution->browser,
             'start_date' => $execution->start_date,
             'end_date' => $execution->end_date,
             'duration' => $execution->duration,
             'suites' => $execution->suites,
             'tests' => $execution->tests,
+            'broken_since_last' => $execution->broken_since_last,
+            'fixed_since_last' => $execution->fixed_since_last,
+            'equal_since_last' => $execution->equal_since_last,
             'skipped' => $execution->skipped,
             'pending' => $execution->pending,
             'passes' => $execution->passes,
@@ -319,6 +339,16 @@ class ReportController extends BaseController
             $force = true;
         }
 
+        //get browser and campaign info
+        $browser = $this->defaultBrowser;
+        $campaign = $this->defaultCampaign;
+        if (isset($get_query_params['browser']) && in_array($get_query_params['browser'], $this->browsers)) {
+            $browser = $get_query_params['browser'];
+        }
+        if (isset($get_query_params['campaign']) && in_array($get_query_params['campaign'], $this->campaigns)) {
+            $campaign = $get_query_params['campaign'];
+        }
+
         $filename = $get_query_params['filename'];
 
         //retrieving version number
@@ -345,6 +375,8 @@ class ReportController extends BaseController
         $execution_data = [
             'ref' => date('YmdHis'),
             'filename' => $filename,
+            'browser' => $browser,
+            'campaign' => $campaign,
             'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
             'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
             'duration' => $stats->duration,
@@ -361,13 +393,14 @@ class ReportController extends BaseController
         $entry_date = date('Y-m-d', strtotime($stats->start));
         $similar = Manager::table('execution')
             ->where('version', '=', $version)
+            ->where('browser', '=', $browser)
+            ->where('campaign', '=', $campaign)
             ->whereDate('start_date', '=', $entry_date)
             ->first();
-        if ($similar) {
-            if (!$force) {
-                throw new HttpForbiddenException($request,
-                    sprintf("A similar entry was found (criteria: version %s and date %s).", $version, $entry_date));
-            }
+        if ($similar && !$force) {
+            throw new HttpForbiddenException($request,
+                sprintf("A similar entry was found (criteria: version %s, browser %s, campaign %s, date %s).",
+                    $version, $browser, $campaign, $entry_date));
         }
         //insert execution
         $execution_id = Manager::table('execution')->insertGetId($execution_data);
@@ -675,6 +708,7 @@ class ReportController extends BaseController
                 return isset($matches[3]) ? $matches[3] : null;
             }
         }
+        return null;
     }
 
     /**
@@ -705,7 +739,7 @@ class ReportController extends BaseController
         $GCP_files_list = [];
         $GCPCallResult = file_get_contents($gcp_url);
         if ($GCPCallResult) {
-            $xml = new SimpleXMLElement($GCPCallResult);
+            $xml = new \SimpleXMLElement($GCPCallResult);
             foreach ($xml->Contents as $content) {
                 $build_name = (string)$content->Key;
                 if (strpos($build_name, '.zip') !== false) {
