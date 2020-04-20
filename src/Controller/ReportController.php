@@ -18,6 +18,15 @@ class ReportController extends BaseController
     private const FILTER_STATE_SKIPPED = 'skipped';
     private const FILTER_STATE_PENDING = 'pending';
 
+    private const FILTER_BROWSER_CHROMIUM = 'chromium';
+    private const FILTER_BROWSER_FIREFOX = 'firefox';
+    private const FILTER_BROWSER_EDGE = 'edge';
+
+    private const FILTER_CAMPAIGN_SANITY = 'sanity';
+    private const FILTER_CAMPAIGN_FUNCTIONAL = 'functional';
+    private const FILTER_CAMPAIGN_E2E = 'e2e';
+    private const FILTER_CAMPAIGN_REGRESSION = 'regression';
+
     private $main_suite_id = null;
     private $suiteChildrenData = [
         'totalPasses' => 0,
@@ -26,20 +35,18 @@ class ReportController extends BaseController
         'totalSkipped' => 0,
     ];
 
-    private $browsers = [
-        'chromium',
-        'firefox',
-        'edge'
+    private $paramsBrowserDefault = [
+            self::FILTER_BROWSER_CHROMIUM,
+            self::FILTER_BROWSER_FIREFOX,
+            self::FILTER_BROWSER_EDGE
     ];
-    private $defaultBrowser = 'chromium';
 
-    private $campaigns = [
-        'functional',
-        'sanity',
-        'e2e',
-        'regression'
+    private $paramsCampaignDefault = [
+            self::FILTER_CAMPAIGN_FUNCTIONAL,
+            self::FILTER_CAMPAIGN_SANITY,
+            self::FILTER_CAMPAIGN_E2E,
+            self::FILTER_CAMPAIGN_REGRESSION
     ];
-    private $defaultCampaign = 'functional';
 
     private $paramsReportDefault = [
         'search' => null,
@@ -62,8 +69,24 @@ class ReportController extends BaseController
         //get all data from GCP
         $GCP_files_list = $this->getDataFromGCP(QANB_GCPURL);
 
+        $requestBrowsers = $request->getQueryParams()['filter_browser'];
+        $paramsBrowsers = array_intersect($this->paramsBrowserDefault, (array)$requestBrowsers);
+        if (count($paramsBrowsers) == 0) {
+            $paramsBrowsers = $this->paramsBrowserDefault;
+        }
+
+        $requestCampaigns = $request->getQueryParams()['filter_campaign'];
+        $paramsCampaigns = array_intersect($this->paramsCampaignDefault, (array)$requestCampaigns);
+        if (count($paramsCampaigns) == 0) {
+            $paramsCampaigns = $this->paramsCampaignDefault;
+        }
+
         //get all data from executions
-        $executions = Manager::table('execution')->orderBy('start_date', 'desc')->get();
+        $executions = Manager::table('execution')
+            ->whereIn('campaign', $paramsCampaigns)
+            ->WhereIn('browser', $paramsBrowsers)
+            ->orderBy('start_date', 'desc')
+            ->get();
 
         $full_list = [];
         $orphan_builds_list = [];
@@ -382,12 +405,12 @@ class ReportController extends BaseController
         }
 
         //get browser and campaign info
-        $browser = $this->defaultBrowser;
-        $campaign = $this->defaultCampaign;
-        if (isset($get_query_params['browser']) && in_array($get_query_params['browser'], $this->browsers)) {
+        $browser = $this->paramsBrowserDefault[0];
+        $campaign = $this->paramsCampaignDefault[0];
+        if (isset($get_query_params['browser']) && in_array($get_query_params['browser'], $this->paramsBrowserDefault)) {
             $browser = $get_query_params['browser'];
         }
-        if (isset($get_query_params['campaign']) && in_array($get_query_params['campaign'], $this->campaigns)) {
+        if (isset($get_query_params['campaign']) && in_array($get_query_params['campaign'], $this->paramsCampaignDefault)) {
             $campaign = $get_query_params['campaign'];
         }
 
