@@ -187,6 +187,48 @@ class ReportController extends BaseController
     }
 
     /**
+     * Delete a report - needs the token
+     * @param Request $request
+     * @param Response $response
+     * @return Response
+     * @throws HttpBadRequestException
+     * @throws NotFoundException
+     */
+    public function delete(Request $request, Response $response):Response {
+        $this->authenticateHeaderToken($request);
+        //check if report exists
+        $routeContext = RouteContext::fromRequest($request);
+        $route = $routeContext->getRoute();
+        $report_id = $route->getArgument('report');
+        $execution = Manager::table('execution')->find($report_id);
+
+        if (!$execution) {
+            throw new NotFoundException('Report not found');
+        }
+
+        //here we go...
+        $delete = Manager::table('execution')->where('id', '=', $report_id)->delete();
+
+        $response->getBody()->write(json_encode([
+            'status' => 'ok'
+        ]));
+        return $response;
+    }
+
+    /**
+     * Verify the token in headers
+     * @param Request $request
+     * @throws HttpBadRequestException
+     */
+    private function authenticateHeaderToken(Request $request) {
+        $headerValueArray = $request->getHeader('QANB_TOKEN');
+        //check token
+        if (!isset($headerValueArray[0]) || $headerValueArray[0] != getenv('QANB_TOKEN')) {
+            throw new HttpBadRequestException($request, "invalid token");
+        }
+    }
+
+    /**
      * Filter suites by using root data (when using toggles)
      * @param $suites
      * @return mixed
