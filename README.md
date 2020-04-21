@@ -44,7 +44,9 @@ parameters:
 name must follow this pattern: `/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/`
 
 Optional:
-- `force`: a special parameter used to force insert when a similar entry is found (criterias are date and version)
+- `force`: a special parameter used to force insert when a similar entry is found (criterias are :browser, campaign, date and version)
+- `browser`: to specify the browser. Possible values are 'chromium' (default), 'firefox', and 'edge'.
+- `campaign`: to specify the campaign. Possible values are 'functional' (default), 'sanity', 'e2e', and 'regression'.
 
 EG : `api.mysite.com/hook/add?token=IpBzOmwXQUrW5Hn&filename=2019-07-22-develop.json`
 
