@@ -143,7 +143,7 @@ class ReportController extends BaseController
         });
 
         $response->getBody()->write(json_encode($full_list));
-        return $response;
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -206,7 +206,7 @@ class ReportController extends BaseController
         //put suites data into the final object
         $execution_data['suites_data'] = $suites;
         $response->getBody()->write(json_encode($execution_data));
-        return $response;
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -235,114 +235,7 @@ class ReportController extends BaseController
         $response->getBody()->write(json_encode([
             'status' => 'ok'
         ]));
-        return $response;
-    }
-
-    /**
-     * Verify the token in headers
-     * @param Request $request
-     * @throws HttpBadRequestException
-     */
-    private function authenticateHeaderToken(Request $request) {
-        $headerValueArray = $request->getHeader('QANB_TOKEN');
-        //check token
-        if (!isset($headerValueArray[0]) || $headerValueArray[0] != getenv('QANB_TOKEN')) {
-            throw new HttpBadRequestException($request, "invalid token");
-        }
-    }
-
-    /**
-     * Filter suites by using root data (when using toggles)
-     * @param $suites
-     * @return mixed
-     */
-    private function filterSuitesByRootData($suites) {
-        $paramsFilter = array_values($this->paramsReport['filter_state']);
-        foreach($suites as $key => $root_suite) {
-            //when the "failed" toggle is turned on
-            if (in_array('failed', $paramsFilter) && $root_suite->childrenData['totalFailures'] > 0) {
-                continue;
-            }
-            //when the "pending" toggle is turned on
-            if (in_array('pending', $paramsFilter) && $root_suite->childrenData['totalPending'] > 0) {
-                continue;
-            }
-            //when the "skipped" toggle is turned on
-            if (in_array('skipped', $paramsFilter) && $root_suite->childrenData['totalSkipped'] > 0) {
-                continue;
-            }
-            //when the "passed" toggle is turned on and we didn't accept this suite, it must only be shown if
-            //it hasn't any pending or failed test
-            //this prevents showing a suite with passed and failed test when we hide failed tests for example
-            if (in_array('passed', $paramsFilter) && $root_suite->childrenData['totalPasses'] > 0
-                && $root_suite->childrenData['totalFailures'] == 0
-                && $root_suite->childrenData['totalSkipped'] == 0
-                && $root_suite->childrenData['totalPending'] == 0) {
-                continue;
-            }
-            unset($suites[$key]);
-        }
-        return $suites;
-    }
-
-    /**Filter the whole tree when using fulltext search
-     * @param $suites
-     * @param callable|null $function
-     * @return array
-     */
-    private function filterTree($suites, callable $function = null): array
-    {
-        foreach ($suites as $key => &$suiteChild) {
-            if (isset($suiteChild->suites) && is_array($suiteChild->suites)) {
-                $suiteChild->suites = $this->filterTree($suiteChild->suites, array($this, 'filterSuite'));
-            }
-            if (empty($suiteChild->suites)
-                && empty($suiteChild->tests)
-                && ($this->filterSuite($suiteChild) && empty($this->paramsReport['search']))) {
-                unset($suites[$key]);
-            }
-        }
-        return array_filter($suites, array($this, 'filterSuite'));
-    }
-
-    /**
-     * Filter suites
-     *
-     * @param \stdClass $suite
-     * @return bool
-     */
-    private function filterSuite(\stdClass $suite): bool
-    {
-        $status = true;
-        // If we need to search fulltext
-        if ($status && !empty($this->paramsReport['search'])) {
-            $status = $this->filterSuiteSearch($suite, $this->paramsReport['search']);
-        }
-        return $status;
-    }
-
-    /**
-     * Filter each suite with text search in tests
-     *
-     * @param \stdClass $suite
-     * @param string $text
-     * @return bool
-     */
-    private function filterSuiteSearch(\stdClass $suite, string $text): bool
-    {
-        // Title
-        if (stripos($suite->title, $text) !== false) {
-            return true;
-        }
-        // Tests
-        if (!empty($suite->tests)) {
-            foreach ($suite->tests as $test) {
-                if (stripos($test->title, $text) !== false) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -376,7 +269,7 @@ class ReportController extends BaseController
         $root_suite->suites = $suites;
         //put suites data into the final object
         $response->getBody()->write(json_encode($root_suite));
-        return $response;
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -489,7 +382,114 @@ class ReportController extends BaseController
         $response->getBody()->write(json_encode([
             'status' => 'ok'
         ]));
-        return $response;
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Verify the token in headers
+     * @param Request $request
+     * @throws HttpBadRequestException
+     */
+    private function authenticateHeaderToken(Request $request) {
+        $headerValueArray = $request->getHeader('QANB_TOKEN');
+        //check token
+        if (!isset($headerValueArray[0]) || $headerValueArray[0] != getenv('QANB_TOKEN')) {
+            throw new HttpBadRequestException($request, "invalid token");
+        }
+    }
+
+    /**
+     * Filter suites by using root data (when using toggles)
+     * @param $suites
+     * @return mixed
+     */
+    private function filterSuitesByRootData($suites) {
+        $paramsFilter = array_values($this->paramsReport['filter_state']);
+        foreach($suites as $key => $root_suite) {
+            //when the "failed" toggle is turned on
+            if (in_array('failed', $paramsFilter) && $root_suite->childrenData['totalFailures'] > 0) {
+                continue;
+            }
+            //when the "pending" toggle is turned on
+            if (in_array('pending', $paramsFilter) && $root_suite->childrenData['totalPending'] > 0) {
+                continue;
+            }
+            //when the "skipped" toggle is turned on
+            if (in_array('skipped', $paramsFilter) && $root_suite->childrenData['totalSkipped'] > 0) {
+                continue;
+            }
+            //when the "passed" toggle is turned on and we didn't accept this suite, it must only be shown if
+            //it hasn't any pending or failed test
+            //this prevents showing a suite with passed and failed test when we hide failed tests for example
+            if (in_array('passed', $paramsFilter) && $root_suite->childrenData['totalPasses'] > 0
+                && $root_suite->childrenData['totalFailures'] == 0
+                && $root_suite->childrenData['totalSkipped'] == 0
+                && $root_suite->childrenData['totalPending'] == 0) {
+                continue;
+            }
+            unset($suites[$key]);
+        }
+        return $suites;
+    }
+
+    /**Filter the whole tree when using fulltext search
+     * @param $suites
+     * @param callable|null $function
+     * @return array
+     */
+    private function filterTree($suites, callable $function = null): array
+    {
+        foreach ($suites as $key => &$suiteChild) {
+            if (isset($suiteChild->suites) && is_array($suiteChild->suites)) {
+                $suiteChild->suites = $this->filterTree($suiteChild->suites, array($this, 'filterSuite'));
+            }
+            if (empty($suiteChild->suites)
+                && empty($suiteChild->tests)
+                && ($this->filterSuite($suiteChild) && empty($this->paramsReport['search']))) {
+                unset($suites[$key]);
+            }
+        }
+        return array_filter($suites, array($this, 'filterSuite'));
+    }
+
+    /**
+     * Filter suites
+     *
+     * @param \stdClass $suite
+     * @return bool
+     */
+    private function filterSuite(\stdClass $suite): bool
+    {
+        $status = true;
+        // If we need to search fulltext
+        if ($status && !empty($this->paramsReport['search'])) {
+            $status = $this->filterSuiteSearch($suite, $this->paramsReport['search']);
+        }
+        return $status;
+    }
+
+    /**
+     * Filter each suite with text search in tests
+     *
+     * @param \stdClass $suite
+     * @param string $text
+     * @return bool
+     */
+    private function filterSuiteSearch(\stdClass $suite, string $text): bool
+    {
+        // Title
+        if (stripos($suite->title, $text) !== false) {
+            return true;
+        }
+        // Tests
+        if (!empty($suite->tests)) {
+            foreach ($suite->tests as $test) {
+                if (stripos($test->title, $text) !== false) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -580,9 +580,21 @@ class ReportController extends BaseController
             ->get();
         $tests_data = [];
         foreach($tests as $test) {
+            if ($test->status == 'failed') {
+                $test->stack_trace_formatted = $this->formatStackTrace($test->stack_trace);
+            }
             $tests_data[$test->suite_id][] = $test;
         }
         return $tests_data;
+    }
+
+    /**
+     * Format the stack_trace
+     * @param $stack_trace
+     * @return string|string[]
+     */
+    private function formatStackTrace($stack_trace) {
+        return str_replace('    at', "<br />&nbsp;&nbsp;&nbsp;&nbsp;at", htmlentities($stack_trace));
     }
 
     /**
