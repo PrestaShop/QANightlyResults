@@ -23,4 +23,5 @@ $app->group('/graph', function(RouteCollectorProxy $group) {
 
 //data routes
 $app->get('/data/badge', [DataController::class, 'badge']);
+$app->get('/data/badge/svg', [DataController::class, 'svg']);
 
