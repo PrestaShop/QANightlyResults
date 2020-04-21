@@ -20,11 +20,6 @@ $app->addRoutingMiddleware();
 require __DIR__ . '/../src/settings.php';
 require __DIR__ . '/../src/database.php';
 
-$app->add(function (Request $request, RequestHandlerInterface $handler) {
-    $response = $handler->handle($request);
-    return $response->withHeader('Content-Type', 'application/json');
-});
-
 // Add Error Middleware
 $display_errors = false;
 if (getenv('QANB_ENV') === 'staging' || getenv('QANB_ENV') === 'testing') {

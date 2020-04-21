@@ -32,7 +32,7 @@ class GraphController extends BaseController {
         $executions = Execution::getGraphData($period, $version);
 
         $response->getBody()->write(json_encode($executions));
-        return $response;
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -44,7 +44,7 @@ class GraphController extends BaseController {
      */
     public function parameters(Request $request, Response $response):Response {
         $response->getBody()->write(json_encode($this->getParameters()));
-        return $response;
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
