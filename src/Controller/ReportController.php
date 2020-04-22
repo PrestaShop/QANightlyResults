@@ -674,7 +674,7 @@ class ReportController extends BaseController
     public function compareReportData($id) {
         //get version and start_date of the given report
         $tempData = Manager::table('execution')
-            ->select(['version', 'start_date'])
+            ->select(['version', 'start_date', 'browser', 'campaign'])
             ->where('id', '=', $id)
             ->first();
 
@@ -682,6 +682,8 @@ class ReportController extends BaseController
         $precedentReport = Manager::table('execution')
             ->select('id')
             ->where('version', '=', $tempData->version)
+            ->where('browser', '=', $tempData->browser)
+            ->where('campaign', '=', $tempData->campaign)
             ->where('start_date', '<', $tempData->start_date)
             ->orderBy('start_date', 'desc')
             ->first();
