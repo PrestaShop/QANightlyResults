@@ -89,10 +89,6 @@ CREATE TABLE `test` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Indexes for dumped tables
---
-
---
 -- Indexes for table `execution`
 --
 ALTER TABLE `execution`
@@ -124,7 +120,7 @@ ALTER TABLE `test`
 -- AUTO_INCREMENT for table `execution`
 --
 ALTER TABLE `execution`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `settings`
 --
@@ -134,12 +130,12 @@ ALTER TABLE `settings`
 -- AUTO_INCREMENT for table `suite`
 --
 ALTER TABLE `suite`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `test`
 --
 ALTER TABLE `test`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for table `suite`
