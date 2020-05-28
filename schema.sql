@@ -121,6 +121,26 @@ ALTER TABLE `test`
   ADD KEY `id` (`id`),
   ADD KEY `suite_id` (`suite_id`);
 
+-- AUTO_INCREMENT for table `execution`
+--
+ALTER TABLE `execution`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+--
+-- AUTO_INCREMENT for table `settings`
+--
+ALTER TABLE `settings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT for table `suite`
+--
+ALTER TABLE `suite`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+--
+-- AUTO_INCREMENT for table `test`
+--
+ALTER TABLE `test`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
 --
 -- Constraints for table `suite`
 --
