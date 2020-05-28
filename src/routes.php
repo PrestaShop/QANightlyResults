@@ -3,7 +3,13 @@
 use App\Controller\DataController;
 use App\Controller\GraphController;
 use App\Controller\ReportController;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 use Slim\Routing\RouteCollectorProxy;
+
+$app->get('/', function (Request $request, Response $response) {
+    return $response;
+});
 
 //reports routes
 $app->group('/reports', function(RouteCollectorProxy $group) {
