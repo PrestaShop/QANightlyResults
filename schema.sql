@@ -10,8 +10,6 @@ CREATE TABLE `execution` (
   `end_date` timestamp NULL DEFAULT NULL,
   `duration` int(11) NOT NULL,
   `version` varchar(20) NOT NULL,
-  `campaign` varchar(50) NOT NULL DEFAULT 'functional',
-  `browser` varchar(50) NOT NULL DEFAULT 'chromium',
   `suites` int(11) DEFAULT NULL,
   `tests` int(11) DEFAULT NULL,
   `skipped` int(11) DEFAULT NULL,
