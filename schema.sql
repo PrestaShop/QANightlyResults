@@ -39,7 +39,7 @@ CREATE TABLE `settings` (
 --
 
 INSERT INTO `settings` (`id`, `name`, `value`) VALUES
-(1, 'version', '1');
+(1, 'version', '2');
 
 -- --------------------------------------------------------
 
