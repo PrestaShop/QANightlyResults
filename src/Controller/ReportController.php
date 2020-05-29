@@ -69,17 +69,22 @@ class ReportController extends BaseController
         //get all data from GCP
         $GCP_files_list = $this->getDataFromGCP(QANB_GCPURL);
 
-        $requestBrowsers = $request->getQueryParams()['filter_browser'] ? $request->getQueryParams()['filter_browser'] : array();
-        $paramsBrowsers = array_intersect($this->paramsBrowserDefault, (array)$requestBrowsers);
-        if (count($paramsBrowsers) == 0) {
-            $paramsBrowsers = $this->paramsBrowserDefault;
+        if (isset($request->getQueryParams()['filter_browser'])) {
+            $requestBrowsers = $request->getQueryParams()['filter_browser'];
+            $paramsBrowsers = array_intersect($this->paramsBrowserDefault, (array)$requestBrowsers);
+            if (count($paramsBrowsers) == 0) {
+                $paramsBrowsers = $this->paramsBrowserDefault;
+            }
         }
 
-        $requestCampaigns = $request->getQueryParams()['filter_campaign'] ? $request->getQueryParams()['filter_campaign'] : array();
-        $paramsCampaigns = array_intersect($this->paramsCampaignDefault, (array)$requestCampaigns);
-        if (count($paramsCampaigns) == 0) {
-            $paramsCampaigns = $this->paramsCampaignDefault;
+        if (isset($request->getQueryParams()['filter_campaign'])) {
+            $requestCampaigns = $request->getQueryParams()['filter_campaign'];
+            $paramsCampaigns = array_intersect($this->paramsCampaignDefault, (array)$requestCampaigns);
+            if (count($paramsCampaigns) == 0) {
+                $paramsCampaigns = $this->paramsCampaignDefault;
+            }
         }
+
 
         //get all data from executions
         $executions = Manager::table('execution')
