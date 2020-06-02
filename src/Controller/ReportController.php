@@ -18,14 +18,9 @@ class ReportController extends BaseController
     private const FILTER_STATE_SKIPPED = 'skipped';
     private const FILTER_STATE_PENDING = 'pending';
 
-    private const FILTER_BROWSER_CHROMIUM = 'chromium';
-    private const FILTER_BROWSER_FIREFOX = 'firefox';
-    private const FILTER_BROWSER_EDGE = 'edge';
+    private const FILTER_BROWSERS = ['chromium', 'firefox', 'webkit'];
 
-    private const FILTER_CAMPAIGN_SANITY = 'sanity';
-    private const FILTER_CAMPAIGN_FUNCTIONAL = 'functional';
-    private const FILTER_CAMPAIGN_E2E = 'e2e';
-    private const FILTER_CAMPAIGN_REGRESSION = 'regression';
+    private const FILTER_CAMPAIGNS = ['functional', 'sanity', 'e2e', 'regression'];
 
     private $main_suite_id = null;
     private $suiteChildrenData = [
@@ -33,19 +28,6 @@ class ReportController extends BaseController
         'totalFailures' => 0,
         'totalPending' => 0,
         'totalSkipped' => 0,
-    ];
-
-    private $paramsBrowserDefault = [
-            self::FILTER_BROWSER_CHROMIUM,
-            self::FILTER_BROWSER_FIREFOX,
-            self::FILTER_BROWSER_EDGE
-    ];
-
-    private $paramsCampaignDefault = [
-            self::FILTER_CAMPAIGN_FUNCTIONAL,
-            self::FILTER_CAMPAIGN_SANITY,
-            self::FILTER_CAMPAIGN_E2E,
-            self::FILTER_CAMPAIGN_REGRESSION
     ];
 
     private $paramsReportDefault = [
@@ -66,34 +48,45 @@ class ReportController extends BaseController
      * @return Response
      */
     public function index(Request $request, Response $response):Response {
-        //get all data from GCP
-        $GCP_files_list = $this->getDataFromGCP(QANB_GCPURL);
+        $requestBrowser = isset($request->getQueryParams()['filter_browser']) ?
+            $request->getQueryParams()['filter_browser'] : false;
 
-        $requestBrowsers = $request->getQueryParams()['filter_browser'];
-        $paramsBrowsers = array_intersect($this->paramsBrowserDefault, (array)$requestBrowsers);
-        if (count($paramsBrowsers) == 0) {
-            $paramsBrowsers = $this->paramsBrowserDefault;
-        }
+        $requestCampaign = isset($request->getQueryParams()['filter_campaign']) ?
+            $request->getQueryParams()['filter_campaign'] : false;
 
-        $requestCampaigns = $request->getQueryParams()['filter_campaign'];
-        $paramsCampaigns = array_intersect($this->paramsCampaignDefault, (array)$requestCampaigns);
-        if (count($paramsCampaigns) == 0) {
-            $paramsCampaigns = $this->paramsCampaignDefault;
-        }
+        $requestVersion = isset($request->getQueryParams()['filter_version']) ?
+            $request->getQueryParams()['filter_version'] : false;
 
         //get all data from executions
-        $executions = Manager::table('execution')
-            ->whereIn('campaign', $paramsCampaigns)
-            ->WhereIn('browser', $paramsBrowsers)
+        $executions = Manager::table('execution');
+        if ($requestBrowser) {
+            $executions = $executions->where('browser', '=', $requestBrowser);
+        }
+        if ($requestCampaign) {
+            $executions = $executions->where('campaign', '=', $requestCampaign);
+        }
+        if ($requestVersion) {
+            $executions = $executions->where('version', '=', $requestVersion);
+        }
+        $executions = $executions
             ->orderBy('start_date', 'desc')
             ->get();
+
+        $GCP_files_list = [];
+        if (!$requestBrowser && !$requestCampaign) {
+            //get all data from GCP
+            //no need to get these data if we filtered by browser or campaign
+            $GCP_files_list = $this->getDataFromGCP(QANB_GCPURL);
+        }
+
+
 
         $full_list = [];
         $orphan_builds_list = [];
         foreach($executions as $execution) {
             $download = null;
             if (isset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version])) {
-                $download = QANB_GCPURL.$GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version];
+                $download = QANB_GCPURL . $GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version];
                 unset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version]);
             }
             $full_list[] = [
@@ -124,12 +117,23 @@ class ReportController extends BaseController
             foreach($values as $version => $build) {
                 preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-([A-z0-9\.]*)-prestashop_(.*)\.zip/', $build, $matches_filename);
                 if (count($matches_filename) == 4) {
-                    $orphan_builds_list[] =
-                        [
-                            'date' => $matches_filename[1],
-                            'version' => $matches_filename[2],
-                            'download' => QANB_GCPURL.$build
-                        ];
+                    if ($requestVersion) {
+                        if ($matches_filename[2] == $requestVersion) {
+                            $orphan_builds_list[] =
+                                [
+                                    'date' => $matches_filename[1],
+                                    'version' => $matches_filename[2],
+                                    'download' => QANB_GCPURL.$build
+                                ];
+                        }
+                    } else {
+                        $orphan_builds_list[] =
+                            [
+                                'date' => $matches_filename[1],
+                                'version' => $matches_filename[2],
+                                'download' => QANB_GCPURL.$build
+                            ];
+                    }
                 }
             }
         }
@@ -298,12 +302,12 @@ class ReportController extends BaseController
         }
 
         //get browser and campaign info
-        $browser = $this->paramsBrowserDefault[0];
-        $campaign = $this->paramsCampaignDefault[0];
-        if (isset($get_query_params['browser']) && in_array($get_query_params['browser'], $this->paramsBrowserDefault)) {
+        $browser = self::FILTER_BROWSERS[0];
+        $campaign = self::FILTER_CAMPAIGNS[0];
+        if (isset($get_query_params['browser']) && in_array($get_query_params['browser'], self::FILTER_BROWSERS)) {
             $browser = $get_query_params['browser'];
         }
-        if (isset($get_query_params['campaign']) && in_array($get_query_params['campaign'], $this->paramsCampaignDefault)) {
+        if (isset($get_query_params['campaign']) && in_array($get_query_params['campaign'], self::FILTER_CAMPAIGNS)) {
             $campaign = $get_query_params['campaign'];
         }
 
@@ -580,7 +584,7 @@ class ReportController extends BaseController
             ->get();
         $tests_data = [];
         foreach($tests as $test) {
-            if ($test->status == 'failed') {
+            if ($test->state == 'failed') {
                 $test->stack_trace_formatted = $this->formatStackTrace($test->stack_trace);
             }
             $tests_data[$test->suite_id][] = $test;
