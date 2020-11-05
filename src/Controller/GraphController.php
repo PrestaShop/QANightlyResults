@@ -32,15 +32,15 @@ class GraphController extends BaseController {
         switch ($period) {
             case 'last_two_months':
                 $start_date = date('Y-m-d', strtotime(" -60 days"));
-                $end_date = date('Y-m-d');
+                $end_date = date('Y-m-d', strtotime(" +1 days"));
                 break;
             case 'last_year':
                 $start_date = date('Y-m-d', strtotime(" -1 years"));
-                $end_date = date('Y-m-d');
+                $end_date = date('Y-m-d', strtotime(" +1 days"));
                 break;
             default:
                 $start_date = date('Y-m-d', strtotime(" -30 days"));
-                $end_date = date('Y-m-d');
+                $end_date = date('Y-m-d', strtotime(" +1 days"));
         }
 
         if (isset($get_query_params['start_date']) && date('Y-m-d', strtotime($get_query_params['start_date'])) == $get_query_params['start_date']) {
