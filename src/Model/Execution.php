@@ -7,23 +7,12 @@ class Execution {
 
     /**
      * Return data for the graph
-     *
-     * @param $period
      * @param $version
+     * @param $start_date
+     * @param $end_date
      * @return mixed
      */
-    public static function getGraphData($period, $version) {
-        switch ($period) {
-            case 'last_two_months':
-                $period_sql = 60;
-                break;
-            case 'last_year':
-                $period_sql = 365;
-                break;
-            default:
-                $period_sql = 30;
-        }
-
+    public static function getGraphData($version, $start_date, $end_date) {
         return DB::select("
         SELECT 
             `id`, 
@@ -37,8 +26,9 @@ class Execution {
             `failures`,
             `pending` 
         FROM `execution` 
-        WHERE `start_date` > DATE_SUB(NOW(), INTERVAL :days DAY)
+        WHERE `start_date` >= :start_date 
+        AND `start_date` < :end_date
         AND `version` = :version
-        ORDER BY `start_date` ASC;", ['days' => $period_sql, 'version' => $version]);
+        ORDER BY `start_date` ASC;", ['start_date' => $start_date, 'end_date' => $end_date, 'version' => $version]);
     }
 }
