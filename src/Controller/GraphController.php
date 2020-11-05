@@ -28,8 +28,30 @@ class GraphController extends BaseController {
         if (isset($get_query_params['version']) && $this->isValidParameter($get_query_params['version'], $parameters['versions']['values'])) {
             $version = $get_query_params['version'];
         }
+
+        switch ($period) {
+            case 'last_two_months':
+                $start_date = date('Y-m-d', strtotime(" -60 days"));
+                $end_date = date('Y-m-d', strtotime(" +1 days"));
+                break;
+            case 'last_year':
+                $start_date = date('Y-m-d', strtotime(" -1 years"));
+                $end_date = date('Y-m-d', strtotime(" +1 days"));
+                break;
+            default:
+                $start_date = date('Y-m-d', strtotime(" -30 days"));
+                $end_date = date('Y-m-d', strtotime(" +1 days"));
+        }
+
+        if (isset($get_query_params['start_date']) && date('Y-m-d', strtotime($get_query_params['start_date'])) == $get_query_params['start_date']) {
+            $start_date = $get_query_params['start_date'];
+        }
+        if (isset($get_query_params['end_date']) && date('Y-m-d', strtotime($get_query_params['end_date'])) == $get_query_params['end_date']) {
+            $end_date = $get_query_params['end_date'];
+        }
+
         //get the data
-        $executions = Execution::getGraphData($period, $version);
+        $executions = Execution::getGraphData($version, $start_date, $end_date);
 
         $response->getBody()->write(json_encode($executions));
         return $response->withHeader('Content-Type', 'application/json');
