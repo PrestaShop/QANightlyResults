@@ -18,9 +18,9 @@ class ReportController extends BaseController
     private const FILTER_STATE_SKIPPED = 'skipped';
     private const FILTER_STATE_PENDING = 'pending';
 
-    private const FILTER_BROWSERS = ['chromium', 'firefox', 'webkit'];
+    private const FILTER_PLATFORMS = ['chromium', 'firefox', 'webkit', 'cli'];
 
-    private const FILTER_CAMPAIGNS = ['functional', 'sanity', 'e2e', 'regression'];
+    private const FILTER_CAMPAIGNS = ['functional', 'sanity', 'e2e', 'regression', 'autoupgrade'];
 
     private $main_suite_id = null;
     private $suiteChildrenData = [
@@ -48,8 +48,8 @@ class ReportController extends BaseController
      * @return Response
      */
     public function index(Request $request, Response $response):Response {
-        $requestBrowser = isset($request->getQueryParams()['filter_browser']) ?
-            $request->getQueryParams()['filter_browser'] : false;
+        $requestPlatform = $request->getQueryParams()['filter_platform']
+            ?? ($request->getQueryParams()['filter_browser'] ?? false);
 
         $requestCampaign = isset($request->getQueryParams()['filter_campaign']) ?
             $request->getQueryParams()['filter_campaign'] : false;
@@ -59,8 +59,8 @@ class ReportController extends BaseController
 
         //get all data from executions
         $executions = Manager::table('execution');
-        if ($requestBrowser) {
-            $executions = $executions->where('browser', '=', $requestBrowser);
+        if ($requestPlatform) {
+            $executions = $executions->where('platform', '=', $requestPlatform);
         }
         if ($requestCampaign) {
             $executions = $executions->where('campaign', '=', $requestCampaign);
@@ -73,9 +73,9 @@ class ReportController extends BaseController
             ->get();
 
         $GCP_files_list = [];
-        if (!$requestBrowser && !$requestCampaign) {
+        if (!$requestPlatform && !$requestCampaign) {
             //get all data from GCP
-            //no need to get these data if we filtered by browser or campaign
+            //no need to get these data if we filtered by platform or campaign
             $GCP_files_list = $this->getDataFromGCP(QANB_GCPURL);
         }
 
@@ -94,7 +94,8 @@ class ReportController extends BaseController
                 'date' => date('Y-m-d', strtotime($execution->start_date)),
                 'version' => $execution->version,
                 'campaign' => $execution->campaign,
-                'browser' => $execution->browser,
+                'browser' => $execution->platform, // retro-compatibility
+                'platform' => $execution->platform,
                 'start_date' => $execution->start_date,
                 'end_date' => $execution->end_date,
                 'duration' => $execution->duration,
@@ -178,7 +179,8 @@ class ReportController extends BaseController
             'date' => date('Y-m-d', strtotime($execution->start_date)),
             'version' => $execution->version,
             'campaign' => $execution->campaign,
-            'browser' => $execution->browser,
+            'browser' => $execution->platform, // retro-compatibility
+            'platform' => $execution->platform,
             'start_date' => $execution->start_date,
             'end_date' => $execution->end_date,
             'duration' => $execution->duration,
@@ -301,11 +303,12 @@ class ReportController extends BaseController
             $force = true;
         }
 
-        //get browser and campaign info
-        $browser = self::FILTER_BROWSERS[0];
+        //get platform and campaign info
+        $platform = self::FILTER_PLATFORMS[0];
         $campaign = self::FILTER_CAMPAIGNS[0];
-        if (isset($get_query_params['browser']) && in_array($get_query_params['browser'], self::FILTER_BROWSERS)) {
-            $browser = $get_query_params['browser'];
+        $queryPlatform = $get_query_params['platform'] ?? ($get_query_params['browser'] ?? null); // retro-compatibility
+        if (null !== $queryPlatform && in_array($queryPlatform, self::FILTER_PLATFORMS)) {
+            $platform = $queryPlatform;
         }
         if (isset($get_query_params['campaign']) && in_array($get_query_params['campaign'], self::FILTER_CAMPAIGNS)) {
             $campaign = $get_query_params['campaign'];
@@ -337,7 +340,7 @@ class ReportController extends BaseController
         $execution_data = [
             'ref' => date('YmdHis'),
             'filename' => $filename,
-            'browser' => $browser,
+            'platform' => $platform,
             'campaign' => $campaign,
             'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
             'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
@@ -355,14 +358,14 @@ class ReportController extends BaseController
         $entry_date = date('Y-m-d', strtotime($stats->start));
         $similar = Manager::table('execution')
             ->where('version', '=', $version)
-            ->where('browser', '=', $browser)
+            ->where('platform', '=', $platform)
             ->where('campaign', '=', $campaign)
             ->whereDate('start_date', '=', $entry_date)
             ->first();
         if ($similar && !$force) {
             throw new HttpForbiddenException($request,
-                sprintf("A similar entry was found (criteria: version %s, browser %s, campaign %s, date %s).",
-                    $version, $browser, $campaign, $entry_date));
+                sprintf("A similar entry was found (criteria: version %s, platform %s, campaign %s, date %s).",
+                    $version, $platform, $campaign, $entry_date));
         }
         //insert execution
         $execution_id = Manager::table('execution')->insertGetId($execution_data);
@@ -678,7 +681,7 @@ class ReportController extends BaseController
     public function compareReportData($id) {
         //get version and start_date of the given report
         $tempData = Manager::table('execution')
-            ->select(['version', 'start_date', 'browser', 'campaign'])
+            ->select(['version', 'start_date', 'platform', 'campaign'])
             ->where('id', '=', $id)
             ->first();
 
@@ -686,7 +689,7 @@ class ReportController extends BaseController
         $precedentReport = Manager::table('execution')
             ->select('id')
             ->where('version', '=', $tempData->version)
-            ->where('browser', '=', $tempData->browser)
+            ->where('platform', '=', $tempData->platform)
             ->where('campaign', '=', $tempData->campaign)
             ->where('start_date', '<', $tempData->start_date)
             ->orderBy('start_date', 'desc')
