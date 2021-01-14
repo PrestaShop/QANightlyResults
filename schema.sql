@@ -11,7 +11,7 @@ CREATE TABLE `execution` (
   `duration` int(11) NOT NULL,
   `version` varchar(20) NOT NULL,
   `campaign` varchar(50) NOT NULL DEFAULT 'functional',
-  `browser` varchar(50) NOT NULL DEFAULT 'chromium',
+  `platform` varchar(50) NOT NULL DEFAULT 'chromium',
   `suites` int(11) DEFAULT NULL,
   `tests` int(11) DEFAULT NULL,
   `skipped` int(11) DEFAULT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE `execution` (
   `equal_since_last` int(11) DEFAULT NULL,
   `insertion_start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `insertion_end_date` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -35,14 +35,14 @@ CREATE TABLE `settings` (
   `id` int(11) NOT NULL,
   `name` varchar(30) NOT NULL,
   `value` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `settings`
 --
 
 INSERT INTO `settings` (`id`, `name`, `value`) VALUES
-(1, 'version', '2');
+(1, 'version', '3');
 
 -- --------------------------------------------------------
 
@@ -70,7 +70,7 @@ CREATE TABLE `suite` (
   `hasTests` int(11) DEFAULT NULL,
   `parent_id` int(11) DEFAULT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -90,7 +90,7 @@ CREATE TABLE `test` (
   `stack_trace` text,
   `diff` text,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Indexes for table `execution`
