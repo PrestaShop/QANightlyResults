@@ -9,8 +9,8 @@ $capsule->addConnection([
     'database'  => QANB_DB_NAME,
     'username'  => QANB_DB_USERNAME,
     'password'  => QANB_DB_PASSWORD,
-    'charset'   => 'utf8',
-    'collation' => 'utf8_unicode_ci',
+    'charset'   => 'utf8mb4',
+    'collation' => 'utf8mb4_0900_ai_ci',
     'prefix'    => '',
 ]);
 $capsule->setAsGlobal();
