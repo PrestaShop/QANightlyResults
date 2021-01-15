@@ -23,7 +23,7 @@ CREATE TABLE `execution` (
   `equal_since_last` int(11) DEFAULT NULL,
   `insertion_start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `insertion_end_date` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -35,7 +35,7 @@ CREATE TABLE `settings` (
   `id` int(11) NOT NULL,
   `name` varchar(30) NOT NULL,
   `value` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Dumping data for table `settings`
@@ -70,7 +70,7 @@ CREATE TABLE `suite` (
   `hasTests` int(11) DEFAULT NULL,
   `parent_id` int(11) DEFAULT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -90,7 +90,7 @@ CREATE TABLE `test` (
   `stack_trace` text,
   `diff` text,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Indexes for table `execution`
