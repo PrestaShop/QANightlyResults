@@ -6,6 +6,9 @@ function update3() {
     echo "\n Upgrading to version 3...\n";
     try {
 
+        // Fix invalid insertion_end_date
+        Manager::statement('UPDATE `execution` SET `insertion_end_date` = NULL WHERE `insertion_end_date` = 0;');
+
         $tables = ['execution', 'settings', 'suite', 'test'];
         foreach ($tables as $table) {
             // convert tables to utf8
@@ -17,6 +20,8 @@ function update3() {
         //update the version in database
         Manager::table('settings')->where('name', '=', 'version')->update(['value' => 3]);
     } catch (Exception $e) {
+        error_log($e->getMessage());
+
         return false;
     }
     echo "Finished updating database\n\n";
