@@ -8,8 +8,8 @@ function update3() {
 
         $tables = ['execution', 'settings', 'suite', 'test'];
         foreach ($tables as $table) {
-            // convert tables to utf8mb4
-            Manager::statement('ALTER TABLE `' . $table . '` CONVERT TO CHARACTER SET utf8mb4;');
+            // convert tables to utf8
+            Manager::statement('ALTER TABLE `' . $table . '` CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci;');
         }
         //change "browser" to a more generic "platform" column
         Manager::statement('ALTER TABLE `execution` CHANGE `browser` `platform` VARCHAR(50) NOT NULL DEFAULT \'chromium\';');
