@@ -14,6 +14,7 @@
         "illuminate/database": "^6.8"
     },
     "require-dev": {
-        "prestashop/php-dev-tools": "^4.0"
+        "prestashop/php-dev-tools": "^4.0",
+        "phpstan/phpstan": "^0.12.88"
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Model\Execution;
@@ -78,10 +80,8 @@ class GraphController extends BaseController
 
     /**
      * Format a list of all the parameters to use in all methods
-     *
-     * @return array
      */
-    private function getParameters()
+    private function getParameters(): array
     {
         //versions
         $versions_possible_values = ['develop'];
@@ -89,7 +89,8 @@ class GraphController extends BaseController
             ->select('version')
             ->groupBy('version')
             ->get();
-        if ($versions_possible_values_from_base) {
+
+        if (!empty($versions_possible_values_from_base)) {
             foreach ($versions_possible_values_from_base as $v) {
                 if (!in_array($v->version, $versions_possible_values)) {
                     $versions_possible_values[] = $v->version;
@@ -137,13 +138,8 @@ class GraphController extends BaseController
 
     /**
      * Check is the parameter is valid
-     *
-     * @param $parameter
-     * @param $values
-     *
-     * @return bool
      */
-    private function isValidParameter($parameter, $values)
+    private function isValidParameter(string $parameter, array $values): bool
     {
         foreach ($values as $value) {
             if ($parameter == $value['value']) {

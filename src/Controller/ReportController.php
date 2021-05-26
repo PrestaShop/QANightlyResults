@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use DI\NotFoundException;
@@ -11,6 +13,7 @@ use Slim\Exception\HttpForbiddenException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use Slim\Routing\RouteContext;
+use stdClass;
 
 class ReportController extends BaseController
 {
@@ -169,7 +172,7 @@ class ReportController extends BaseController
         $routeContext = RouteContext::fromRequest($request);
         $route = $routeContext->getRoute();
 
-        $report_id = $route->getArgument('report');
+        $report_id = (int) $route->getArgument('report');
 
         $this->paramsReport = array_merge($this->paramsReportDefault, $request->getQueryParams());
 
@@ -269,14 +272,19 @@ class ReportController extends BaseController
         $routeContext = RouteContext::fromRequest($request);
         $route = $routeContext->getRoute();
 
-        $report_id = $route->getArgument('report');
-        $suite_id = $route->getArgument('suite');
+        $report_id = (int) $route->getArgument('report');
+        $suite_id = (int) $route->getArgument('suite');
 
         //get suite data
         $root_suite = Manager::table('suite')
             ->where('execution_id', '=', $report_id)
             ->where('id', '=', $suite_id)
             ->first();
+
+        if (!$root_suite) {
+            throw new NotFoundException('Suite not found for this execution');
+        }
+
         //get tests for this root suite
         $tests = Manager::table('test')
             ->where('suite_id', '=', $suite_id)
@@ -429,12 +437,8 @@ class ReportController extends BaseController
 
     /**
      * Filter suites by using root data (when using toggles)
-     *
-     * @param $suites
-     *
-     * @return mixed
      */
-    private function filterSuitesByRootData($suites)
+    private function filterSuitesByRootData(array $suites): array
     {
         $paramsFilter = array_values($this->paramsReport['filter_state']);
         foreach ($suites as $key => $root_suite) {
@@ -489,15 +493,13 @@ class ReportController extends BaseController
     /**
      * Filter suites
      *
-     * @param \stdClass $suite
-     *
      * @return bool
      */
-    private function filterSuite(\stdClass $suite): bool
+    private function filterSuite(stdClass $suite): bool
     {
         $status = true;
         // If we need to search fulltext
-        if ($status && !empty($this->paramsReport['search'])) {
+        if (!empty($this->paramsReport['search'])) {
             $status = $this->filterSuiteSearch($suite, $this->paramsReport['search']);
         }
 
@@ -507,12 +509,9 @@ class ReportController extends BaseController
     /**
      * Filter each suite with text search in tests
      *
-     * @param \stdClass $suite
-     * @param string $text
-     *
      * @return bool
      */
-    private function filterSuiteSearch(\stdClass $suite, string $text): bool
+    private function filterSuiteSearch(stdClass $suite, string $text): bool
     {
         // Title
         if (stripos($suite->title, $text) !== false) {
@@ -532,14 +531,8 @@ class ReportController extends BaseController
 
     /**
      * Method to render the whole suites tree
-     *
-     * @param $suites
-     * @param $tests_data
-     * @param null $parent_id
-     *
-     * @return array
      */
-    private function buildTree($suites, $tests_data, $parent_id = null)
+    private function buildTree(Collection $suites, array $tests_data, ?int $parent_id = null): array
     {
         $branch = [];
         foreach ($suites as &$suite) {
@@ -562,12 +555,8 @@ class ReportController extends BaseController
 
     /**
      * Loop through the whole suites tree to count all the tests children by state
-     *
-     * @param $suites
-     *
-     * @return array
      */
-    private function getRootSuitesAggregatedData($suites)
+    private function getRootSuitesAggregatedData(array $suites): array
     {
         foreach ($suites as $root_suite) {
             $this->suiteChildrenData = [
@@ -585,10 +574,8 @@ class ReportController extends BaseController
 
     /**
      * Recursive function to map all the tests
-     *
-     * @param $suite
      */
-    private function loopThroughSuiteData($suite)
+    private function loopThroughSuiteData(stdClass $suite)
     {
         $this->suiteChildrenData['totalPasses'] += $suite->totalPasses;
         $this->suiteChildrenData['totalFailures'] += $suite->totalFailures;
@@ -603,12 +590,8 @@ class ReportController extends BaseController
 
     /**
      * Get all the suites data from an execution
-     *
-     * @param $report_id
-     *
-     * @return Collection
      */
-    private function getReportData($report_id)
+    private function getReportData(int $report_id): Collection
     {
         return Manager::table('suite')
             ->where('execution_id', '=', $report_id)
@@ -618,12 +601,8 @@ class ReportController extends BaseController
 
     /**
      * Get all the tests data from an execution
-     *
-     * @param $report_id
-     *
-     * @return array
      */
-    private function getTestData($report_id)
+    private function getTestData(int $report_id): array
     {
         $tests = Manager::table('test')
             ->join('suite', 'test.suite_id', '=', 'suite.id')
@@ -643,24 +622,16 @@ class ReportController extends BaseController
 
     /**
      * Format the stack_trace
-     *
-     * @param $stack_trace
-     *
-     * @return string|string[]
      */
-    private function formatStackTrace($stack_trace)
+    private function formatStackTrace(string $stack_trace): string
     {
         return str_replace('    at', '<br />&nbsp;&nbsp;&nbsp;&nbsp;at', htmlentities($stack_trace));
     }
 
     /**
      * Loop through data and insert it, recursive function
-     *
-     * @param $execution_id
-     * @param $suite
-     * @param null $parent_suite_id
      */
-    private function loopThrough($execution_id, $suite, $parent_suite_id = null)
+    private function loopThrough(int $execution_id, stdClass $suite, ?int $parent_suite_id = null)
     {
         $data_suite = [
             'execution_id' => $execution_id,
@@ -721,11 +692,9 @@ class ReportController extends BaseController
     }
 
     /**
-     * @param $id
-     *
      * @return array|bool
      */
-    public function compareReportData($id)
+    public function compareReportData(int $id)
     {
         //get version and start_date of the given report
         $tempData = Manager::table('execution')
@@ -794,12 +763,8 @@ class ReportController extends BaseController
 
     /**
      * Sanitize text by removing weird characters
-     *
-     * @param $text
-     *
-     * @return string
      */
-    private function sanitize($text)
+    private function sanitize(string $text): string
     {
         $StrArr = str_split($text);
         $NewStr = '';
@@ -820,12 +785,9 @@ class ReportController extends BaseController
     /**
      * Extract campaign name and file name from json data
      *
-     * @param $filename
-     * @param $type
-     *
      * @return mixed|null
      */
-    private function extractNames($filename, $type)
+    private function extractNames(string $filename, string $type)
     {
         if (strlen($filename) == 0) {
             return null;
@@ -857,12 +819,8 @@ class ReportController extends BaseController
 
     /**
      * Get the test state
-     *
-     * @param $test
-     *
-     * @return string
      */
-    private function getTestState($test)
+    private function getTestState(stdClass $test): string
     {
         if (isset($test->state)) {
             return $test->state;
@@ -879,12 +837,8 @@ class ReportController extends BaseController
 
     /**
      * Format data from GCP (list of builds)
-     *
-     * @param $gcp_url
-     *
-     * @return array
      */
-    private function getDataFromGCP($gcp_url)
+    private function getDataFromGCP(string $gcp_url): array
     {
         $GCP_files_list = [];
         $GCPCallResult = file_get_contents($gcp_url);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use Illuminate\Database\Capsule\Manager;
@@ -54,7 +56,7 @@ class DataController extends BaseController
                 <path fill="#444" d="M0 0h58v20H0z"/>
                 <path fill="' . $color . '" d="M58 0h85v20H58z"/>
             </g>
-            <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="110"> 
+            <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="110">
                 <text x="285" y="140" transform="scale(0.1)" textLength="430">' . $badge_data['branch'] . '</text>
                 <text x="1000" y="140" transform="scale(.1)" textLength="750">' . $badge_data['percent'] . '% passed</text>
             </g>
@@ -67,12 +69,8 @@ class DataController extends BaseController
 
     /**
      * Get all data for badges
-     *
-     * @param $request
-     *
-     * @return array|null
      */
-    private function getBadgeData($request)
+    private function getBadgeData(Request $request): ?array
     {
         $badge = null;
         //default values
