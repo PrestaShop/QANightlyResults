@@ -1,7 +1,6 @@
 <?php
-use \DI\Bridge\Slim\Bridge;
-use Psr\Http\Server\RequestHandlerInterface;
-use Slim\Psr7\Request;
+
+use DI\Bridge\Slim\Bridge;
 
 require __DIR__ . '/../vendor/autoload.php';
 

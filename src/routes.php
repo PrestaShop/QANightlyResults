@@ -12,7 +12,7 @@ $app->get('/', function (Request $request, Response $response) {
 });
 
 //reports routes
-$app->group('/reports', function(RouteCollectorProxy $group) {
+$app->group('/reports', function (RouteCollectorProxy $group) {
     $group->get('', [ReportController::class, 'index']);
     $group->get('/{report:[0-9]+}', [ReportController::class, 'report']);
     $group->get('/{report:[0-9]+}/suites/{suite:[0-9]+}', [ReportController::class, 'suite']);
@@ -22,7 +22,7 @@ $app->group('/reports', function(RouteCollectorProxy $group) {
 $app->get('/hook/add', [ReportController::class, 'insert']);
 
 //graph routes
-$app->group('/graph', function(RouteCollectorProxy $group) {
+$app->group('/graph', function (RouteCollectorProxy $group) {
     $group->get('', [GraphController::class, 'index']);
     $group->get('/parameters', [GraphController::class, 'parameters']);
 });
@@ -30,4 +30,3 @@ $app->group('/graph', function(RouteCollectorProxy $group) {
 //data routes
 $app->get('/data/badge', [DataController::class, 'badge']);
 $app->get('/data/badge/svg', [DataController::class, 'svg']);
-
