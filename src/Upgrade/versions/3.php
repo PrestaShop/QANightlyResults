@@ -2,10 +2,10 @@
 
 use Illuminate\Database\Capsule\Manager;
 
-function update3() {
+function update3()
+{
     echo "\n Upgrading to version 3...\n";
     try {
-
         // Fix invalid insertion_end_date
         Manager::statement('UPDATE `execution` SET `insertion_end_date` = NULL WHERE `insertion_end_date` = 0;');
 
@@ -25,8 +25,8 @@ function update3() {
         return false;
     }
     echo "Finished updating database\n\n";
-    return true;
 
+    return true;
 }
 
 return update3();

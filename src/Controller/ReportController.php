@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use DI\NotFoundException;
@@ -10,6 +13,7 @@ use Slim\Exception\HttpForbiddenException;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
 use Slim\Routing\RouteContext;
+use stdClass;
 
 class ReportController extends BaseController
 {
@@ -37,7 +41,7 @@ class ReportController extends BaseController
             self::FILTER_STATE_PASSED,
             self::FILTER_STATE_SKIPPED,
             self::FILTER_STATE_PENDING,
-        ]
+        ],
     ];
 
     private $paramsReport = [];
@@ -45,9 +49,11 @@ class ReportController extends BaseController
     /**
      * @param Request $request
      * @param Response $response
+     *
      * @return Response
      */
-    public function index(Request $request, Response $response):Response {
+    public function index(Request $request, Response $response): Response
+    {
         $requestPlatform = $request->getQueryParams()['filter_platform']
             ?? ($request->getQueryParams()['filter_browser'] ?? false);
 
@@ -79,11 +85,9 @@ class ReportController extends BaseController
             $GCP_files_list = $this->getDataFromGCP(QANB_GCPURL);
         }
 
-
-
         $full_list = [];
         $orphan_builds_list = [];
-        foreach($executions as $execution) {
+        foreach ($executions as $execution) {
             $download = null;
             if (isset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version])) {
                 $download = QANB_GCPURL . $GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version];
@@ -110,12 +114,12 @@ class ReportController extends BaseController
                 'broken_since_last' => $execution->broken_since_last,
                 'fixed_since_last' => $execution->fixed_since_last,
                 'equal_since_last' => $execution->equal_since_last,
-                'download' => $download
+                'download' => $download,
             ];
         }
         //clean ugly array
-        foreach($GCP_files_list as $date => $values) {
-            foreach($values as $version => $build) {
+        foreach ($GCP_files_list as $date => $values) {
+            foreach ($values as $version => $build) {
                 preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-([A-z0-9\.]*)-prestashop_(.*)\.zip/', $build, $matches_filename);
                 if (count($matches_filename) == 4) {
                     if ($requestVersion) {
@@ -124,7 +128,7 @@ class ReportController extends BaseController
                                 [
                                     'date' => $matches_filename[1],
                                     'version' => $matches_filename[2],
-                                    'download' => QANB_GCPURL.$build
+                                    'download' => QANB_GCPURL . $build,
                                 ];
                         }
                     } else {
@@ -132,7 +136,7 @@ class ReportController extends BaseController
                             [
                                 'date' => $matches_filename[1],
                                 'version' => $matches_filename[2],
-                                'download' => QANB_GCPURL.$build
+                                'download' => QANB_GCPURL . $build,
                             ];
                     }
                 }
@@ -144,26 +148,31 @@ class ReportController extends BaseController
         usort($full_list, function ($dt1, $dt2) {
             $tm1 = isset($dt1['start_date']) ? $dt1['start_date'] : $dt1['date'];
             $tm2 = isset($dt2['start_date']) ? $dt2['start_date'] : $dt2['date'];
+
             return ($tm1 < $tm2) ? 1 : (($tm1 > $tm2) ? -1 : 0);
         });
 
         $response->getBody()->write(json_encode($full_list));
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
      * Display a single report information
+     *
      * @param Request $request
      * @param Response $response
+     *
      * @return Response
+     *
      * @throws NotFoundException
      */
-    public function report(Request $request, Response $response):Response {
-
+    public function report(Request $request, Response $response): Response
+    {
         $routeContext = RouteContext::fromRequest($request);
         $route = $routeContext->getRoute();
 
-        $report_id = $route->getArgument('report');
+        $report_id = (int) $route->getArgument('report');
 
         $this->paramsReport = array_merge($this->paramsReportDefault, $request->getQueryParams());
 
@@ -192,13 +201,13 @@ class ReportController extends BaseController
             'skipped' => $execution->skipped,
             'pending' => $execution->pending,
             'passes' => $execution->passes,
-            'failures' => $execution->failures
+            'failures' => $execution->failures,
         ];
 
         $suites = $this->getReportData($report_id);
         $tests_data = $this->getTestData($report_id);
         //find the first suite ID
-        foreach($suites as $suite) {
+        foreach ($suites as $suite) {
             if ($suite->parent_id == null) {
                 $this->main_suite_id = $suite->id;
                 break;
@@ -212,18 +221,23 @@ class ReportController extends BaseController
         //put suites data into the final object
         $execution_data['suites_data'] = $suites;
         $response->getBody()->write(json_encode($execution_data));
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
      * Delete a report - needs the token
+     *
      * @param Request $request
      * @param Response $response
+     *
      * @return Response
+     *
      * @throws HttpBadRequestException
      * @throws NotFoundException
      */
-    public function delete(Request $request, Response $response):Response {
+    public function delete(Request $request, Response $response): Response
+    {
         $this->authenticateHeaderToken($request);
         //check if report exists
         $routeContext = RouteContext::fromRequest($request);
@@ -239,29 +253,38 @@ class ReportController extends BaseController
         $delete = Manager::table('execution')->where('id', '=', $report_id)->delete();
 
         $response->getBody()->write(json_encode([
-            'status' => 'ok'
+            'status' => 'ok',
         ]));
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
      * Display a single suite information
+     *
      * @param Request $request
      * @param Response $response
+     *
      * @return Response
      */
-    public function suite(Request $request, Response $response):Response {
+    public function suite(Request $request, Response $response): Response
+    {
         $routeContext = RouteContext::fromRequest($request);
         $route = $routeContext->getRoute();
 
-        $report_id = $route->getArgument('report');
-        $suite_id = $route->getArgument('suite');
+        $report_id = (int) $route->getArgument('report');
+        $suite_id = (int) $route->getArgument('suite');
 
         //get suite data
         $root_suite = Manager::table('suite')
             ->where('execution_id', '=', $report_id)
             ->where('id', '=', $suite_id)
             ->first();
+
+        if (!$root_suite) {
+            throw new NotFoundException('Suite not found for this execution');
+        }
+
         //get tests for this root suite
         $tests = Manager::table('test')
             ->where('suite_id', '=', $suite_id)
@@ -275,28 +298,33 @@ class ReportController extends BaseController
         $root_suite->suites = $suites;
         //put suites data into the final object
         $response->getBody()->write(json_encode($root_suite));
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
      * Insert a new report data in the database
+     *
      * @param Request $request
      * @param Response $response
+     *
      * @return Response
+     *
      * @throws HttpBadRequestException
      * @throws HttpForbiddenException
      */
-    public function insert(Request $request, Response $response):Response {
+    public function insert(Request $request, Response $response): Response
+    {
         $get_query_params = $request->getQueryParams();
         $force = false;
 
         //check arguments in GET query
         if (!isset($get_query_params['token']) || !isset($get_query_params['filename'])) {
-            throw new HttpBadRequestException($request, "no enough parameters");
+            throw new HttpBadRequestException($request, 'no enough parameters');
         }
         //check token
         if ($get_query_params['token'] != getenv('QANB_TOKEN')) {
-            throw new HttpBadRequestException($request, "invalid token");
+            throw new HttpBadRequestException($request, 'invalid token');
         }
         //force parameter
         if (isset($get_query_params['force']) && $get_query_params['force'] == 'true') {
@@ -319,21 +347,21 @@ class ReportController extends BaseController
         //retrieving version number
         preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/', $filename, $matches);
         if (!isset($matches[1])) {
-            throw new HttpBadRequestException($request, "could not retrieve version from filename");
+            throw new HttpBadRequestException($request, 'could not retrieve version from filename');
         }
         $version = $matches[1];
         if (strlen($matches[1]) < 1) {
-            throw new HttpBadRequestException($request, sprintf("version found not correct (%s) from filename %s", $version, $filename));
+            throw new HttpBadRequestException($request, sprintf('version found not correct (%s) from filename %s', $version, $filename));
         }
-        $url = QANB_GCPURL.'reports/'.$filename;
+        $url = QANB_GCPURL . 'reports/' . $filename;
         $contents = file_get_contents($url);
         if (!$contents) {
-            throw new HttpBadRequestException($request, "unable to retrieve content from GCP URL");
+            throw new HttpBadRequestException($request, 'unable to retrieve content from GCP URL');
         }
         //try to decode json
         $file_contents = json_decode($contents);
-        if ($file_contents == NULL) {
-            throw new HttpBadRequestException($request, "unable to decode JSON data");
+        if ($file_contents == null) {
+            throw new HttpBadRequestException($request, 'unable to decode JSON data');
         }
         //starting real stuff
         $stats = $file_contents->stats;
@@ -351,7 +379,7 @@ class ReportController extends BaseController
             'passes' => $stats->passes,
             'failures' => $stats->failures,
             'suites' => $stats->suites,
-            'tests' => $stats->tests
+            'tests' => $stats->tests,
         ];
 
         //let's check if there's not a similar entry...
@@ -363,9 +391,7 @@ class ReportController extends BaseController
             ->whereDate('start_date', '=', $entry_date)
             ->first();
         if ($similar && !$force) {
-            throw new HttpForbiddenException($request,
-                sprintf("A similar entry was found (criteria: version %s, platform %s, campaign %s, date %s).",
-                    $version, $platform, $campaign, $entry_date));
+            throw new HttpForbiddenException($request, sprintf('A similar entry was found (criteria: version %s, platform %s, campaign %s, date %s).', $version, $platform, $campaign, $entry_date));
         }
         //insert execution
         $execution_id = Manager::table('execution')->insertGetId($execution_data);
@@ -387,32 +413,35 @@ class ReportController extends BaseController
             ->update($update_data);
 
         $response->getBody()->write(json_encode([
-            'status' => 'ok'
+            'status' => 'ok',
         ]));
+
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
      * Verify the token in headers
+     *
      * @param Request $request
+     *
      * @throws HttpBadRequestException
      */
-    private function authenticateHeaderToken(Request $request) {
+    private function authenticateHeaderToken(Request $request)
+    {
         $headerValueArray = $request->getHeader('QANB_TOKEN');
         //check token
         if (!isset($headerValueArray[0]) || $headerValueArray[0] != getenv('QANB_TOKEN')) {
-            throw new HttpBadRequestException($request, "invalid token");
+            throw new HttpBadRequestException($request, 'invalid token');
         }
     }
 
     /**
      * Filter suites by using root data (when using toggles)
-     * @param $suites
-     * @return mixed
      */
-    private function filterSuitesByRootData($suites) {
+    private function filterSuitesByRootData(array $suites): array
+    {
         $paramsFilter = array_values($this->paramsReport['filter_state']);
-        foreach($suites as $key => $root_suite) {
+        foreach ($suites as $key => $root_suite) {
             //when the "failed" toggle is turned on
             if (in_array('failed', $paramsFilter) && $root_suite->childrenData['totalFailures'] > 0) {
                 continue;
@@ -436,6 +465,7 @@ class ReportController extends BaseController
             }
             unset($suites[$key]);
         }
+
         return $suites;
     }
 
@@ -448,7 +478,7 @@ class ReportController extends BaseController
     {
         foreach ($suites as $key => &$suiteChild) {
             if (isset($suiteChild->suites) && is_array($suiteChild->suites)) {
-                $suiteChild->suites = $this->filterTree($suiteChild->suites, array($this, 'filterSuite'));
+                $suiteChild->suites = $this->filterTree($suiteChild->suites, [$this, 'filterSuite']);
             }
             if (empty($suiteChild->suites)
                 && empty($suiteChild->tests)
@@ -456,33 +486,32 @@ class ReportController extends BaseController
                 unset($suites[$key]);
             }
         }
-        return array_filter($suites, array($this, 'filterSuite'));
+
+        return array_filter($suites, [$this, 'filterSuite']);
     }
 
     /**
      * Filter suites
      *
-     * @param \stdClass $suite
      * @return bool
      */
-    private function filterSuite(\stdClass $suite): bool
+    private function filterSuite(stdClass $suite): bool
     {
         $status = true;
         // If we need to search fulltext
-        if ($status && !empty($this->paramsReport['search'])) {
+        if (!empty($this->paramsReport['search'])) {
             $status = $this->filterSuiteSearch($suite, $this->paramsReport['search']);
         }
+
         return $status;
     }
 
     /**
      * Filter each suite with text search in tests
      *
-     * @param \stdClass $suite
-     * @param string $text
      * @return bool
      */
-    private function filterSuiteSearch(\stdClass $suite, string $text): bool
+    private function filterSuiteSearch(stdClass $suite, string $text): bool
     {
         // Title
         if (stripos($suite->title, $text) !== false) {
@@ -496,17 +525,15 @@ class ReportController extends BaseController
                 }
             }
         }
+
         return false;
     }
 
     /**
      * Method to render the whole suites tree
-     * @param $suites
-     * @param $tests_data
-     * @param null $parent_id
-     * @return array
      */
-    private function buildTree($suites, $tests_data, $parent_id = null) {
+    private function buildTree(Collection $suites, array $tests_data, ?int $parent_id = null): array
+    {
         $branch = [];
         foreach ($suites as &$suite) {
             //add tests in suite
@@ -522,17 +549,16 @@ class ReportController extends BaseController
                 unset($suite);
             }
         }
+
         return $branch;
     }
 
     /**
      * Loop through the whole suites tree to count all the tests children by state
-     *
-     * @param $suites
-     * @return array
      */
-    private function getRootSuitesAggregatedData($suites) {
-        foreach($suites as $root_suite) {
+    private function getRootSuitesAggregatedData(array $suites): array
+    {
+        foreach ($suites as $root_suite) {
             $this->suiteChildrenData = [
                 'totalPasses' => 0,
                 'totalFailures' => 0,
@@ -542,21 +568,21 @@ class ReportController extends BaseController
             $this->loopThroughSuiteData($root_suite);
             $root_suite->childrenData = $this->suiteChildrenData;
         }
+
         return $suites;
     }
 
     /**
      * Recursive function to map all the tests
-     *
-     * @param $suite
      */
-    private function loopThroughSuiteData($suite) {
+    private function loopThroughSuiteData(stdClass $suite)
+    {
         $this->suiteChildrenData['totalPasses'] += $suite->totalPasses;
         $this->suiteChildrenData['totalFailures'] += $suite->totalFailures;
         $this->suiteChildrenData['totalPending'] += $suite->totalPending;
         $this->suiteChildrenData['totalSkipped'] += $suite->totalSkipped;
         if ($suite->hasSuites == 1) {
-            foreach($suite->suites as $child_suite) {
+            foreach ($suite->suites as $child_suite) {
                 $this->loopThroughSuiteData($child_suite);
             }
         }
@@ -564,10 +590,9 @@ class ReportController extends BaseController
 
     /**
      * Get all the suites data from an execution
-     * @param $report_id
-     * @return Collection
      */
-    private function getReportData($report_id) {
+    private function getReportData(int $report_id): Collection
+    {
         return Manager::table('suite')
             ->where('execution_id', '=', $report_id)
             ->orderBy('id')
@@ -576,42 +601,38 @@ class ReportController extends BaseController
 
     /**
      * Get all the tests data from an execution
-     * @param $report_id
-     * @return array
      */
-    private function getTestData($report_id) {
+    private function getTestData(int $report_id): array
+    {
         $tests = Manager::table('test')
             ->join('suite', 'test.suite_id', '=', 'suite.id')
             ->where('suite.execution_id', '=', $report_id)
             ->select('test.*')
             ->get();
         $tests_data = [];
-        foreach($tests as $test) {
+        foreach ($tests as $test) {
             if ($test->state == 'failed') {
                 $test->stack_trace_formatted = $this->formatStackTrace($test->stack_trace);
             }
             $tests_data[$test->suite_id][] = $test;
         }
+
         return $tests_data;
     }
 
     /**
      * Format the stack_trace
-     * @param $stack_trace
-     * @return string|string[]
      */
-    private function formatStackTrace($stack_trace) {
-        return str_replace('    at', "<br />&nbsp;&nbsp;&nbsp;&nbsp;at", htmlentities($stack_trace));
+    private function formatStackTrace(string $stack_trace): string
+    {
+        return str_replace('    at', '<br />&nbsp;&nbsp;&nbsp;&nbsp;at', htmlentities($stack_trace));
     }
 
     /**
      * Loop through data and insert it, recursive function
-     * @param $execution_id
-     * @param $suite
-     * @param null $parent_suite_id
      */
-    private function loopThrough($execution_id, $suite, $parent_suite_id = null) {
-
+    private function loopThrough(int $execution_id, stdClass $suite, ?int $parent_suite_id = null)
+    {
         $data_suite = [
             'execution_id' => $execution_id,
             'uuid' => $suite->uuid,
@@ -619,19 +640,18 @@ class ReportController extends BaseController
             'campaign' => $this->extractNames($suite->file, 'campaign'),
             'file' => $this->extractNames($suite->file, 'file'),
             'duration' => $suite->duration,
-            'hasSkipped' => $suite->hasSkipped ? 1 :0,
-            'hasPending' => $suite->hasPending ? 1 :0,
-            'hasPasses' => $suite->hasPasses ? 1 :0,
-            'hasFailures' => $suite->hasFailures ? 1 :0,
+            'hasSkipped' => $suite->hasSkipped ? 1 : 0,
+            'hasPending' => $suite->hasPending ? 1 : 0,
+            'hasPasses' => $suite->hasPasses ? 1 : 0,
+            'hasFailures' => $suite->hasFailures ? 1 : 0,
             'totalSkipped' => $suite->totalSkipped,
             'totalPending' => $suite->totalPending,
             'totalPasses' => $suite->totalPasses,
             'totalFailures' => $suite->totalFailures,
-            'hasSuites' => $suite->hasSuites ? 1 :0,
-            'hasTests' => $suite->hasTests ? 1 :0,
+            'hasSuites' => $suite->hasSuites ? 1 : 0,
+            'hasTests' => $suite->hasTests ? 1 : 0,
             'parent_id' => $parent_suite_id,
         ];
-
 
         //inserting current suite
         $suite_id = Manager::table('suite')->insertGetId($data_suite);
@@ -639,14 +659,13 @@ class ReportController extends BaseController
         if ($suite_id) {
             //insert tests
             if (count($suite->tests) > 0) {
-                foreach($suite->tests as $test) {
+                foreach ($suite->tests as $test) {
                     $identifier = '';
                     if (isset($test->context)) {
                         try {
                             $identifier_data = json_decode($test->context);
                             $identifier = $identifier_data->value;
-                        } catch(Exception $e) {
-
+                        } catch (Exception $e) {
                         }
                     }
                     $data_test = [
@@ -665,7 +684,7 @@ class ReportController extends BaseController
             }
             //insert children suites
             if (count($suite->suites) > 0) {
-                foreach($suite->suites as $s) {
+                foreach ($suite->suites as $s) {
                     $this->loopThrough($execution_id, $s, $suite_id);
                 }
             }
@@ -673,12 +692,10 @@ class ReportController extends BaseController
     }
 
     /**
-     *
-     *
-     * @param $id
      * @return array|bool
      */
-    public function compareReportData($id) {
+    public function compareReportData(int $id)
+    {
         //get version and start_date of the given report
         $tempData = Manager::table('execution')
             ->select(['version', 'start_date', 'platform', 'campaign'])
@@ -705,10 +722,10 @@ class ReportController extends BaseController
                 't2.state as current_test_state',
             ])
             ->join('suite as s1', 's1.id', '=', 't1.suite_id')
-            ->crossJoin('test as t2', function($join) {
+            ->crossJoin('test as t2', function ($join) {
                 $join->on('t2.identifier', '=', 't1.identifier');
                 $join->whereNotNull('t2.identifier');
-                })
+            })
             ->join('suite as s2', 's2.id', '=', 't2.suite_id')
             ->where('s1.execution_id', '=', $precedentReport->id)
             ->where('s2.execution_id', '=', $id)
@@ -720,55 +737,57 @@ class ReportController extends BaseController
             })
             ->get();
 
-
         if (count($data) > 0) {
             $results = [
                 'fixed' => 0,
                 'broken' => 0,
                 'equal' => 0,
             ];
-            foreach($data as $line) {
+            foreach ($data as $line) {
                 if ($line->old_test_state == 'failed' && $line->current_test_state == 'failed') {
-                    $results['equal'] += 1;
+                    ++$results['equal'];
                 }
                 if ($line->old_test_state == 'passed' && $line->current_test_state == 'failed') {
-                    $results['broken'] += 1;
+                    ++$results['broken'];
                 }
                 if ($line->old_test_state == 'failed' && $line->current_test_state == 'passed') {
-                    $results['fixed'] += 1;
+                    ++$results['fixed'];
                 }
             }
         } else {
             return false;
         }
+
         return $results;
     }
 
     /**
      * Sanitize text by removing weird characters
-     * @param $text
-     * @return string
      */
-    private function sanitize($text) {
+    private function sanitize(string $text): string
+    {
         $StrArr = str_split($text);
         $NewStr = '';
         foreach ($StrArr as $Char) {
             $CharNo = ord($Char);
-            if ($CharNo == 163) { $NewStr .= $Char; continue; }
+            if ($CharNo == 163) {
+                $NewStr .= $Char;
+                continue;
+            }
             if ($CharNo > 31 && $CharNo < 127) {
                 $NewStr .= $Char;
             }
         }
+
         return $NewStr;
     }
 
     /**
      * Extract campaign name and file name from json data
-     * @param $filename
-     * @param $type
+     *
      * @return mixed|null
      */
-    private function extractNames($filename, $type)
+    private function extractNames(string $filename, string $type)
     {
         if (strlen($filename) == 0) {
             return null;
@@ -794,15 +813,14 @@ class ReportController extends BaseController
                 return isset($matches[3]) ? $matches[3] : null;
             }
         }
+
         return null;
     }
 
     /**
      * Get the test state
-     * @param $test
-     * @return string
      */
-    private function getTestState($test)
+    private function getTestState(stdClass $test): string
     {
         if (isset($test->state)) {
             return $test->state;
@@ -813,21 +831,21 @@ class ReportController extends BaseController
         if ($test->pending == true) {
             return 'pending';
         }
+
         return 'unknown';
     }
 
     /**
      * Format data from GCP (list of builds)
-     * @param $gcp_url
-     * @return array
      */
-    private function getDataFromGCP($gcp_url) {
+    private function getDataFromGCP(string $gcp_url): array
+    {
         $GCP_files_list = [];
         $GCPCallResult = file_get_contents($gcp_url);
         if ($GCPCallResult) {
             $xml = new \SimpleXMLElement($GCPCallResult);
             foreach ($xml->Contents as $content) {
-                $build_name = (string)$content->Key;
+                $build_name = (string) $content->Key;
                 if (strpos($build_name, '.zip') !== false) {
                     //get version and date
                     preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-([A-z0-9\.]*)-prestashop_(.*)\.zip/', $build_name, $matches_filename);
@@ -839,6 +857,7 @@ class ReportController extends BaseController
                 }
             }
         }
+
         return $GCP_files_list;
     }
 }

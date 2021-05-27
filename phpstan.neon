@@ -1,0 +1,9 @@
+parameters:
+  level: 5
+  bootstrapFiles:
+    - bootstrap.php
+  paths:
+    - src
+    - public
+  ignoreErrors:
+    - '~^Call to an undefined static method Illuminate\\Database\\Capsule\\Manager::.*$~'

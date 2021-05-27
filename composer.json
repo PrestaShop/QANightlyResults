@@ -12,5 +12,9 @@
         "slim/psr7": "^0.6.0",
         "php-di/slim-bridge": "^3.0",
         "illuminate/database": "^6.8"
+    },
+    "require-dev": {
+        "prestashop/php-dev-tools": "^4.0",
+        "phpstan/phpstan": "^0.12.88"
     }
 }
