@@ -25,6 +25,7 @@ function loadRoutes(App $app): void
         $group->delete('/{report:[0-9]+}', [ReportController::class, 'delete']);
     });
     $app->get('/hook/add', [ReportController::class, 'insert']);
+    $app->get('/hook/reports/import', [ReportController::class, 'import']);
 
     //graph routes
     $app->group('/graph', function (RouteCollectorProxy $group) {

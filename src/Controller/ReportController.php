@@ -303,7 +303,7 @@ class ReportController extends BaseController
     }
 
     /**
-     * Insert a new report data in the database
+     * Import a new report data in the database
      *
      * @param Request $request
      * @param Response $response
@@ -311,60 +311,23 @@ class ReportController extends BaseController
      * @return Response
      *
      * @throws HttpBadRequestException
+
      * @throws HttpForbiddenException
      */
-    public function insert(Request $request, Response $response): Response
+    public function import(Request $request, Response $response): Response
     {
-        $get_query_params = $request->getQueryParams();
-        $force = false;
+        $getQueryParams = $request->getQueryParams();
+        $this->checkAuth($getQueryParams, $request);
+        $force = isset($getQueryParams['force']) && $getQueryParams['force'] == 'true';
+        $platform = $this->getPlatform($getQueryParams);
+        $campaign = $this->getCampaign($getQueryParams);
+        $filename = $getQueryParams['filename'];
 
-        //check arguments in GET query
-        if (!isset($get_query_params['token']) || !isset($get_query_params['filename'])) {
-            throw new HttpBadRequestException($request, 'no enough parameters');
-        }
-        //check token
-        if ($get_query_params['token'] != getenv('QANB_TOKEN')) {
-            throw new HttpBadRequestException($request, 'invalid token');
-        }
-        //force parameter
-        if (isset($get_query_params['force']) && $get_query_params['force'] == 'true') {
-            $force = true;
-        }
+        $version = $this->getNumberVersion($filename, $request);
+        $fileContents = $this->getContents($filename, $request);
 
-        //get platform and campaign info
-        $platform = self::FILTER_PLATFORMS[0];
-        $campaign = self::FILTER_CAMPAIGNS[0];
-        $queryPlatform = $get_query_params['platform'] ?? ($get_query_params['browser'] ?? null); // retro-compatibility
-        if (null !== $queryPlatform && in_array($queryPlatform, self::FILTER_PLATFORMS)) {
-            $platform = $queryPlatform;
-        }
-        if (isset($get_query_params['campaign']) && in_array($get_query_params['campaign'], self::FILTER_CAMPAIGNS)) {
-            $campaign = $get_query_params['campaign'];
-        }
-
-        $filename = $get_query_params['filename'];
-
-        //retrieving version number
-        preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/', $filename, $matches);
-        if (!isset($matches[1])) {
-            throw new HttpBadRequestException($request, 'could not retrieve version from filename');
-        }
-        $version = $matches[1];
-        if (strlen($matches[1]) < 1) {
-            throw new HttpBadRequestException($request, sprintf('version found not correct (%s) from filename %s', $version, $filename));
-        }
-        $url = QANB_GCPURL . 'reports/' . $filename;
-        $contents = file_get_contents($url);
-        if (!$contents) {
-            throw new HttpBadRequestException($request, 'unable to retrieve content from GCP URL');
-        }
-        //try to decode json
-        $file_contents = json_decode($contents);
-        if ($file_contents == null) {
-            throw new HttpBadRequestException($request, 'unable to decode JSON data');
-        }
         //starting real stuff
-        $stats = $file_contents->stats;
+        $stats = $fileContents->stats;
         $execution_data = [
             'ref' => date('YmdHis'),
             'filename' => $filename,
@@ -396,7 +359,86 @@ class ReportController extends BaseController
         //insert execution
         $execution_id = Manager::table('execution')->insertGetId($execution_data);
 
-        $this->loopThrough($execution_id, $file_contents->suites);
+        $this->loopThrough($execution_id, $fileContents->suites);
+
+        $update_data = ['insertion_end_date' => Manager::Raw('NOW()')];
+
+        //calculate comparison with last execution
+        $comparison = $this->compareReportData($execution_id);
+        if ($comparison) {
+            $update_data['broken_since_last'] = $comparison['broken'];
+            $update_data['fixed_since_last'] = $comparison['fixed'];
+            $update_data['equal_since_last'] = $comparison['equal'];
+        }
+
+        Manager::table('execution')
+            ->where('id', '=', $execution_id)
+            ->update($update_data);
+
+        $response->getBody()->write(json_encode([
+            'status' => 'ok',
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Insert a new report data in the database
+     *
+     * @param Request $request
+     * @param Response $response
+     *
+     * @return Response
+     *
+     * @throws HttpBadRequestException
+     * @throws HttpForbiddenException
+     */
+    public function insert(Request $request, Response $response): Response
+    {
+        $getQueryParams = $request->getQueryParams();
+        $this->checkAuth($getQueryParams, $request);
+        $force = isset($getQueryParams['force']) && $getQueryParams['force'] == 'true';
+        $platform = $this->getPlatform($getQueryParams);
+        $campaign = $this->getCampaign($getQueryParams);
+        $filename = $getQueryParams['filename'];
+
+        $version = $this->getNumberVersion($filename, $request);
+        $fileContents = $this->getContents($filename, $request);
+
+        //starting real stuff
+        $stats = $fileContents->stats;
+        $execution_data = [
+            'ref' => date('YmdHis'),
+            'filename' => $filename,
+            'platform' => $platform,
+            'campaign' => $campaign,
+            'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
+            'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
+            'duration' => $stats->duration,
+            'version' => $version,
+            'skipped' => $stats->skipped,
+            'pending' => $stats->pending,
+            'passes' => $stats->passes,
+            'failures' => $stats->failures,
+            'suites' => $stats->suites,
+            'tests' => $stats->tests,
+        ];
+
+        //let's check if there's not a similar entry...
+        $entry_date = date('Y-m-d', strtotime($stats->start));
+        $similar = Manager::table('execution')
+            ->where('version', '=', $version)
+            ->where('platform', '=', $platform)
+            ->where('campaign', '=', $campaign)
+            ->whereDate('start_date', '=', $entry_date)
+            ->first();
+        if ($similar && !$force) {
+            throw new HttpForbiddenException($request, sprintf('A similar entry was found (criteria: version %s, platform %s, campaign %s, date %s).', $version, $platform, $campaign, $entry_date));
+        }
+        //insert execution
+        $execution_id = Manager::table('execution')->insertGetId($execution_data);
+
+        $this->loopThrough($execution_id, $fileContents->suites);
 
         $update_data = ['insertion_end_date' => Manager::Raw('NOW()')];
 
@@ -859,5 +901,71 @@ class ReportController extends BaseController
         }
 
         return $GCP_files_list;
+    }
+
+    private function checkAuth(array $queryParams, $request): void
+    {
+        //check arguments in GET query
+        if (!isset($queryParams['token']) || !isset($queryParams['filename'])) {
+            throw new HttpBadRequestException($request, 'no enough parameters');
+        }
+        //check token
+        if ($queryParams['token'] != getenv('QANB_TOKEN')) {
+            throw new HttpBadRequestException($request, 'invalid token');
+        }
+    }
+
+    private function getPlatform(array $queryParams): string
+    {
+        $platform = self::FILTER_PLATFORMS[0];
+        $queryPlatform = $queryParams['platform'] ?? ($queryParams['browser'] ?? null); // retro-compatibility
+        if (null !== $queryPlatform && in_array($queryPlatform, self::FILTER_PLATFORMS)) {
+            $platform = $queryPlatform;
+        }
+
+        return $platform;
+    }
+
+    private function getCampaign(array $queryParams): string
+    {
+        $campaign = self::FILTER_CAMPAIGNS[0];
+        if (isset($queryParams['campaign']) && in_array($queryParams['campaign'], self::FILTER_CAMPAIGNS)) {
+            $campaign = $queryParams['campaign'];
+        }
+
+        return $campaign;
+    }
+
+    private function getNumberVersion(string $filename, Request $request): string
+    {
+        //retrieving version number
+        preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/', $filename, $matches);
+        if (!isset($matches[1])) {
+            throw new HttpBadRequestException($request, 'could not retrieve version from filename');
+        }
+
+        $version = $matches[1];
+        if (strlen($version) < 1) {
+            throw new HttpBadRequestException($request, sprintf('version found not correct (%s) from filename %s', $version, $filename));
+        }
+
+        return $version;
+    }
+
+    private function getContents(string $filename, Request $request): stdClass
+    {
+        $url = QANB_GCPURL . 'reports/' . $filename;
+        $contents = file_get_contents($url);
+        if (!$contents) {
+            throw new HttpBadRequestException($request, 'unable to retrieve content from GCP URL');
+        }
+
+        //try to decode json
+        $fileContents = json_decode($contents);
+        if ($fileContents == null) {
+            throw new HttpBadRequestException($request, 'unable to decode JSON data');
+        }
+
+        return $fileContents;
     }
 }
