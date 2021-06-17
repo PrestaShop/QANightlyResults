@@ -205,16 +205,28 @@ class ReportController extends BaseController
         ];
 
         $suites = $this->getReportData($report_id);
-        $tests_data = $this->getTestData($report_id);
-        //find the first suite ID
+        $testsData = $this->getTestData($report_id);
+
+        // Find if there is main suite id
+        $hasOnlyOneMainSuite = false;
         foreach ($suites as $suite) {
-            if ($suite->parent_id == null) {
-                $this->main_suite_id = $suite->id;
-                break;
+            if ($suite->parent_id === null) {
+                if ($hasOnlyOneMainSuite === false) {
+                    $hasOnlyOneMainSuite = true;
+                    $this->mainSuiteId = $suite->id;
+                } else {
+                    // There is another suite with null, so not only one is used
+                    // Used for legacy purpose
+                    $hasOnlyOneMainSuite = false;
+                    $this->mainSuiteId = null;
+                    break;
+                }
             }
         }
+
+
         //build the recursive tree
-        $suites = $this->buildTree($suites, $tests_data, $this->main_suite_id);
+        $suites = $this->buildTree($suites, $testsData, $this->mainSuiteId);
         $suites = $this->getRootSuitesAggregatedData($suites);
         $suites = $this->filterSuitesByRootData($suites);
         $suites = $this->filterTree($suites);
@@ -273,12 +285,12 @@ class ReportController extends BaseController
         $route = $routeContext->getRoute();
 
         $report_id = (int) $route->getArgument('report');
-        $suite_id = (int) $route->getArgument('suite');
+        $suiteId = (int) $route->getArgument('suite');
 
         //get suite data
         $root_suite = Manager::table('suite')
             ->where('execution_id', '=', $report_id)
-            ->where('id', '=', $suite_id)
+            ->where('id', '=', $suiteId)
             ->first();
 
         if (!$root_suite) {
@@ -287,14 +299,14 @@ class ReportController extends BaseController
 
         //get tests for this root suite
         $tests = Manager::table('test')
-            ->where('suite_id', '=', $suite_id)
+            ->where('suite_id', '=', $suiteId)
             ->get();
         $root_suite->tests = $tests;
 
         $children_suites = $this->getReportData($report_id);
-        $tests_data = $this->getTestData($report_id);
+        $testsData = $this->getTestData($report_id);
         //build the recursive tree
-        $suites = $this->buildTree($children_suites, $tests_data, $suite_id);
+        $suites = $this->buildTree($children_suites, $testsData, $suiteId);
         $root_suite->suites = $suites;
         //put suites data into the final object
         $response->getBody()->write(json_encode($root_suite));
@@ -357,14 +369,16 @@ class ReportController extends BaseController
             throw new HttpForbiddenException($request, sprintf('A similar entry was found (criteria: version %s, platform %s, campaign %s, date %s).', $version, $platform, $campaign, $entry_date));
         }
         //insert execution
-        $execution_id = Manager::table('execution')->insertGetId($execution_data);
+        $executionId = Manager::table('execution')->insertGetId($execution_data);
 
-        $this->loopThrough($execution_id, $fileContents->suites);
+        foreach ($fileContents->results as $suite) {
+            $this->loopThroughSuite($executionId, $suite);
+        }
 
         $update_data = ['insertion_end_date' => Manager::Raw('NOW()')];
 
         //calculate comparison with last execution
-        $comparison = $this->compareReportData($execution_id);
+        $comparison = $this->compareReportData($executionId);
         if ($comparison) {
             $update_data['broken_since_last'] = $comparison['broken'];
             $update_data['fixed_since_last'] = $comparison['fixed'];
@@ -372,7 +386,7 @@ class ReportController extends BaseController
         }
 
         Manager::table('execution')
-            ->where('id', '=', $execution_id)
+            ->where('id', '=', $executionId)
             ->update($update_data);
 
         $response->getBody()->write(json_encode([
@@ -436,14 +450,14 @@ class ReportController extends BaseController
             throw new HttpForbiddenException($request, sprintf('A similar entry was found (criteria: version %s, platform %s, campaign %s, date %s).', $version, $platform, $campaign, $entry_date));
         }
         //insert execution
-        $execution_id = Manager::table('execution')->insertGetId($execution_data);
+        $executionId = Manager::table('execution')->insertGetId($execution_data);
 
-        $this->loopThrough($execution_id, $fileContents->suites);
+        $this->loopThrough($executionId, $fileContents->suites);
 
         $update_data = ['insertion_end_date' => Manager::Raw('NOW()')];
 
         //calculate comparison with last execution
-        $comparison = $this->compareReportData($execution_id);
+        $comparison = $this->compareReportData($executionId);
         if ($comparison) {
             $update_data['broken_since_last'] = $comparison['broken'];
             $update_data['fixed_since_last'] = $comparison['fixed'];
@@ -451,7 +465,7 @@ class ReportController extends BaseController
         }
 
         Manager::table('execution')
-            ->where('id', '=', $execution_id)
+            ->where('id', '=', $executionId)
             ->update($update_data);
 
         $response->getBody()->write(json_encode([
@@ -574,19 +588,22 @@ class ReportController extends BaseController
     /**
      * Method to render the whole suites tree
      */
-    private function buildTree(Collection $suites, array $tests_data, ?int $parent_id = null): array
+    private function buildTree(Collection $suites, array $testsData, ?int $parentId = null): array
     {
         $branch = [];
         foreach ($suites as &$suite) {
-            //add tests in suite
-            if ($suite->hasTests == 1 && isset($tests_data[$suite->id])) {
-                $suite->tests = $tests_data[$suite->id];
+            // add tests in suite
+            if ($suite->hasTests == 1 && isset($testsData[$suite->id])) {
+                $suite->tests = $testsData[$suite->id];
             }
-            if ($suite->parent_id == $parent_id) {
-                $children = $this->buildTree($suites, $tests_data, $suite->id);
+
+            if ($suite->parent_id == $parentId) {
+                $children = $this->buildTree($suites, $testsData, $suite->id);
+
                 if ($children) {
                     $suite->suites = $children;
                 }
+
                 $branch[$suite->id] = $suite;
                 unset($suite);
             }
@@ -651,15 +668,15 @@ class ReportController extends BaseController
             ->where('suite.execution_id', '=', $report_id)
             ->select('test.*')
             ->get();
-        $tests_data = [];
+        $testsData = [];
         foreach ($tests as $test) {
             if ($test->state == 'failed') {
                 $test->stack_trace_formatted = $this->formatStackTrace($test->stack_trace);
             }
-            $tests_data[$test->suite_id][] = $test;
+            $testsData[$test->suite_id][] = $test;
         }
 
-        return $tests_data;
+        return $testsData;
     }
 
     /**
@@ -673,10 +690,10 @@ class ReportController extends BaseController
     /**
      * Loop through data and insert it, recursive function
      */
-    private function loopThrough(int $execution_id, stdClass $suite, ?int $parent_suite_id = null)
+    private function loopThrough(int $executionId, stdClass $suite, ?int $parentSuiteId = null)
     {
-        $data_suite = [
-            'execution_id' => $execution_id,
+        $dataSuite = [
+            'execution_id' => $executionId,
             'uuid' => $suite->uuid,
             'title' => $suite->title,
             'campaign' => $this->extractNames($suite->file, 'campaign'),
@@ -692,13 +709,13 @@ class ReportController extends BaseController
             'totalFailures' => $suite->totalFailures,
             'hasSuites' => $suite->hasSuites ? 1 : 0,
             'hasTests' => $suite->hasTests ? 1 : 0,
-            'parent_id' => $parent_suite_id,
+            'parent_id' => $parentSuiteId,
         ];
 
         //inserting current suite
-        $suite_id = Manager::table('suite')->insertGetId($data_suite);
+        $suiteId = Manager::table('suite')->insertGetId($dataSuite);
 
-        if ($suite_id) {
+        if ($suiteId) {
             //insert tests
             if (count($suite->tests) > 0) {
                 foreach ($suite->tests as $test) {
@@ -710,8 +727,8 @@ class ReportController extends BaseController
                         } catch (Exception $e) {
                         }
                     }
-                    $data_test = [
-                        'suite_id' => $suite_id,
+                    $dataTest = [
+                        'suite_id' => $suiteId,
                         'uuid' => $test->uuid,
                         'identifier' => $identifier,
                         'title' => $test->title,
@@ -721,15 +738,82 @@ class ReportController extends BaseController
                         'stack_trace' => isset($test->err->estack) ? $this->sanitize($test->err->estack) : null,
                         'diff' => isset($test->err->diff) ? $this->sanitize($test->err->diff) : null,
                     ];
-                    Manager::table('test')->insertGetId($data_test);
+                    Manager::table('test')->insertGetId($dataTest);
                 }
             }
             //insert children suites
             if (count($suite->suites) > 0) {
                 foreach ($suite->suites as $s) {
-                    $this->loopThrough($execution_id, $s, $suite_id);
+                    $this->loopThrough($executionId, $s, $suiteId);
                 }
             }
+        }
+    }
+
+    /**
+     * Loop through data and insert it, recursive function
+     */
+    private function loopThroughSuite(int $executionId, stdClass $suite, ?int $parentSuiteId = null)
+    {
+        if (!empty($suite->root)) {
+            $suiteId = null;
+        } else {
+            $dataSuite = [
+                'execution_id' => $executionId,
+                'uuid' => $suite->uuid,
+                'title' => $suite->title,
+                'campaign' => $this->extractNames($suite->file, 'campaign'),
+                'file' => $this->extractNames($suite->file, 'file'),
+                'duration' => $suite->duration,
+                'hasSkipped' => !empty($suite->skipped),
+                'hasPending' => !empty($suite->pending),
+                'hasPasses' => !empty($suite->passes),
+                'hasFailures' => !empty($suite->failures),
+                'totalSkipped' => count($suite->skipped),
+                'totalPending' => count($suite->pending),
+                'totalPasses' => count($suite->passes),
+                'totalFailures' => count($suite->failures),
+                'hasSuites' => !empty($suite->suites),
+                'hasTests' => !empty($suite->tests),
+                'parent_id' => $parentSuiteId,
+            ];
+
+            //inserting current suite
+            $suiteId = Manager::table('suite')->insertGetId($dataSuite);
+            if (!$suiteId) {
+                return;
+            }
+        }
+
+        //insert tests
+        foreach ($suite->tests as $test) {
+            $identifier = '';
+            if (isset($test->context)) {
+                try {
+                    $identifier_data = json_decode($test->context);
+                    $identifier = $identifier_data->value;
+                } catch (Exception $e) {
+                    // Don't care if it fails
+                }
+            }
+
+            $dataTest = [
+                'suite_id' => $suiteId,
+                'uuid' => $test->uuid,
+                'identifier' => $identifier,
+                'title' => $test->title,
+                'state' => $this->getTestState($test),
+                'duration' => $test->duration,
+                'error_message' => isset($test->err->message) ? $this->sanitize($test->err->message) : null,
+                'stack_trace' => isset($test->err->estack) ? $this->sanitize($test->err->estack) : null,
+                'diff' => isset($test->err->diff) ? $this->sanitize($test->err->diff) : null,
+            ];
+            Manager::table('test')->insertGetId($dataTest);
+        }
+
+        //insert children suites
+        foreach ($suite->suites as $s) {
+            $this->loopThroughSuite($executionId, $s, $suiteId);
         }
     }
 
