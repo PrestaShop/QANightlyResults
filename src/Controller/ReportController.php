@@ -26,7 +26,7 @@ class ReportController extends BaseController
 
     private const FILTER_CAMPAIGNS = ['functional', 'sanity', 'e2e', 'regression', 'autoupgrade'];
 
-    private $main_suite_id = null;
+    private $mainSuiteId = null;
     private $suiteChildrenData = [
         'totalPasses' => 0,
         'totalFailures' => 0,
