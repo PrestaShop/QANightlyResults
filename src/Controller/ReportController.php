@@ -224,7 +224,6 @@ class ReportController extends BaseController
             }
         }
 
-
         //build the recursive tree
         $suites = $this->buildTree($suites, $testsData, $this->mainSuiteId);
         $suites = $this->getRootSuitesAggregatedData($suites);
