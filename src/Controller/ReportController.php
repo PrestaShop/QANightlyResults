@@ -26,7 +26,7 @@ class ReportController extends BaseController
 
     private const FILTER_CAMPAIGNS = ['functional', 'sanity', 'e2e', 'regression', 'autoupgrade'];
 
-    private $main_suite_id = null;
+    private $mainSuiteId = null;
     private $suiteChildrenData = [
         'totalPasses' => 0,
         'totalFailures' => 0,
@@ -205,16 +205,27 @@ class ReportController extends BaseController
         ];
 
         $suites = $this->getReportData($report_id);
-        $tests_data = $this->getTestData($report_id);
-        //find the first suite ID
+        $testsData = $this->getTestData($report_id);
+
+        // Find if there is main suite id
+        $hasOnlyOneMainSuite = false;
         foreach ($suites as $suite) {
-            if ($suite->parent_id == null) {
-                $this->main_suite_id = $suite->id;
-                break;
+            if ($suite->parent_id === null) {
+                if ($hasOnlyOneMainSuite === false) {
+                    $hasOnlyOneMainSuite = true;
+                    $this->mainSuiteId = $suite->id;
+                } else {
+                    // There is another suite with null, so not only one is used
+                    // Used for legacy purpose
+                    $hasOnlyOneMainSuite = false;
+                    $this->mainSuiteId = null;
+                    break;
+                }
             }
         }
+
         //build the recursive tree
-        $suites = $this->buildTree($suites, $tests_data, $this->main_suite_id);
+        $suites = $this->buildTree($suites, $testsData, $this->mainSuiteId);
         $suites = $this->getRootSuitesAggregatedData($suites);
         $suites = $this->filterSuitesByRootData($suites);
         $suites = $this->filterTree($suites);
@@ -273,12 +284,12 @@ class ReportController extends BaseController
         $route = $routeContext->getRoute();
 
         $report_id = (int) $route->getArgument('report');
-        $suite_id = (int) $route->getArgument('suite');
+        $suiteId = (int) $route->getArgument('suite');
 
         //get suite data
         $root_suite = Manager::table('suite')
             ->where('execution_id', '=', $report_id)
-            ->where('id', '=', $suite_id)
+            ->where('id', '=', $suiteId)
             ->first();
 
         if (!$root_suite) {
@@ -287,14 +298,14 @@ class ReportController extends BaseController
 
         //get tests for this root suite
         $tests = Manager::table('test')
-            ->where('suite_id', '=', $suite_id)
+            ->where('suite_id', '=', $suiteId)
             ->get();
         $root_suite->tests = $tests;
 
         $children_suites = $this->getReportData($report_id);
-        $tests_data = $this->getTestData($report_id);
+        $testsData = $this->getTestData($report_id);
         //build the recursive tree
-        $suites = $this->buildTree($children_suites, $tests_data, $suite_id);
+        $suites = $this->buildTree($children_suites, $testsData, $suiteId);
         $root_suite->suites = $suites;
         //put suites data into the final object
         $response->getBody()->write(json_encode($root_suite));
@@ -303,7 +314,7 @@ class ReportController extends BaseController
     }
 
     /**
-     * Insert a new report data in the database
+     * Import a new report data in the database
      *
      * @param Request $request
      * @param Response $response
@@ -311,60 +322,23 @@ class ReportController extends BaseController
      * @return Response
      *
      * @throws HttpBadRequestException
+
      * @throws HttpForbiddenException
      */
-    public function insert(Request $request, Response $response): Response
+    public function import(Request $request, Response $response): Response
     {
-        $get_query_params = $request->getQueryParams();
-        $force = false;
+        $getQueryParams = $request->getQueryParams();
+        $this->checkAuth($getQueryParams, $request);
+        $force = isset($getQueryParams['force']) && $getQueryParams['force'] == 'true';
+        $platform = $this->getPlatform($getQueryParams);
+        $campaign = $this->getCampaign($getQueryParams);
+        $filename = $getQueryParams['filename'];
 
-        //check arguments in GET query
-        if (!isset($get_query_params['token']) || !isset($get_query_params['filename'])) {
-            throw new HttpBadRequestException($request, 'no enough parameters');
-        }
-        //check token
-        if ($get_query_params['token'] != getenv('QANB_TOKEN')) {
-            throw new HttpBadRequestException($request, 'invalid token');
-        }
-        //force parameter
-        if (isset($get_query_params['force']) && $get_query_params['force'] == 'true') {
-            $force = true;
-        }
+        $version = $this->getNumberVersion($filename, $request);
+        $fileContents = $this->getContents($filename, $request);
 
-        //get platform and campaign info
-        $platform = self::FILTER_PLATFORMS[0];
-        $campaign = self::FILTER_CAMPAIGNS[0];
-        $queryPlatform = $get_query_params['platform'] ?? ($get_query_params['browser'] ?? null); // retro-compatibility
-        if (null !== $queryPlatform && in_array($queryPlatform, self::FILTER_PLATFORMS)) {
-            $platform = $queryPlatform;
-        }
-        if (isset($get_query_params['campaign']) && in_array($get_query_params['campaign'], self::FILTER_CAMPAIGNS)) {
-            $campaign = $get_query_params['campaign'];
-        }
-
-        $filename = $get_query_params['filename'];
-
-        //retrieving version number
-        preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/', $filename, $matches);
-        if (!isset($matches[1])) {
-            throw new HttpBadRequestException($request, 'could not retrieve version from filename');
-        }
-        $version = $matches[1];
-        if (strlen($matches[1]) < 1) {
-            throw new HttpBadRequestException($request, sprintf('version found not correct (%s) from filename %s', $version, $filename));
-        }
-        $url = QANB_GCPURL . 'reports/' . $filename;
-        $contents = file_get_contents($url);
-        if (!$contents) {
-            throw new HttpBadRequestException($request, 'unable to retrieve content from GCP URL');
-        }
-        //try to decode json
-        $file_contents = json_decode($contents);
-        if ($file_contents == null) {
-            throw new HttpBadRequestException($request, 'unable to decode JSON data');
-        }
         //starting real stuff
-        $stats = $file_contents->stats;
+        $stats = $fileContents->stats;
         $execution_data = [
             'ref' => date('YmdHis'),
             'filename' => $filename,
@@ -394,14 +368,16 @@ class ReportController extends BaseController
             throw new HttpForbiddenException($request, sprintf('A similar entry was found (criteria: version %s, platform %s, campaign %s, date %s).', $version, $platform, $campaign, $entry_date));
         }
         //insert execution
-        $execution_id = Manager::table('execution')->insertGetId($execution_data);
+        $executionId = Manager::table('execution')->insertGetId($execution_data);
 
-        $this->loopThrough($execution_id, $file_contents->suites);
+        foreach ($fileContents->results as $suite) {
+            $this->loopThroughSuite($executionId, $suite);
+        }
 
         $update_data = ['insertion_end_date' => Manager::Raw('NOW()')];
 
         //calculate comparison with last execution
-        $comparison = $this->compareReportData($execution_id);
+        $comparison = $this->compareReportData($executionId);
         if ($comparison) {
             $update_data['broken_since_last'] = $comparison['broken'];
             $update_data['fixed_since_last'] = $comparison['fixed'];
@@ -409,7 +385,86 @@ class ReportController extends BaseController
         }
 
         Manager::table('execution')
-            ->where('id', '=', $execution_id)
+            ->where('id', '=', $executionId)
+            ->update($update_data);
+
+        $response->getBody()->write(json_encode([
+            'status' => 'ok',
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
+    }
+
+    /**
+     * Insert a new report data in the database
+     *
+     * @param Request $request
+     * @param Response $response
+     *
+     * @return Response
+     *
+     * @throws HttpBadRequestException
+     * @throws HttpForbiddenException
+     */
+    public function insert(Request $request, Response $response): Response
+    {
+        $getQueryParams = $request->getQueryParams();
+        $this->checkAuth($getQueryParams, $request);
+        $force = isset($getQueryParams['force']) && $getQueryParams['force'] == 'true';
+        $platform = $this->getPlatform($getQueryParams);
+        $campaign = $this->getCampaign($getQueryParams);
+        $filename = $getQueryParams['filename'];
+
+        $version = $this->getNumberVersion($filename, $request);
+        $fileContents = $this->getContents($filename, $request);
+
+        //starting real stuff
+        $stats = $fileContents->stats;
+        $execution_data = [
+            'ref' => date('YmdHis'),
+            'filename' => $filename,
+            'platform' => $platform,
+            'campaign' => $campaign,
+            'start_date' => date('Y-m-d H:i:s', strtotime($stats->start)),
+            'end_date' => date('Y-m-d H:i:s', strtotime($stats->end)),
+            'duration' => $stats->duration,
+            'version' => $version,
+            'skipped' => $stats->skipped,
+            'pending' => $stats->pending,
+            'passes' => $stats->passes,
+            'failures' => $stats->failures,
+            'suites' => $stats->suites,
+            'tests' => $stats->tests,
+        ];
+
+        //let's check if there's not a similar entry...
+        $entry_date = date('Y-m-d', strtotime($stats->start));
+        $similar = Manager::table('execution')
+            ->where('version', '=', $version)
+            ->where('platform', '=', $platform)
+            ->where('campaign', '=', $campaign)
+            ->whereDate('start_date', '=', $entry_date)
+            ->first();
+        if ($similar && !$force) {
+            throw new HttpForbiddenException($request, sprintf('A similar entry was found (criteria: version %s, platform %s, campaign %s, date %s).', $version, $platform, $campaign, $entry_date));
+        }
+        //insert execution
+        $executionId = Manager::table('execution')->insertGetId($execution_data);
+
+        $this->loopThrough($executionId, $fileContents->suites);
+
+        $update_data = ['insertion_end_date' => Manager::Raw('NOW()')];
+
+        //calculate comparison with last execution
+        $comparison = $this->compareReportData($executionId);
+        if ($comparison) {
+            $update_data['broken_since_last'] = $comparison['broken'];
+            $update_data['fixed_since_last'] = $comparison['fixed'];
+            $update_data['equal_since_last'] = $comparison['equal'];
+        }
+
+        Manager::table('execution')
+            ->where('id', '=', $executionId)
             ->update($update_data);
 
         $response->getBody()->write(json_encode([
@@ -532,19 +587,22 @@ class ReportController extends BaseController
     /**
      * Method to render the whole suites tree
      */
-    private function buildTree(Collection $suites, array $tests_data, ?int $parent_id = null): array
+    private function buildTree(Collection $suites, array $testsData, ?int $parentId = null): array
     {
         $branch = [];
         foreach ($suites as &$suite) {
-            //add tests in suite
-            if ($suite->hasTests == 1 && isset($tests_data[$suite->id])) {
-                $suite->tests = $tests_data[$suite->id];
+            // add tests in suite
+            if ($suite->hasTests == 1 && isset($testsData[$suite->id])) {
+                $suite->tests = $testsData[$suite->id];
             }
-            if ($suite->parent_id == $parent_id) {
-                $children = $this->buildTree($suites, $tests_data, $suite->id);
+
+            if ($suite->parent_id == $parentId) {
+                $children = $this->buildTree($suites, $testsData, $suite->id);
+
                 if ($children) {
                     $suite->suites = $children;
                 }
+
                 $branch[$suite->id] = $suite;
                 unset($suite);
             }
@@ -609,15 +667,15 @@ class ReportController extends BaseController
             ->where('suite.execution_id', '=', $report_id)
             ->select('test.*')
             ->get();
-        $tests_data = [];
+        $testsData = [];
         foreach ($tests as $test) {
             if ($test->state == 'failed') {
                 $test->stack_trace_formatted = $this->formatStackTrace($test->stack_trace);
             }
-            $tests_data[$test->suite_id][] = $test;
+            $testsData[$test->suite_id][] = $test;
         }
 
-        return $tests_data;
+        return $testsData;
     }
 
     /**
@@ -631,10 +689,10 @@ class ReportController extends BaseController
     /**
      * Loop through data and insert it, recursive function
      */
-    private function loopThrough(int $execution_id, stdClass $suite, ?int $parent_suite_id = null)
+    private function loopThrough(int $executionId, stdClass $suite, ?int $parentSuiteId = null)
     {
-        $data_suite = [
-            'execution_id' => $execution_id,
+        $dataSuite = [
+            'execution_id' => $executionId,
             'uuid' => $suite->uuid,
             'title' => $suite->title,
             'campaign' => $this->extractNames($suite->file, 'campaign'),
@@ -650,13 +708,13 @@ class ReportController extends BaseController
             'totalFailures' => $suite->totalFailures,
             'hasSuites' => $suite->hasSuites ? 1 : 0,
             'hasTests' => $suite->hasTests ? 1 : 0,
-            'parent_id' => $parent_suite_id,
+            'parent_id' => $parentSuiteId,
         ];
 
         //inserting current suite
-        $suite_id = Manager::table('suite')->insertGetId($data_suite);
+        $suiteId = Manager::table('suite')->insertGetId($dataSuite);
 
-        if ($suite_id) {
+        if ($suiteId) {
             //insert tests
             if (count($suite->tests) > 0) {
                 foreach ($suite->tests as $test) {
@@ -668,8 +726,8 @@ class ReportController extends BaseController
                         } catch (Exception $e) {
                         }
                     }
-                    $data_test = [
-                        'suite_id' => $suite_id,
+                    $dataTest = [
+                        'suite_id' => $suiteId,
                         'uuid' => $test->uuid,
                         'identifier' => $identifier,
                         'title' => $test->title,
@@ -679,15 +737,82 @@ class ReportController extends BaseController
                         'stack_trace' => isset($test->err->estack) ? $this->sanitize($test->err->estack) : null,
                         'diff' => isset($test->err->diff) ? $this->sanitize($test->err->diff) : null,
                     ];
-                    Manager::table('test')->insertGetId($data_test);
+                    Manager::table('test')->insertGetId($dataTest);
                 }
             }
             //insert children suites
             if (count($suite->suites) > 0) {
                 foreach ($suite->suites as $s) {
-                    $this->loopThrough($execution_id, $s, $suite_id);
+                    $this->loopThrough($executionId, $s, $suiteId);
                 }
             }
+        }
+    }
+
+    /**
+     * Loop through data and insert it, recursive function
+     */
+    private function loopThroughSuite(int $executionId, stdClass $suite, ?int $parentSuiteId = null)
+    {
+        if (!empty($suite->root)) {
+            $suiteId = null;
+        } else {
+            $dataSuite = [
+                'execution_id' => $executionId,
+                'uuid' => $suite->uuid,
+                'title' => $suite->title,
+                'campaign' => $this->extractNames($suite->file, 'campaign'),
+                'file' => $this->extractNames($suite->file, 'file'),
+                'duration' => $suite->duration,
+                'hasSkipped' => !empty($suite->skipped),
+                'hasPending' => !empty($suite->pending),
+                'hasPasses' => !empty($suite->passes),
+                'hasFailures' => !empty($suite->failures),
+                'totalSkipped' => count($suite->skipped),
+                'totalPending' => count($suite->pending),
+                'totalPasses' => count($suite->passes),
+                'totalFailures' => count($suite->failures),
+                'hasSuites' => !empty($suite->suites),
+                'hasTests' => !empty($suite->tests),
+                'parent_id' => $parentSuiteId,
+            ];
+
+            //inserting current suite
+            $suiteId = Manager::table('suite')->insertGetId($dataSuite);
+            if (!$suiteId) {
+                return;
+            }
+        }
+
+        //insert tests
+        foreach ($suite->tests as $test) {
+            $identifier = '';
+            if (isset($test->context)) {
+                try {
+                    $identifier_data = json_decode($test->context);
+                    $identifier = $identifier_data->value;
+                } catch (Exception $e) {
+                    // Don't care if it fails
+                }
+            }
+
+            $dataTest = [
+                'suite_id' => $suiteId,
+                'uuid' => $test->uuid,
+                'identifier' => $identifier,
+                'title' => $test->title,
+                'state' => $this->getTestState($test),
+                'duration' => $test->duration,
+                'error_message' => isset($test->err->message) ? $this->sanitize($test->err->message) : null,
+                'stack_trace' => isset($test->err->estack) ? $this->sanitize($test->err->estack) : null,
+                'diff' => isset($test->err->diff) ? $this->sanitize($test->err->diff) : null,
+            ];
+            Manager::table('test')->insertGetId($dataTest);
+        }
+
+        //insert children suites
+        foreach ($suite->suites as $s) {
+            $this->loopThroughSuite($executionId, $s, $suiteId);
         }
     }
 
@@ -859,5 +984,71 @@ class ReportController extends BaseController
         }
 
         return $GCP_files_list;
+    }
+
+    private function checkAuth(array $queryParams, $request): void
+    {
+        //check arguments in GET query
+        if (!isset($queryParams['token']) || !isset($queryParams['filename'])) {
+            throw new HttpBadRequestException($request, 'no enough parameters');
+        }
+        //check token
+        if ($queryParams['token'] != getenv('QANB_TOKEN')) {
+            throw new HttpBadRequestException($request, 'invalid token');
+        }
+    }
+
+    private function getPlatform(array $queryParams): string
+    {
+        $platform = self::FILTER_PLATFORMS[0];
+        $queryPlatform = $queryParams['platform'] ?? ($queryParams['browser'] ?? null); // retro-compatibility
+        if (null !== $queryPlatform && in_array($queryPlatform, self::FILTER_PLATFORMS)) {
+            $platform = $queryPlatform;
+        }
+
+        return $platform;
+    }
+
+    private function getCampaign(array $queryParams): string
+    {
+        $campaign = self::FILTER_CAMPAIGNS[0];
+        if (isset($queryParams['campaign']) && in_array($queryParams['campaign'], self::FILTER_CAMPAIGNS)) {
+            $campaign = $queryParams['campaign'];
+        }
+
+        return $campaign;
+    }
+
+    private function getNumberVersion(string $filename, Request $request): string
+    {
+        //retrieving version number
+        preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/', $filename, $matches);
+        if (!isset($matches[1])) {
+            throw new HttpBadRequestException($request, 'could not retrieve version from filename');
+        }
+
+        $version = $matches[1];
+        if (strlen($version) < 1) {
+            throw new HttpBadRequestException($request, sprintf('version found not correct (%s) from filename %s', $version, $filename));
+        }
+
+        return $version;
+    }
+
+    private function getContents(string $filename, Request $request): stdClass
+    {
+        $url = QANB_GCPURL . 'reports/' . $filename;
+        $contents = file_get_contents($url);
+        if (!$contents) {
+            throw new HttpBadRequestException($request, 'unable to retrieve content from GCP URL');
+        }
+
+        //try to decode json
+        $fileContents = json_decode($contents);
+        if ($fileContents == null) {
+            throw new HttpBadRequestException($request, 'unable to decode JSON data');
+        }
+
+        return $fileContents;
     }
 }
