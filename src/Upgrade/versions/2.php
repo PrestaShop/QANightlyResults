@@ -2,7 +2,8 @@
 
 use Illuminate\Database\Capsule\Manager;
 
-function update2() {
+function update2()
+{
     echo "\n Upgrading to version 2...\n";
     try {
         //add the identifier for tests
@@ -15,8 +16,8 @@ ADD `browser` VARCHAR(50) NOT NULL DEFAULT \'chromium\' AFTER `campaign`;');
         return false;
     }
     echo "Finished updating database\n\n";
-    return true;
 
+    return true;
 }
 
 return update2();
