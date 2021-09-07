@@ -669,7 +669,7 @@ class ReportController extends BaseController
             ->get();
         $testsData = [];
         foreach ($tests as $test) {
-            if ($test->state == 'failed') {
+            if ($test->state == 'failed' && is_string($test->stack_trace)) {
                 $test->stack_trace_formatted = $this->formatStackTrace($test->stack_trace);
             }
             $testsData[$test->suite_id][] = $test;
