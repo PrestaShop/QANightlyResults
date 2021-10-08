@@ -91,8 +91,8 @@ class ReportController extends BaseController
             $download = null;
             if (isset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version])) {
                 $download = QANB_GCPURL . $GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version];
-                unset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version]);
             }
+
             $full_list[] = [
                 'id' => $execution->id,
                 'date' => date('Y-m-d', strtotime($execution->start_date)),
