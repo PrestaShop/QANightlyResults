@@ -86,7 +86,6 @@ class ReportController extends BaseController
         }
 
         $full_list = [];
-        $orphan_builds_list = [];
         foreach ($executions as $execution) {
             $download = null;
             if (isset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version])) {
@@ -117,34 +116,8 @@ class ReportController extends BaseController
                 'download' => $download,
             ];
         }
-        //clean ugly array
-        foreach ($GCP_files_list as $date => $values) {
-            foreach ($values as $version => $build) {
-                preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-([A-z0-9\.]*)-prestashop_(.*)\.zip/', $build, $matches_filename);
-                if (count($matches_filename) == 4) {
-                    if ($requestVersion) {
-                        if ($matches_filename[2] == $requestVersion) {
-                            $orphan_builds_list[] =
-                                [
-                                    'date' => $matches_filename[1],
-                                    'version' => $matches_filename[2],
-                                    'download' => QANB_GCPURL . $build,
-                                ];
-                        }
-                    } else {
-                        $orphan_builds_list[] =
-                            [
-                                'date' => $matches_filename[1],
-                                'version' => $matches_filename[2],
-                                'download' => QANB_GCPURL . $build,
-                            ];
-                    }
-                }
-            }
-        }
 
         //merge two arrays in one and sort them by date
-        $full_list = array_merge($full_list, $orphan_builds_list);
         usort($full_list, function ($dt1, $dt2) {
             $tm1 = isset($dt1['start_date']) ? $dt1['start_date'] : $dt1['date'];
             $tm2 = isset($dt2['start_date']) ? $dt2['start_date'] : $dt2['date'];
