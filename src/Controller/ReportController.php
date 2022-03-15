@@ -88,8 +88,12 @@ class ReportController extends BaseController
         $full_list = [];
         foreach ($executions as $execution) {
             $download = null;
-            if (isset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version])) {
-                $download = QANB_GCPURL . $GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version];
+            if (isset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version]['zip'])) {
+                $download = QANB_GCPURL . $GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version]['zip'];
+            }
+            $xml = null;
+            if (isset($GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version]['xml'])) {
+                $xml = QANB_GCPURL . $GCP_files_list[date('Y-m-d', strtotime($execution->start_date))][$execution->version]['xml'];
             }
 
             $full_list[] = [
@@ -114,6 +118,7 @@ class ReportController extends BaseController
                 'fixed_since_last' => $execution->fixed_since_last,
                 'equal_since_last' => $execution->equal_since_last,
                 'download' => $download,
+                'xml' => $xml,
             ];
         }
 
@@ -944,13 +949,18 @@ class ReportController extends BaseController
             $xml = new \SimpleXMLElement($GCPCallResult);
             foreach ($xml->Contents as $content) {
                 $build_name = (string) $content->Key;
-                if (strpos($build_name, '.zip') !== false) {
-                    //get version and date
-                    preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-([A-z0-9\.]*)-prestashop_(.*)\.zip/', $build_name, $matches_filename);
-                    if (count($matches_filename) == 4) {
-                        $date = $matches_filename[1];
-                        $version = $matches_filename[2];
-                        $GCP_files_list[$date][$version] = $build_name;
+                foreach(['xml', 'zip'] as $extension) {
+                    if (strpos($build_name, '.' . $extension) !== false) {
+                        //get version and date
+                        preg_match('/([0-9]{4}-[0-9]{2}-[0-9]{2})-([A-z0-9\.]*)-prestashop_(.*)\.' . $extension. '/', $build_name, $matches_filename);
+                        if (count($matches_filename) == 4) {
+                            $date = $matches_filename[1];
+                            $version = $matches_filename[2];
+                            if (!isset($GCP_files_list[$date][$version])) {
+                                $GCP_files_list[$date][$version] = [];
+                            }
+                            $GCP_files_list[$date][$version][$extension] = $build_name;
+                        }
                     }
                 }
             }
