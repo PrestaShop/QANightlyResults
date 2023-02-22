@@ -36,13 +36,17 @@ runs:
     - name: Build and push image
       shell: bash
       working-directory: ${{ inputs.app-path }}
+      # run: |
+      #   docker buildx build \
+      #     --cache-from="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest" \
+      #     --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest" \
+      #     --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:${ENVIRONMENT}" .
+      #   docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:${ENVIRONMENT}"
+      #   docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest"
       run: |
         docker buildx build \
-          --cache-from="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest" \
-          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest" \
-          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:${ENVIRONMENT}" .
-        docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:${ENVIRONMENT}"
-        docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest"
+          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:testing" \
+        docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:testing"
       env:
         APP_PATH: ${{ inputs.app-path }}
         GCLOUD_REGISTRY: ${{ inputs.gcp-registry }}

@@ -29,17 +29,17 @@ jobs:
         with:
           fetch-depth: 20
 
-      # - name: Auth GCP
-      #   uses: ./.github/actions/auth-gcp
-      #   with:
-      #     gcp-credentials: ${{ secrets.INTEGRATION_GOOGLE_APPLICATION_CREDENTIALS }}
-      #     cluster-name: "test-cluster-1" # need to be changed by the new cluster
+      - name: Auth GCP
+        uses: ./.github/actions/auth-gcp
+        with:
+          gcp-credentials: ${{ secrets.INTEGRATION_GOOGLE_APPLICATION_CREDENTIALS }}
+          cluster-name: "test-cluster-1" # need to be changed by the new cluster
 
-      # - name: Build API app 👷
-      #   uses: ./.github/actions/build
-      #   with:
-      #     project: ${{ env.PROJECT_NAME }}
-      #     gcp-credentials: ${{ secrets.INTEGRATION_GOOGLE_APPLICATION_CREDENTIALS }}
-      #     gcp-namespace: ${{ env.GCLOUD_NAMESPACE }}
-      #     app-path: ${{ env.APP_PATH }}
-      #     environment: "integration"
+      - name: Build API app 👷
+        uses: ./.github/actions/build
+        with:
+          project: ${{ env.PROJECT_NAME }}
+          gcp-credentials: ${{ secrets.INTEGRATION_GOOGLE_APPLICATION_CREDENTIALS }}
+          gcp-namespace: ${{ env.GCLOUD_NAMESPACE }}
+          app-path: ${{ env.APP_PATH }}
+          environment: "integration"
