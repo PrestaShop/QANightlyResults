@@ -1,0 +1,52 @@
+name: 'Build application'
+description: 'Build project and push to gcp registry'
+inputs:
+  project:
+    description: "Project id (used for gcp)"
+    required: true
+  app-path:
+    required: true
+    description: "Application path"
+  prefix-tag:
+    required: false
+    description: "Prefixed used in alpha for the tag image"
+    default: ""
+  gcp-registry:
+    required: false
+    description: "GCP registry name"
+    default: "gcr.io"
+  gcp-namespace:
+    required: false
+    description: "GCP namespace"
+    default: "prestashop-cloud-integration"
+  gcp-credentials:
+    required: true
+    description: "GCP services account credentials"
+  environment:
+    required: false
+    description: "Application environment (integration / production)"
+    default: "integration"
+  release_version:
+    required: false
+    description: "Release version"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Build and push image
+      shell: bash
+      working-directory: ${{ inputs.app-path }}
+      run: |
+        docker buildx build \
+          --cache-from="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest" \
+          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest" \
+          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:${ENVIRONMENT}" .
+        docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:${ENVIRONMENT}"
+        docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest"
+      env:
+        APP_PATH: ${{ inputs.app-path }}
+        GCLOUD_REGISTRY: ${{ inputs.gcp-registry }}
+        GCLOUD_NAMESPACE: ${{ inputs.gcp-namespace }}
+        GCLOUD_PROJECT: ${{ inputs.project }}
+        RELEASE_VERSION: ${{ inputs.release_version }}
+        ENVIRONMENT: ${{ inputs.environment }}

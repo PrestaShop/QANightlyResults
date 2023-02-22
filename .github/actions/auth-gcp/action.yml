@@ -1,0 +1,41 @@
+name: 'Auth GCP'
+description: 'Auth gcp and configure docker to push into GCP registry'
+inputs:
+  gcp-namespace:
+    required: false
+    description: 'GCP namespace'
+    default: 'prestashop-cloud-integration'
+  gcp-credentials:
+    required: true
+    description: 'GCP services account credentials'
+  cluster-name:
+    required: false
+    description: 'Cluster name'
+    default: 'test-cluster-1'
+  cluster-zone:
+    required: false
+    description: 'Cluster zone'
+    default: 'europe-west4-a'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Authenticating to GCP ⚙️
+      uses: google-github-actions/auth@v1
+      with:
+        project_id: ${{ inputs.gcp-namespace }}
+        credentials_json: ${{ inputs.gcp-credentials }}
+
+    - name: Setting up Cloud SDK ⚙️
+      uses: google-github-actions/setup-gcloud@v1
+
+    - name: Authenticating to the kubernetes cluster 🔑
+      shell: bash
+      run: |
+        gcloud components install gke-gcloud-auth-plugin
+        export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+        source ~/.bashrc
+        gcloud auth configure-docker
+
+
+      # gcloud container clusters get-credentials ${{ inputs.cluster-name }}  --zone ${{ inputs.cluster-zone }} --project ${{ inputs.gcp-namespace }}
