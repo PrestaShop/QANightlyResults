@@ -45,7 +45,7 @@ runs:
       #   docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest"
       run: |
         docker buildx build \
-          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:testing" \
+          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:testing" .
         docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:testing"
       env:
         APP_PATH: ${{ inputs.app-path }}
