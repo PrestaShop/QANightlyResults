@@ -36,6 +36,4 @@ runs:
         export USE_GKE_GCLOUD_AUTH_PLUGIN=True
         source ~/.bashrc
         gcloud auth configure-docker
-
-
-      # gcloud container clusters get-credentials ${{ inputs.cluster-name }}  --zone ${{ inputs.cluster-zone }} --project ${{ inputs.gcp-namespace }}
+        gcloud container clusters get-credentials ${{ inputs.cluster-name }}  --zone ${{ inputs.cluster-zone }} --project ${{ inputs.gcp-namespace }}

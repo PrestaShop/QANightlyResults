@@ -22,10 +22,6 @@ inputs:
   gcp-credentials:
     required: true
     description: "GCP services account credentials"
-  environment:
-    required: false
-    description: "Application environment (integration / production)"
-    default: "integration"
   release_version:
     required: false
     description: "Release version"
@@ -33,20 +29,26 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Get tag
+      shell: bash
+      id: get_tag
+      run: echo ::set-output name=TAG::$PREFIX_TAG$(echo $GITHUB_REF | cut -d / -f 3)
+      env:
+        PREFIX_TAG: ${{ inputs.prefix-tag }}
     - name: Build and push image
       shell: bash
       working-directory: ${{ inputs.app-path }}
       run: |
         docker buildx build \
-          --cache-from="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest" \
-          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest" \
-          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:${ENVIRONMENT}" .
-        docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:${ENVIRONMENT}"
-        docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/${GCLOUD_PROJECT}/${GCLOUD_PROJECT}:latest"
+          --cache-from="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/testing-qanightly-migration/${GCLOUD_PROJECT}:latest" \
+          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/testing-qanightly-migration/${GCLOUD_PROJECT}:latest" \
+          --tag="${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/testing-qanightly-migration/${GCLOUD_PROJECT}:${TAG}" .
+        docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/testing-qanightly-migration/${GCLOUD_PROJECT}:${TAG}"
+        docker push "${GCLOUD_REGISTRY}/${GCLOUD_NAMESPACE}/testing-qanightly-migration/${GCLOUD_PROJECT}:latest"
       env:
         APP_PATH: ${{ inputs.app-path }}
         GCLOUD_REGISTRY: ${{ inputs.gcp-registry }}
         GCLOUD_NAMESPACE: ${{ inputs.gcp-namespace }}
         GCLOUD_PROJECT: ${{ inputs.project }}
         RELEASE_VERSION: ${{ inputs.release_version }}
-        ENVIRONMENT: ${{ inputs.environment }}
+        TAG: ${{ steps.get_tag.outputs.TAG }}
