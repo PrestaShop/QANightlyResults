@@ -37,7 +37,7 @@ jobs:
       - name: Trigger build
         uses: aurelien-baudet/workflow-dispatch@v2
         with:
-          workflow: integration-cd-build-api-qanighlty.yml
+          workflow: integration-cd-build-api-qanightly.yml
           repo: PrestaShopCorp/qanightlyresults-cd
           inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
@@ -46,7 +46,7 @@ jobs:
       - name: Trigger deploy
         uses: aurelien-baudet/workflow-dispatch@v2
         with:
-          workflow: integration-cd-deploy-api-qanighlty.yml
+          workflow: integration-cd-deploy-api-qanightly.yml
           repo: PrestaShopCorp/qanightlyresults-cd
           inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
