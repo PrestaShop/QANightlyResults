@@ -6,6 +6,7 @@ on:
 
 env:
   DISTRIBUTION_APP: "api-qanightly"
+  LABELS: ${{toJSON(github.event.pull_request.labels)}}
 
 jobs:
   integration_deployment:
@@ -17,6 +18,15 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'prestabulle3')
 
     steps:
+      - name: Checkout the repository 🎁
+        uses: actions/checkout@v3
+
+      - name: Authenticating to GCP ⚙️
+        uses: google-github-actions/auth@v1
+        with:
+          project_id: ${{ secrets.GCLOUD_NAMESPACE_INTEGRATION }}
+          credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
       - name: Managing labels 🏷️
         run: /bin/bash .github/scripts/manage-labels.sh
 
@@ -30,6 +40,8 @@ jobs:
           workflow: integration-cd-build-api-qanighlty.yml
           repo: PrestaShopCorp/qanightlyresults-cd
           inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}"}'
+          token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
+          ref: 'refs/heads/main'
 
       - name: Trigger deploy
         uses: aurelien-baudet/workflow-dispatch@v2
@@ -37,3 +49,5 @@ jobs:
           workflow: integration-cd-deploy-api-qanighlty.yml
           repo: PrestaShopCorp/qanightlyresults-cd
           inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
+          token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
+          ref: 'refs/heads/main'
