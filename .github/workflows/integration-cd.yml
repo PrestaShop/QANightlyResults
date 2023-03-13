@@ -34,12 +34,16 @@ jobs:
         run: echo "BULLE=$BULLE$(echo $LABELS > labels.json && cat labels.json | jq -r '.[]|.name'|grep prestabulle)" >> $GITHUB_OUTPUT
         id: get_bulle
 
+      - name: Get branch name
+        id: branch
+        uses: tj-actions/branch-names@v5.1
+
       - name: Trigger build
         uses: aurelien-baudet/workflow-dispatch@v2
         with:
           workflow: integration-cd-build-api-qanightly.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "${{ github.ref_name }}"}'
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
           ref: 'refs/heads/main'
 
@@ -48,6 +52,6 @@ jobs:
         with:
           workflow: integration-cd-deploy-api-qanightly.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "${{ github.ref_name }}", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
           ref: 'refs/heads/main'
