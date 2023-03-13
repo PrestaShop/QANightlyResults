@@ -39,7 +39,7 @@ jobs:
         with:
           workflow: integration-cd-build-api-qanightly.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "$GITHUB_REF"}'
+          inputs: '{ "branch": "${{ github.ref_name }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
           ref: 'refs/heads/main'
 
@@ -48,6 +48,6 @@ jobs:
         with:
           workflow: integration-cd-deploy-api-qanightly.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "$GITHUB_REF", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
+          inputs: '{ "branch": "${{ github.ref_name }}", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
           ref: 'refs/heads/main'
