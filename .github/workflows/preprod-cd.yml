@@ -24,6 +24,10 @@ jobs:
           project_id: ${{ secrets.GCLOUD_NAMESPACE_PREPROD }}
           credentials_json: ${{ secrets.PREPROD_GOOGLE_APPLICATION_CREDENTIALS }}
 
+      - name: Get branch name
+        id: branch
+        uses: tj-actions/branch-names@v5.1
+
       - name: Trigger build
         uses: aurelien-baudet/workflow-dispatch@v2
         with:
@@ -38,6 +42,6 @@ jobs:
         with:
           workflow: preprod-cd-deploy-api-qanightly.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}"}'
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
           ref: 'refs/heads/main'
