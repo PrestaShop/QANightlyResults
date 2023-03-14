@@ -33,7 +33,8 @@ RUN  docker-php-ext-install pdo_mysql gd mysqli && \
      docker-php-source delete
 
 COPY --from=0 /var/www/html/ /var/www/html/
-RUN mkdir -p /var/www/html/application/files/ && \
+RUN mv /var/www/html/vhost.conf /etc/apache2/sites-enabled/000-default.conf && \
+    mkdir -p /var/www/html/application/files/ && \
     chown -R www-data:www-data /var/www/html && \
     a2enmod rewrite && \
     a2enmod ssl && \
