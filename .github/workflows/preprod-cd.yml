@@ -3,7 +3,8 @@ name: preprod CD for API QAnightly
 on:
   push:
     branches:
-      - develop
+      - ops/ci-cd-rework
+      # - develop
 
 env:
   DISTRIBUTION_APP: "api-qanightly"
@@ -42,6 +43,6 @@ jobs:
         with:
           workflow: preprod-cd-deploy-api-qanightly.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
           ref: 'refs/heads/main'
