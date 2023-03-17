@@ -20,6 +20,8 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'prestabulle3')
 
     steps:
+      - name: Checkout the repository 🎁
+        uses: actions/checkout@v3
 
       - name: Setting up the Bulle variable for later 💬
         run: echo "BULLE=$BULLE$(echo $LABELS > labels.json && cat labels.json | jq -r '.[]|.name'|grep prestabulle)" >> $GITHUB_OUTPUT
