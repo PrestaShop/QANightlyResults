@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controller\DataController;
 use App\Controller\GraphController;
+use App\Controller\HealthCheckController;
 use App\Controller\ReportController;
 use Slim\App;
 use Slim\Psr7\Request;
@@ -36,4 +37,7 @@ function loadRoutes(App $app): void
     //data routes
     $app->get('/data/badge', [DataController::class, 'badge']);
     $app->get('/data/badge/svg', [DataController::class, 'svg']);
+
+    // healthcheck
+    $app->get('/healthcheck', [HealthCheckController::class, 'check']);
 }
