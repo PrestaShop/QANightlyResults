@@ -1,0 +1,58 @@
+name: Integration CD for API QAnightly
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled]
+
+env:
+  DISTRIBUTION_APP: "api-qanightly"
+  LABELS: ${{toJSON(github.event.pull_request.labels)}}
+  BUCKET_PRESTABULLE: ${{ secrets.BUCKET_PRESTABULLE }}
+
+jobs:
+  integration_deployment:
+    name: Deploy (integration)
+    runs-on: ubuntu-latest
+    concurrency: integration-cd
+    if: contains(github.event.pull_request.labels.*.name, 'prestabulle1') ||
+      contains(github.event.pull_request.labels.*.name, 'prestabulle2') ||
+      contains(github.event.pull_request.labels.*.name, 'prestabulle3')
+
+    steps:
+      - name: Checkout the repository 🎁
+        uses: actions/checkout@v3
+
+      - name: Authenticating to GCP ⚙️
+        uses: google-github-actions/auth@v1
+        with:
+          project_id: ${{ secrets.GCLOUD_NAMESPACE_INTEGRATION }}
+          credentials_json: ${{ secrets.INTEGRATION_GOOGLE_APPLICATION_CREDENTIALS }}
+
+      - name: Managing labels 🏷️
+        run: /bin/bash .github/scripts/manage-labels.sh
+
+      - name: Setting up the Bulle variable for later 💬
+        run: echo "BULLE=$BULLE$(echo $LABELS > labels.json && cat labels.json | jq -r '.[]|.name'|grep prestabulle)" >> $GITHUB_OUTPUT
+        id: get_bulle
+
+      - name: Get branch name
+        id: branch
+        uses: tj-actions/branch-names@v5.1
+
+      - name: Trigger build
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: integration-cd-build-api-qanightly.yml
+          repo: PrestaShopCorp/qanightlyresults-cd
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}"}'
+          token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
+          ref: 'refs/heads/main'
+
+      - name: Trigger deploy
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: integration-cd-deploy-api-qanightly.yml
+          repo: PrestaShopCorp/qanightlyresults-cd
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
+          token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
+          ref: 'refs/heads/main'
