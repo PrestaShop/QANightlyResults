@@ -7,6 +7,7 @@ on:
 env:
   DISTRIBUTION_APP: "api-qanightly"
   LABELS: ${{toJSON(github.event.pull_request.labels)}}
+  BUCKET_PRESTABULLE: ${{ secrets.BUCKET_PRESTABULLE }}
 
 jobs:
   integration_deployment:
