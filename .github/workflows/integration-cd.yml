@@ -1,11 +1,11 @@
-name: Integration CD for API QAnightly
+name: Integration CD for QAnightly
 
 on:
   pull_request:
     types: [opened, reopened, synchronize, labeled]
 
 env:
-  DISTRIBUTION_APP: "api-qanightly"
+  DISTRIBUTION_APP: "qanightly"
   LABELS: ${{toJSON(github.event.pull_request.labels)}}
   BUCKET_PRESTABULLE: ${{ secrets.BUCKET_PRESTABULLE }}
 
@@ -14,6 +14,7 @@ jobs:
     name: Deploy (integration)
     runs-on: ubuntu-latest
     concurrency: integration-cd
+    environment: integration
     if: contains(github.event.pull_request.labels.*.name, 'prestabulle1') ||
       contains(github.event.pull_request.labels.*.name, 'prestabulle2') ||
       contains(github.event.pull_request.labels.*.name, 'prestabulle3')
@@ -25,8 +26,11 @@ jobs:
       - name: Authenticating to GCP ⚙️
         uses: google-github-actions/auth@v1
         with:
-          project_id: ${{ secrets.GCLOUD_NAMESPACE_INTEGRATION }}
+          project_id: ${{ secrets.GCP_RUN_PROJECT_ID }}
           credentials_json: ${{ secrets.INTEGRATION_GOOGLE_APPLICATION_CREDENTIALS }}
+
+      - name: Setting up Cloud SDK ⚙️
+        uses: google-github-actions/setup-gcloud@v1
 
       - name: Managing labels 🏷️
         run: /bin/bash .github/scripts/manage-labels.sh
@@ -39,20 +43,11 @@ jobs:
         id: branch
         uses: tj-actions/branch-names@v5.1
 
-      - name: Trigger build
+      - name: Trigger CI / CD
         uses: aurelien-baudet/workflow-dispatch@v2
         with:
-          workflow: integration-cd-build-api-qanightly.yml
+          workflow: integration-cd.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}"}'
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "bulle": "${{ steps.get_bulle.outputs.BULLE }}", "project": "nightly", "repository": "PrestaShop/nightly-board"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
-          ref: 'refs/heads/main'
-
-      - name: Trigger deploy
-        uses: aurelien-baudet/workflow-dispatch@v2
-        with:
-          workflow: integration-cd-deploy-api-qanightly.yml
-          repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "label": "${{ steps.get_bulle.outputs.BULLE }}"}'
-          token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
-          ref: 'refs/heads/main'
+          ref: 'refs/heads/feat/migration-nightly-upgrade'
