@@ -13,7 +13,6 @@ jobs:
   integration_deployment:
     name: Deploy (integration)
     runs-on: ubuntu-latest
-    concurrency: integration-cd
     environment: integration
     if: contains(github.event.pull_request.labels.*.name, 'prestabulle1') ||
       contains(github.event.pull_request.labels.*.name, 'prestabulle2') ||
