@@ -1,6 +1,6 @@
 # QANightlyResults
 
-QANightlyResults is an Slim Framewok app, acting as a backend (via a JSON API) to handle
+QANightlyResults is an Slim Framework app, acting as a backend (via a JSON API) to handle
 and browse tests reports records.
 
 You can use any frontend app you want to consume this API. We use a [Vue app](https://github.com/PrestaShop/nightly-board).
