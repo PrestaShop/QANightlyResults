@@ -25,7 +25,6 @@ jobs:
       - name: Authenticating to GCP ⚙️
         uses: google-github-actions/auth@v1
         with:
-          project_id: ${{ secrets.GCP_RUN_PROJECT_ID }}
           credentials_json: ${{ secrets.INTEGRATION_GOOGLE_APPLICATION_CREDENTIALS }}
 
       - name: Setting up Cloud SDK ⚙️
