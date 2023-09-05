@@ -5,9 +5,7 @@ on:
     types: [opened, reopened, synchronize, labeled]
 
 env:
-  DISTRIBUTION_APP: "qanightly"
   LABELS: ${{toJSON(github.event.pull_request.labels)}}
-  BUCKET_PRESTABULLE: ${{ secrets.BUCKET_PRESTABULLE }}
 
 jobs:
   integration_deployment:
@@ -21,17 +19,6 @@ jobs:
     steps:
       - name: Checkout the repository 🎁
         uses: actions/checkout@v3
-
-      - name: Authenticating to GCP ⚙️
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.INTEGRATION_GOOGLE_APPLICATION_CREDENTIALS }}
-
-      - name: Setting up Cloud SDK ⚙️
-        uses: google-github-actions/setup-gcloud@v1
-
-      - name: Managing labels 🏷️
-        run: /bin/bash .github/scripts/manage-labels.sh
 
       - name: Setting up the Bulle variable for later 💬
         run: echo "BULLE=$BULLE$(echo $LABELS > labels.json && cat labels.json | jq -r '.[]|.name'|grep prestabulle)" >> $GITHUB_OUTPUT

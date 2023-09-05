@@ -5,9 +5,6 @@ on:
     branches:
       - develop
 
-env:
-  DISTRIBUTION_APP: "qanightly"
-
 jobs:
   preprod_deployment:
     name: Deploy (preprod)

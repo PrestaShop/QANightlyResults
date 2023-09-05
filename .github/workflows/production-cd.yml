@@ -4,9 +4,6 @@ on:
   release:
     types: [released]
 
-env:
-  DISTRIBUTION_APP: "qanightly"
-
 jobs:
   production_deployment:
     name: Deploy (production)
