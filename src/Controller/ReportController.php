@@ -700,7 +700,7 @@ class ReportController extends BaseController
                     if (isset($test->context)) {
                         try {
                             $identifier_data = json_decode($test->context);
-                            $identifier = $identifier_data->value;
+                            $identifier = is_array($identifier_data) ? $identifier_data[0]->value : $identifier_data->value;
                         } catch (Exception $e) {
                         }
                     }
@@ -768,7 +768,7 @@ class ReportController extends BaseController
             if (isset($test->context)) {
                 try {
                     $identifier_data = json_decode($test->context);
-                    $identifier = $identifier_data->value;
+                    $identifier = is_array($identifier_data) ? $identifier_data[0]->value : $identifier_data->value;
                 } catch (Exception $e) {
                     // Don't care if it fails
                 }
