@@ -1,0 +1,30 @@
+name: preprod CD for QAnightly
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  preprod_deployment:
+    name: Deploy (preprod)
+    runs-on: ubuntu-latest
+    environment: preproduction
+    concurrency: preprod-cd
+
+    steps:
+      - name: Checkout the repository 🎁
+        uses: actions/checkout@v3
+
+      - name: Get branch name
+        id: branch
+        uses: tj-actions/branch-names@v5.1
+
+      - name: Trigger CI / CD
+        uses: aurelien-baudet/workflow-dispatch@v2
+        with:
+          workflow: preproduction-cd.yml
+          repo: PrestaShopCorp/qanightlyresults-cd
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "project": "api-nightly", "repository": "PrestaShop/QANightlyResults"}'
+          token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
+          ref: 'refs/heads/main'
