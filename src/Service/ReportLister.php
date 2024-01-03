@@ -2,9 +2,7 @@
 
 namespace App\Service;
 
-use SimpleXMLElement;
-
-class ReportLister 
+class ReportLister
 {
     public string $url;
 
@@ -21,19 +19,19 @@ class ReportLister
         }
 
         $listing = [];
-        
-        $xml = new SimpleXMLElement($return);
+
+        $xml = new \SimpleXMLElement($return);
         foreach ($xml->Contents as $content) {
             $buildName = (string) $content->Key;
 
-            foreach(['xml', 'zip'] as $extension) {
+            foreach (['xml', 'zip'] as $extension) {
                 if (strpos($buildName, '.' . $extension) === false) {
                     continue;
                 }
 
                 // Extract version and date
                 preg_match(
-                    '/([0-9]{4}-[0-9]{2}-[0-9]{2})-([A-z0-9\.]*)-prestashop_(.*)\.' . $extension. '/',
+                    '/([0-9]{4}-[0-9]{2}-[0-9]{2})-([A-z0-9\.]*)-prestashop_(.*)\.' . $extension . '/',
                     $buildName,
                     $matches
                 );

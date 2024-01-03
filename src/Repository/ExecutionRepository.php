@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Execution;
-use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -12,8 +11,8 @@ use Doctrine\Persistence\ManagerRegistry;
  *
  * @method Execution|null find($id, $lockMode = null, $lockVersion = null)
  * @method Execution|null findOneBy(array $criteria, array $orderBy = null)
- * @method Execution[]    findAll()
- * @method Execution[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Execution[] findAll()
+ * @method Execution[] findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class ExecutionRepository extends ServiceEntityRepository
 {
@@ -27,8 +26,7 @@ class ExecutionRepository extends ServiceEntityRepository
         string $platform,
         string $campaign,
         string $date
-    ): ?Execution
-    {
+    ): ?Execution {
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')
             ->andWhere('e.platform = :platform')
@@ -49,9 +47,8 @@ class ExecutionRepository extends ServiceEntityRepository
         string $version,
         string $platform,
         string $campaign,
-        DateTime $date
-    ): ?Execution
-    {
+        \DateTime $date
+    ): ?Execution {
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')
             ->andWhere('e.platform = :platform')
@@ -97,13 +94,13 @@ class ExecutionRepository extends ServiceEntityRepository
                 continue;
             }
             $results[] = $datum['version'];
-        };
+        }
+
         return $results;
     }
 
     public function findAllBetweenDates(string $version, string $startDate, string $endDate): array
     {
-
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')
             ->andWhere('e.start_date >= :start_date')

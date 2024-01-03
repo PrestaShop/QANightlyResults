@@ -2,7 +2,6 @@
 
 namespace App\Tests\Controller;
 
-use App\Controller\ReportController;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ImportControllerTest extends WebTestCase
@@ -152,7 +151,6 @@ class ImportControllerTest extends WebTestCase
         $this->assertArrayHasKey('message', $content);
         $this->assertEquals('A similar entry was found (criteria: version develop, platform cli, campaign autoupgrade, date 2024-01-01).', $content['message']);
     }
-
 
     public function testReportWithNoParameters(): void
     {

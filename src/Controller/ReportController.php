@@ -1,11 +1,10 @@
 <?php
+
 namespace App\Controller;
 
-use App\Entity\Execution;
 use App\Repository\ExecutionRepository;
 use App\Service\ReportLister;
 use App\Service\ReportSuiteBuilder;
-use DateTimeZone;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,7 +37,7 @@ class ReportController extends AbstractController
     public function reports(Request $request): JsonResponse
     {
         $executionFilters = [];
-        
+
         if ($request->query->has('filter_platform')) {
             $executionFilters['platform'] = $request->query->get('filter_platform');
         } elseif ($request->query->has('filter_browser')) {
@@ -51,7 +50,7 @@ class ReportController extends AbstractController
             $executionFilters['version'] = $request->query->get('filter_version');
         }
         $executions = $this->executionRepository->findBy($executionFilters, [
-            'start_date' => 'DESC'
+            'start_date' => 'DESC',
         ]);
 
         $reportListing = [];
@@ -99,7 +98,7 @@ class ReportController extends AbstractController
             ];
         }
 
-        //merge two arrays in one and sort them by date
+        // merge two arrays in one and sort them by date
         usort($reports, function ($dt1, $dt2) {
             $tm1 = isset($dt1['start_date']) ? $dt1['start_date'] : $dt1['date'];
             $tm2 = isset($dt2['start_date']) ? $dt2['start_date'] : $dt2['date'];
@@ -116,7 +115,7 @@ class ReportController extends AbstractController
         $execution = $this->executionRepository->findOneById($idReport);
         if (!$execution) {
             return new JsonResponse([
-                'message' => 'Execution not found'
+                'message' => 'Execution not found',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -132,8 +131,8 @@ class ReportController extends AbstractController
             'campaign' => $execution->getCampaign(),
             'browser' => $execution->getPlatform(), // retro-compatibility
             'platform' => $execution->getPlatform(),
-            'start_date' => $execution->getStartDate()->setTimezone(new DateTimeZone('-01:00'))->format('Y-m-d H:i:s'),
-            'end_date' => $execution->getEndDate()->setTimezone(new DateTimeZone('-01:00'))->format('Y-m-d H:i:s'),
+            'start_date' => $execution->getStartDate()->setTimezone(new \DateTimeZone('-01:00'))->format('Y-m-d H:i:s'),
+            'end_date' => $execution->getEndDate()->setTimezone(new \DateTimeZone('-01:00'))->format('Y-m-d H:i:s'),
             'duration' => $execution->getDuration(),
             'suites' => $execution->getSuites(),
             'tests' => $execution->getTests(),
@@ -160,7 +159,7 @@ class ReportController extends AbstractController
         $execution = $this->executionRepository->findOneById($idReport);
         if (!$execution) {
             return new JsonResponse([
-                'message' => 'Execution not found'
+                'message' => 'Execution not found',
             ], Response::HTTP_NOT_FOUND);
         }
 

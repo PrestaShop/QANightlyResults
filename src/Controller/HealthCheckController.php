@@ -1,9 +1,9 @@
 <?php
+
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class HealthCheckController extends AbstractController
@@ -18,8 +18,8 @@ class HealthCheckController extends AbstractController
 
         // Check database
         try {
-            //@todo
-            //Manager::table('settings')->first();
+            // @todo
+            // Manager::table('settings')->first();
         } catch (QueryException $e) {
             $data['database'] = false;
         }

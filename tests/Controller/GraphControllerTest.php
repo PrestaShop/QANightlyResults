@@ -18,7 +18,7 @@ class GraphControllerTest extends WebTestCase
 
         $content = json_decode($response->getContent(), true);
         $this->assertGreaterThan(0, count($content));
-        foreach($content as $item) {
+        foreach ($content as $item) {
             $this->assertArrayHasKey('id', $item);
             $this->assertIsInt($item['id']);
             $this->assertArrayHasKey('start_date', $item);
@@ -67,7 +67,7 @@ class GraphControllerTest extends WebTestCase
         $this->assertEquals('last_year', $content['periods']['values'][2]['value']);
         $this->assertArrayHasKey('default', $content['periods']);
         $this->assertEquals('last_month', $content['periods']['default']);
-        
+
         $this->assertArrayHasKey('versions', $content);
         $this->assertIsArray($content['versions']);
         $this->assertArrayHasKey('type', $content['versions']);

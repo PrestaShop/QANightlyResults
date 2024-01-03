@@ -3,7 +3,6 @@
 namespace App\Tests\Controller;
 
 use App\Controller\ImportController;
-use App\Controller\ReportController;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ReportControllerTest extends WebTestCase
@@ -21,7 +20,7 @@ class ReportControllerTest extends WebTestCase
         $content = json_decode($response->getContent(), true);
         $this->assertGreaterThan(0, count($content));
         $datePrevious = null;
-        foreach($content as $item) {
+        foreach ($content as $item) {
             if ($datePrevious) {
                 $this->assertGreaterThanOrEqual($item['start_date'], $datePrevious);
             }
@@ -33,9 +32,9 @@ class ReportControllerTest extends WebTestCase
             $this->assertArrayHasKey('campaign', $item);
             $this->assertContains($item['campaign'], ImportController::FILTER_CAMPAIGNS);
             $this->assertArrayHasKey('browser', $item);
-            $this->assertContains($item['browser'], ReportController::FILTER_PLATFORMS);
+            $this->assertContains($item['browser'], ImportController::FILTER_PLATFORMS);
             $this->assertArrayHasKey('platform', $item);
-            $this->assertContains($item['platform'], ReportController::FILTER_PLATFORMS);
+            $this->assertContains($item['platform'], ImportController::FILTER_PLATFORMS);
             $this->assertEquals($item['browser'], $item['platform']);
             $this->assertArrayHasKey('start_date', $item);
             $this->assertArrayHasKey('end_date', $item);
@@ -91,11 +90,11 @@ class ReportControllerTest extends WebTestCase
         $this->assertArrayHasKey('date', $content);
         $this->assertArrayHasKey('version', $content);
         $this->assertArrayHasKey('campaign', $content);
-        $this->assertContains($content['campaign'], ReportController::FILTER_CAMPAIGNS);
+        $this->assertContains($content['campaign'], ImportController::FILTER_CAMPAIGNS);
         $this->assertArrayHasKey('browser', $content);
-        $this->assertContains($content['browser'], ReportController::FILTER_PLATFORMS);
+        $this->assertContains($content['browser'], ImportController::FILTER_PLATFORMS);
         $this->assertArrayHasKey('platform', $content);
-        $this->assertContains($content['platform'], ReportController::FILTER_PLATFORMS);
+        $this->assertContains($content['platform'], ImportController::FILTER_PLATFORMS);
         $this->assertEquals($content['browser'], $content['platform']);
         $this->assertArrayHasKey('start_date', $content);
         $this->assertArrayHasKey('end_date', $content);
@@ -119,10 +118,10 @@ class ReportControllerTest extends WebTestCase
         $this->assertIsInt($content['passes']);
         $this->assertArrayHasKey('failures', $content);
         $this->assertIsInt($content['failures']);
-        
+
         $this->assertArrayHasKey('suites_data', $content);
         $this->assertIsArray($content['suites_data']);
-        foreach($content['suites_data'] as $suiteId => $suiteItem) {
+        foreach ($content['suites_data'] as $suiteId => $suiteItem) {
             $this->partialTestSuite($content['id'], $suiteId, $suiteItem, null, true);
         }
     }
@@ -183,7 +182,7 @@ class ReportControllerTest extends WebTestCase
 
         foreach ($states as $stateRemoved) {
             $query = [];
-            foreach($states as $state) {
+            foreach ($states as $state) {
                 if ($state === $stateRemoved) {
                     continue;
                 }
@@ -216,7 +215,7 @@ class ReportControllerTest extends WebTestCase
         $this->assertEquals($data, $content);
     }
 
-    private function partialTestSuite(int $executionId, int $id, array $item, ?int $idParent = null, ?bool $hasChildrenData = null): void
+    private function partialTestSuite(int $executionId, int $id, array $item, int $idParent = null, bool $hasChildrenData = null): void
     {
         $this->assertIsInt($id);
 
@@ -260,7 +259,7 @@ class ReportControllerTest extends WebTestCase
             $this->assertArrayHasKey('suites', $item);
             $this->assertIsArray($item['suites']);
             $this->assertGreaterThan(0, count($item['suites']));
-            foreach($item['suites'] as $suiteChildId => $suiteChild) {
+            foreach ($item['suites'] as $suiteChildId => $suiteChild) {
                 $this->assertIsInt($suiteChildId);
                 $this->partialTestSuite($executionId, $suiteChildId, $suiteChild, $id);
             }
@@ -269,7 +268,7 @@ class ReportControllerTest extends WebTestCase
             $this->assertArrayHasKey('tests', $item);
             $this->assertIsArray($item['tests']);
             $this->assertGreaterThan(0, count($item['tests']));
-            foreach($item['tests'] as $testItem) {
+            foreach ($item['tests'] as $testItem) {
                 $this->partialTestTest($item['id'], $testItem);
             }
         }

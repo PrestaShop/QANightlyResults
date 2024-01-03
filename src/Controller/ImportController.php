@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\Execution;
@@ -6,10 +7,6 @@ use App\Entity\Suite;
 use App\Entity\Test;
 use App\Repository\ExecutionRepository;
 use App\Repository\TestRepository;
-use App\Service\ReportLister;
-use App\Service\ReportSuiteBuilder;
-use DateTime;
-use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,7 +21,7 @@ class ImportController extends AbstractController
     public const FILTER_CAMPAIGNS = ['functional', 'sanity', 'e2e', 'regression', 'autoupgrade'];
 
     private const FORMAT_DATE_MOCHA5 = 'Y-m-d H:i:s';
-    private const FORMAT_DATE_MOCHA6 = DateTime::RFC3339_EXTENDED;
+    private const FORMAT_DATE_MOCHA6 = \DateTime::RFC3339_EXTENDED;
 
     private EntityManagerInterface $entityManager;
 
@@ -60,7 +57,7 @@ class ImportController extends AbstractController
 
     private ?string $campaign;
 
-    private ?DateTime $startDate;
+    private ?\DateTime $startDate;
 
     protected function checkAuth(Request $request, string $dateFormat): ?JsonResponse
     {
@@ -69,19 +66,19 @@ class ImportController extends AbstractController
 
         if (!$token || !$this->filename) {
             return new JsonResponse([
-                'message' => 'No enough parameters'
+                'message' => 'No enough parameters',
             ], Response::HTTP_BAD_REQUEST);
         }
         if ($token !== $this->nightlyToken) {
             return new JsonResponse([
-                'message' => 'Invalid token'
+                'message' => 'Invalid token',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
         preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/', $this->filename, $matchesVersion);
         if (!isset($matchesVersion[1])) {
             return new JsonResponse([
-                'message' => 'Could not retrieve version from filename'
+                'message' => 'Could not retrieve version from filename',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -92,36 +89,36 @@ class ImportController extends AbstractController
                     'Version found not correct (%s) from filename %s',
                     $this->version,
                     $this->filename
-                )
+                ),
             ], Response::HTTP_BAD_REQUEST);
         }
 
         $fileContent = @file_get_contents($this->nightlyGCPUrl . 'reports/' . $this->filename);
         if (!$fileContent) {
             return new JsonResponse([
-                'message' => 'Unable to retrieve content from GCP URL'
+                'message' => 'Unable to retrieve content from GCP URL',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         $this->jsonContent = json_decode($fileContent);
         if (!$this->jsonContent) {
             return new JsonResponse([
-                'message' => 'Unable to decode JSON data'
+                'message' => 'Unable to decode JSON data',
             ], Response::HTTP_BAD_REQUEST);
         }
 
         $force = $request->query->get('force', false);
         $force = is_bool($force) ? $force : false;
-        
+
         $this->platform = $request->query->has('platform') ? $request->query->get('platform') : (
             $request->query->has('browser') ? $request->query->get('browser') : null
         );
         $this->platform = in_array($this->platform, self::FILTER_PLATFORMS) ? $this->platform : self::FILTER_PLATFORMS[0];
-        
+
         $this->campaign = $request->query->has('campaign') ? $request->query->get('campaign') : null;
         $this->campaign = in_array($this->campaign, self::FILTER_CAMPAIGNS) ? $this->campaign : self::FILTER_CAMPAIGNS[0];
 
-        $this->startDate = DateTime::createFromFormat($dateFormat, $this->jsonContent->stats->start);
+        $this->startDate = \DateTime::createFromFormat($dateFormat, $this->jsonContent->stats->start);
 
         // Check if there is no similar entry
         if (!$force && $this->executionRepository->findOneByNightly($this->version, $this->platform, $this->campaign, $this->startDate->format('Y-m-d'))) {
@@ -132,7 +129,7 @@ class ImportController extends AbstractController
                     $this->platform,
                     $this->campaign,
                     $this->startDate->format('Y-m-d')
-                )
+                ),
             ], Response::HTTP_FORBIDDEN);
         }
 
@@ -155,14 +152,14 @@ class ImportController extends AbstractController
             ->setPlatform($this->platform)
             ->setCampaign($this->campaign)
             ->setStartDate($this->startDate)
-            ->setEndDate(DateTime::createFromFormat(self::FORMAT_DATE_MOCHA5, $this->jsonContent->stats->end))
+            ->setEndDate(\DateTime::createFromFormat(self::FORMAT_DATE_MOCHA5, $this->jsonContent->stats->end))
             ->setDuration($this->jsonContent->stats->duration)
             ->setVersion($this->version)
             ->setSkipped($this->jsonContent->stats->skipped)
             ->setPending($this->jsonContent->stats->pending)
             ->setPasses($this->jsonContent->stats->passes)
             ->setFailures($this->jsonContent->stats->failures)
-            ->setInsertionStartDate(new DateTime())
+            ->setInsertionStartDate(new \DateTime())
         ;
         $this->entityManager->persist($execution);
         $this->entityManager->flush();
@@ -171,7 +168,7 @@ class ImportController extends AbstractController
 
         // Calculate comparison with last execution
         $execution = $this->compareReportData($execution);
-        $execution->setInsertionEndDate(new DateTime());
+        $execution->setInsertionEndDate(new \DateTime());
 
         $this->entityManager->persist($execution);
         $this->entityManager->flush();
@@ -198,25 +195,25 @@ class ImportController extends AbstractController
             ->setPlatform($this->platform)
             ->setCampaign($this->campaign)
             ->setStartDate($this->startDate)
-            ->setEndDate(DateTime::createFromFormat(self::FORMAT_DATE_MOCHA6, $this->jsonContent->stats->end))
+            ->setEndDate(\DateTime::createFromFormat(self::FORMAT_DATE_MOCHA6, $this->jsonContent->stats->end))
             ->setDuration($this->jsonContent->stats->duration)
             ->setVersion($this->version)
             ->setSkipped($this->jsonContent->stats->skipped)
             ->setPending($this->jsonContent->stats->pending)
             ->setPasses($this->jsonContent->stats->passes)
             ->setFailures($this->jsonContent->stats->failures)
-            ->setInsertionStartDate(new DateTime())
+            ->setInsertionStartDate(new \DateTime())
         ;
         $this->entityManager->persist($execution);
         $this->entityManager->flush();
 
-        foreach($this->jsonContent->results as $suite) {
+        foreach ($this->jsonContent->results as $suite) {
             $this->insertExecutionSuite($execution, $suite, self::FORMAT_DATE_MOCHA6);
         }
 
         // Calculate comparison with last execution
         $execution = $this->compareReportData($execution);
-        $execution->setInsertionEndDate(new DateTime());
+        $execution->setInsertionEndDate(new \DateTime());
 
         $this->entityManager->persist($execution);
         $this->entityManager->flush();
@@ -227,7 +224,7 @@ class ImportController extends AbstractController
         ]);
     }
 
-    private function insertExecutionSuite(Execution $execution, \stdClass $suite, string $dateFormat, ?int $parentSuiteId = null)
+    private function insertExecutionSuite(Execution $execution, \stdClass $suite, string $dateFormat, int $parentSuiteId = null)
     {
         $isMocha6 = $dateFormat === self::FORMAT_DATE_MOCHA6;
 
@@ -362,7 +359,7 @@ class ImportController extends AbstractController
         if (!$executionPrevious) {
             return $execution;
         }
-        
+
         $data = $this->testRepository->findComparisonDate($execution, $executionPrevious);
         if (empty($data)) {
             return $execution;
@@ -374,7 +371,7 @@ class ImportController extends AbstractController
             ->setBrokenSinceLast(0)
             ->setEqualSinceLast(0)
         ;
-        foreach($data as $datum) {
+        foreach ($data as $datum) {
             if ($datum['old_test_state'] == 'failed' && $datum['current_test_state'] == 'failed') {
                 $execution->setEqualSinceLast($execution->getEqualSinceLast() + 1);
             }
@@ -385,6 +382,7 @@ class ImportController extends AbstractController
                 $execution->setFixedSinceLast($execution->getFixedSinceLast() + 1);
             }
         }
+
         return $execution;
     }
 }

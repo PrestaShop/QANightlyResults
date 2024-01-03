@@ -6,10 +6,8 @@ use App\Entity\Execution;
 use App\Entity\Suite;
 use App\Entity\Test;
 use App\Repository\SuiteRepository;
-use DateTimeZone;
-use Doctrine\Common\Collections\Collection;
 
-class ReportSuiteBuilder 
+class ReportSuiteBuilder
 {
     public const FILTER_STATE_FAILED = 'failed';
     public const FILTER_STATE_PASSED = 'passed';
@@ -45,21 +43,24 @@ class ReportSuiteBuilder
         $this->suiteRepository = $suiteRepository;
     }
 
-    public function filterSearch(?string $search = null): self
+    public function filterSearch(string $search = null): self
     {
         $this->filterSearch = $search;
+
         return $this;
     }
 
     public function filterStates(array $states = self::FILTER_STATES): self
     {
         $this->filterStates = $states;
+
         return $this;
     }
 
     public function filterSuite(int $suiteId = null): self
     {
         $this->filterSuiteId = $suiteId;
+
         return $this;
     }
 
@@ -82,7 +83,7 @@ class ReportSuiteBuilder
                 $mainSuiteId = null;
                 break;
             }
-            
+
             $hasOnlyOneMainSuite = true;
             $mainSuiteId = $suite->getId();
         }
@@ -92,6 +93,7 @@ class ReportSuiteBuilder
         // Build the recursive tree
         $this->suites = $this->buildTree($mainSuiteId, true);
         $this->suites = $this->filterTree($this->suites, true);
+
         return $this;
     }
 
@@ -106,7 +108,7 @@ class ReportSuiteBuilder
     {
         $data = [];
 
-        foreach($this->suites as $suite) {
+        foreach ($this->suites as $suite) {
             $data[$suite->getId()] = $this->formatSuite($suite);
         }
 
@@ -116,10 +118,10 @@ class ReportSuiteBuilder
     private function formatSuite(Suite $suite): array
     {
         $suites = $tests = [];
-        foreach($suite->getSuites() as $suiteChild) {
+        foreach ($suite->getSuites() as $suiteChild) {
             $suites[$suiteChild->getId()] = $this->formatSuite($suiteChild);
         }
-        foreach($suite->getTests() as $test) {
+        foreach ($suite->getTests() as $test) {
             $tests[] = $this->formatTest($test);
         }
 
@@ -143,14 +145,14 @@ class ReportSuiteBuilder
             'hasTests' => $suite->getHasTests(),
             'parent_id' => $suite->getParentId(),
             'insertion_date' => $suite->getInsertionDate()
-                ->setTimezone(new DateTimeZone('-01:00'))
+                ->setTimezone(new \DateTimeZone('-01:00'))
                 ->format('Y-m-d H:i:s'),
             'suites' => $suites,
             'tests' => $tests,
-            'childrenData' => $this->stats[$suite->getId()] ?? []
+            'childrenData' => $this->stats[$suite->getId()] ?? [],
         ];
 
-        return array_filter($data, function($value): bool {
+        return array_filter($data, function ($value): bool {
             return !is_array($value) || !empty($value);
         });
     }
@@ -169,7 +171,7 @@ class ReportSuiteBuilder
             'stack_trace' => $test->getStackTrace(),
             'diff' => $test->getDiff(),
             'insertion_date' => $test->getInsertionDate()
-                ->setTimezone(new DateTimeZone('-01:00'))
+                ->setTimezone(new \DateTimeZone('-01:00'))
                 ->format('Y-m-d H:i:s'),
         ];
 
@@ -183,8 +185,8 @@ class ReportSuiteBuilder
     private function getTests(): array
     {
         $tests = [];
-        foreach($this->suites as $suite) {
-            foreach($suite->getTests() as $test) {
+        foreach ($this->suites as $suite) {
+            foreach ($suite->getTests() as $test) {
                 if ($test->getState() == 'failed' && $test->getStackTrace()) {
                     $stackTrace = str_replace('    at', '<br />&nbsp;&nbsp;&nbsp;&nbsp;at', htmlentities($test->getStackTrace()));
                     $test->setStackTraceFormatted($stackTrace);
@@ -246,8 +248,8 @@ class ReportSuiteBuilder
                     continue;
                 }
                 // When the "passed" toggle is turned on and we didn't accept this suite, it must only be shown if
-                //it hasn't any pending or failed test
-                //this prevents showing a suite with passed and failed test when we hide failed tests for example
+                // it hasn't any pending or failed test
+                // this prevents showing a suite with passed and failed test when we hide failed tests for example
                 if (in_array('passed', $this->filterStates)
                     && $this->stats[$suite->getId()]['totalPasses'] > 0
                     && $this->stats[$suite->getId()]['totalFailures'] == 0
@@ -267,7 +269,7 @@ class ReportSuiteBuilder
         $num = $basis;
 
         foreach ($suites as $suite) {
-            $num += $suite->{'getTotal'.ucfirst($status)}();
+            $num += $suite->{'getTotal' . ucfirst($status)}();
 
             if ($suite->getHasSuites() == 1) {
                 $num += $this->countStatus(0, $suite->getSuites(), $status);
@@ -279,13 +281,14 @@ class ReportSuiteBuilder
 
     /**
      * Filter the whole tree when using fulltext search
+     *
      * @param $suites
      * @param callable|null $function
+     *
      * @return array
      */
     private function filterTree(array $suites, bool $isRoot): array
     {
-
         if ($isRoot) {
             foreach ($suites as $key => &$suite) {
             }

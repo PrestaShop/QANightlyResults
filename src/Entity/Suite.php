@@ -321,12 +321,13 @@ class Suite
      */
     public function setTests(array $tests): static
     {
-        foreach($this->tests as $test) {
+        foreach ($this->tests as $test) {
             $this->removeTest($test);
         }
-        foreach($tests as $test) {
+        foreach ($tests as $test) {
             $this->addTest($test);
         }
+
         return $this;
     }
 

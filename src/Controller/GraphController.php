@@ -1,12 +1,11 @@
 <?php
+
 namespace App\Controller;
 
-use App\Entity\Execution;
 use App\Repository\ExecutionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class GraphController extends AbstractController
@@ -70,7 +69,7 @@ class GraphController extends AbstractController
                 'failures' => $execution->getFailures(),
                 'pending' => $execution->getPending(),
             ];
-        };
+        }
 
         return new JsonResponse($executions);
     }

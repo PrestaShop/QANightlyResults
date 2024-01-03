@@ -1,7 +1,7 @@
 <?php
+
 namespace App\Controller;
 
-use App\Entity\Execution;
 use App\Repository\ExecutionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,7 +24,7 @@ class DataController extends AbstractController
         $badge_data = $this->getBadgeData($request, false);
         if (!$badge_data) {
             return new JsonResponse([
-                'message' => 'Execution not found'
+                'message' => 'Execution not found',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -72,8 +72,7 @@ class DataController extends AbstractController
     private function getBadgeData(
         Request $request,
         bool $hexColor
-    ): ?array
-    {
+    ): ?array {
         $branch = $request->query->get('branch', 'develop');
         $date = $request->query->get('date');
         if ($date) {
