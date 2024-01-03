@@ -1,34 +1,9 @@
 <?php
 
-use DI\Bridge\Slim\Bridge;
-use Slim\Handlers\ErrorHandler;
+use App\Kernel;
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 
-$app = Bridge::create();
-
-/*
- * Load routes
- */
-require __DIR__ . '/../src/routes.php';
-
-loadRoutes($app);
-$app->addRoutingMiddleware();
-
-/*
- * Load settings
- */
-require __DIR__ . '/../src/settings.php';
-require __DIR__ . '/../src/database.php';
-
-// Add Error Middleware
-$display_errors = false;
-if (getenv('QANB_ENV') === 'staging' || getenv('QANB_ENV') === 'testing') {
-    $display_errors = true;
-}
-$errorMiddleware = $app->addErrorMiddleware($display_errors, $display_errors, $display_errors);
-/** @var ErrorHandler */
-$defaultHandler = $errorMiddleware->getDefaultErrorHandler();
-$defaultHandler->forceContentType('application/json');
-
-$app->run();
+return function (array $context) {
+    return new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
+};
