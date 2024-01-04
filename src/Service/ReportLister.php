@@ -41,7 +41,7 @@ class ReportLister
 
                 $date = $matches[1];
                 $version = $matches[2];
-                if (!isset($GCP_files_list[$date][$version])) {
+                if (!isset($listing[$date][$version])) {
                     $listing[$date][$version] = [];
                 }
                 $listing[$date][$version][$extension] = $buildName;

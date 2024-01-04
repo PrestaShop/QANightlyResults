@@ -16,7 +16,7 @@ class Suite
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'suite')]
+    #[ORM\ManyToOne(inversedBy: 'suitesCollection')]
     private ?Execution $execution = null;
 
     #[ORM\Column(length: 50)]
@@ -164,7 +164,7 @@ class Suite
         return $this;
     }
 
-    public function isHasSkipped(): ?bool
+    public function hasSkipped(): ?bool
     {
         return $this->hasSkipped;
     }
@@ -176,7 +176,7 @@ class Suite
         return $this;
     }
 
-    public function isHasPending(): ?bool
+    public function hasPending(): ?bool
     {
         return $this->hasPending;
     }
@@ -188,7 +188,7 @@ class Suite
         return $this;
     }
 
-    public function isHasPasses(): ?bool
+    public function hasPasses(): ?bool
     {
         return $this->hasPasses;
     }
@@ -200,7 +200,7 @@ class Suite
         return $this;
     }
 
-    public function isHasFailures(): ?bool
+    public function hasFailures(): ?bool
     {
         return $this->hasFailures;
     }

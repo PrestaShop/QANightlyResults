@@ -133,10 +133,10 @@ class ReportSuiteBuilder
             'campaign' => $suite->getCampaign(),
             'file' => $suite->getFile(),
             'duration' => $suite->getDuration(),
-            'hasSkipped' => $suite->isHasSkipped() ? 1 : 0,
-            'hasPending' => $suite->isHasPending() ? 1 : 0,
-            'hasPasses' => $suite->isHasPasses() ? 1 : 0,
-            'hasFailures' => $suite->isHasFailures() ? 1 : 0,
+            'hasSkipped' => $suite->hasSkipped() ? 1 : 0,
+            'hasPending' => $suite->hasPending() ? 1 : 0,
+            'hasPasses' => $suite->hasPasses() ? 1 : 0,
+            'hasFailures' => $suite->hasFailures() ? 1 : 0,
             'totalSkipped' => $suite->getTotalSkipped(),
             'totalPending' => $suite->getTotalPending(),
             'totalPasses' => $suite->getTotalPasses(),
@@ -175,8 +175,8 @@ class ReportSuiteBuilder
                 ->format('Y-m-d H:i:s'),
         ];
 
-        if ($test->getStackTraceFormatted() !== null) {
-            $data['stack_trace_formatted'] = $test->getStackTraceFormatted();
+        if ($test->getFormattedStackTrace() !== null) {
+            $data['stack_trace_formatted'] = $test->getFormattedStackTrace();
         }
 
         return $data;
@@ -189,7 +189,7 @@ class ReportSuiteBuilder
             foreach ($suite->getTests() as $test) {
                 if ($test->getState() == 'failed' && $test->getStackTrace()) {
                     $stackTrace = str_replace('    at', '<br />&nbsp;&nbsp;&nbsp;&nbsp;at', htmlentities($test->getStackTrace()));
-                    $test->setStackTraceFormatted($stackTrace);
+                    $test->setFormattedStackTrace($stackTrace);
                 }
                 if (!isset($tests[$test->getSuite()->getId()])) {
                     $tests[$test->getSuite()->getId()] = [];

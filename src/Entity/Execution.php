@@ -333,7 +333,7 @@ class Execution
     {
         if (!$this->suitesCollection->contains($suite)) {
             $this->suitesCollection->add($suite);
-            $suite->setExecutionId($this);
+            $suite->setExecution($this);
         }
 
         return $this;
@@ -343,8 +343,8 @@ class Execution
     {
         if ($this->suitesCollection->removeElement($suite)) {
             // set the owning side to null (unless already changed)
-            if ($suite->getExecutionId() === $this) {
-                $suite->setExecutionId(null);
+            if ($suite->getExecution() === $this) {
+                $suite->setExecution(null);
             }
         }
 

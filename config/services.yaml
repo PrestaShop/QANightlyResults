@@ -4,12 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    QANB_DB_HOST: '%env(QANB_DB_HOST)%'
-    QANB_DB_NAME: '%env(QANB_DB_NAME)%'
-    QANB_DB_USERNAME: '%env(QANB_DB_USERNAME)%'
-    QANB_DB_PASSWORD: '%env(QANB_DB_PASSWORD)%'
     QANB_GCPURL: '%env(QANB_GCPURL)%'
-    QANB_VERSION: '%env(QANB_VERSION)%'
     QANB_TOKEN: '%env(QANB_TOKEN)%'
 
 services:

@@ -45,7 +45,7 @@ class Test
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $insertion_date;
 
-    private ?string $stack_trace_formatted = null;
+    private ?string $formattedStackTrace = null;
 
     public function getId(): ?int
     {
@@ -155,14 +155,14 @@ class Test
         return $this;
     }
 
-    public function getStackTraceFormatted(): ?string
+    public function getFormattedStackTrace(): ?string
     {
-        return $this->stack_trace_formatted;
+        return $this->formattedStackTrace;
     }
 
-    public function setStackTraceFormatted(?string $stack_trace_formatted): static
+    public function setFormattedStackTrace(?string $formattedStackTrace): static
     {
-        $this->stack_trace_formatted = $stack_trace_formatted;
+        $this->formattedStackTrace = $formattedStackTrace;
 
         return $this;
     }
