@@ -70,8 +70,8 @@ class Execution
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $insertion_start_date;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTimeInterface $insertion_end_date;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $insertion_end_date;
 
     /** @var Collection<int, Suite> */
     #[ORM\OneToMany(mappedBy: 'execution', targetEntity: Suite::class)]

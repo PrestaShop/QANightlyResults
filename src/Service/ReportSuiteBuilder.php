@@ -27,6 +27,8 @@ class ReportSuiteBuilder
 
     private ?int $filterSuiteId = null;
 
+    private bool $filterEmptyArrays = true;
+
     /** @var array<int, Suite> */
     private array $suites = [];
 
@@ -35,6 +37,13 @@ class ReportSuiteBuilder
 
     /** @var array<int, array<string, int>> */
     private array $stats = [];
+
+    public function filterEmptyArrays(bool $filterEmptyArrays): self
+    {
+        $this->filterEmptyArrays = $filterEmptyArrays;
+
+        return $this;
+    }
 
     public function filterSearch(string $search = null): self
     {
@@ -63,8 +72,8 @@ class ReportSuiteBuilder
     public function build(Execution $execution): self
     {
         $this->suites = $execution->getSuitesCollection()->toArray();
-        // Find if there is main suite id
 
+        // Find if there is main suite id
         $hasOnlyOneMainSuite = false;
         $mainSuiteId = null;
         foreach ($this->suites as $suite) {
@@ -157,9 +166,13 @@ class ReportSuiteBuilder
             'childrenData' => $this->stats[$suite->getId()] ?? [],
         ];
 
-        return array_filter($data, function ($value): bool {
-            return !is_array($value) || !empty($value);
-        });
+        if ($this->filterEmptyArrays) {
+            return array_filter($data, function ($value): bool {
+                return !is_array($value) || !empty($value);
+            });
+        }
+
+        return $data;
     }
 
     /**

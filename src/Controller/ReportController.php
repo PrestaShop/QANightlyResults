@@ -169,6 +169,7 @@ class ReportController extends AbstractController
 
         $return = $this->reportSuiteBuilder
             ->filterSuite($idSuite)
+            ->filterEmptyArrays(false)
             ->build($execution)
             ->toArrayNth(0);
 

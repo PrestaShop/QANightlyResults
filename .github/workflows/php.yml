@@ -58,52 +58,55 @@ jobs:
 
       - name: Run phpstan
         run: ./vendor/bin/phpstan analyse
-#   phpunit:
-#     permissions:
-#       contents: read  # for actions/checkout to fetch code
-#     name: PHPUnit
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         php: [ '8.1', '8.2' ]
-#       fail-fast: false
-#     steps:
-#       - name: Setup PHP
-#         uses: shivammathur/setup-php@v2
-#         with:
-#           php-version: ${{ matrix.php }}
-#           extensions: mbstring, intl, gd, xml, dom, json, fileinfo, curl, zip, iconv, simplexml
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  phpunit:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+    name: PHPUnit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-#       - uses: actions/checkout@v3
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql version: '8.0'
+          mysql database: 'qanightlyresults'
+          mysql root password: 'password'
 
-#       - name: PrestaShop Configuration
-#         run: cp .github/workflows/phpunit/parameters.yml app/config/parameters.yml
+      - uses: actions/checkout@v3
 
-#       - name: Get Composer Cache Directory
-#         id: composer-cache
-#         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Config
+        run: cp .env.dist .env
 
-#       - name: Cache Composer Directory
-#         uses: actions/cache@v3
-#         with:
-#           path: ${{ steps.composer-cache.outputs.dir }}
-#           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-#           restore-keys: ${{ runner.os }}-composer-
+      - name: Composer Install
+        run: composer install --ansi --prefer-dist --no-interaction --no-progress
 
-#       - name: Composer Install
-#         run: composer install --ansi --prefer-dist --no-interaction --no-progress
+      - name: Change MySQL authentication method
+        run: sleep 15 && mysql -h127.0.0.1 -uroot -ppassword -e "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'password'; FLUSH PRIVILEGES;"
 
-#       - name: Update phpunit version
-#         if: ${{ startsWith(matrix.php, '8.') }}
-#         run: composer update -w --ignore-platform-reqs --no-interaction phpunit/phpunit
+      - name: Setup database
+        run: php bin/console doctrine:schema:update --dump-sql --force --env=test
 
-#       - name: Run phpunit
-#         run: ./vendor/phpunit/phpunit/phpunit -c tests/Unit/phpunit.xml
-#         env:
-#           SYMFONY_DEPRECATIONS_HELPER: disabled
+      - name: Inject data for AutoUpgrade
+        run: |
+          DATE=$(date -d "2 days ago" +"%Y-%m-%d")
+          php bin/console nightly:import autoupgrade_$DATE-develop.json\
+            -p cli \
+            -c autoupgrade \
+            --env test
 
-#       - name: Test git versionned files unchanged
-#         if: ${{ !startsWith(matrix.php, '8.') }}  # composer.lock changes when updating phpunit version
-#         run: git diff --exit-code
+      - name: Inject data for Core
+        run: |
+          DATE=$(date -d "2 days ago" +"%Y-%m-%d")
+          php bin/console nightly:import $DATE-develop.json\
+           -p chromium \
+           -c functional \
+           --env test
+
+      - name: Run phpunit
+        run: ./vendor/bin/phpunit
