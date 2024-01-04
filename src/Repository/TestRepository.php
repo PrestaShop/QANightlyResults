@@ -23,7 +23,11 @@ class TestRepository extends ServiceEntityRepository
         parent::__construct($registry, Test::class);
     }
 
-    // Get comparison data between current report and precedent report
+    /**
+     * Get comparison data between current report and precedent report
+     *
+     * @return array<int, array{'old_test_state': string, 'current_test_state': string}>
+     */
     public function findComparisonDate(Execution $current, Execution $previous): array
     {
         return $this->createQueryBuilder('t1')

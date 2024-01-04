@@ -21,10 +21,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v3
 
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
       - name: Config
         run: cp .env.dist .env
 
@@ -39,46 +35,29 @@ jobs:
 
       - name: Run ergebnis/composer-normalize
         run: composer normalize --dry-run --no-check-lock
-#   phpstan:
-#     permissions:
-#       contents: read  # for actions/checkout to fetch code
-#     name: PHP Static Analysis
-#     runs-on: ubuntu-latest
-#     strategy:
-#       matrix:
-#         php: [ '8.1', '8.2' ]
-#       fail-fast: false
-#     steps:
-#       - name: Setup PHP
-#         uses: shivammathur/setup-php@v2
-#         with:
-#           php-version: '8.1'  # will be overriden by platform.php in composer.json see https://phpstan.org/config-reference#phpversion
-#           extensions: mbstring, intl, gd, xml, dom, json, fileinfo, curl, zip, iconv, simplexml
-#           coverage: none  # disable coverage to disable xdebug in the action.
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  phpstan:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+    name: PHP Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-#       - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-#       - name: Get Composer Cache Directory
-#         id: composer-cache
-#         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Config
+        run: cp .env.dist .env
 
-#       - name: Cache Composer Directory
-#         uses: actions/cache@v3
-#         with:
-#           path: ${{ steps.composer-cache.outputs.dir }}
-#           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-#           restore-keys: ${{ runner.os }}-composer-
+      - name: Composer Install
+        run: composer install --ansi --prefer-dist --no-interaction --no-progress
 
-#       - name: Composer Install
-#         run: |
-#           composer install --ansi --prefer-dist --no-interaction --no-progress
-#           rm composer.lock
-#           composer config platform.php ${{ matrix.php }}
-
-#       - name: Run phpstan
-#         run: ./vendor/bin/phpstan analyse -c phpstan.neon.dist
+      - name: Run phpstan
+        run: ./vendor/bin/phpstan analyse
 #   phpunit:
 #     permissions:
 #       contents: read  # for actions/checkout to fetch code

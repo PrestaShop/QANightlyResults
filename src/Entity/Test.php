@@ -43,7 +43,7 @@ class Test
     private ?string $diff = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTimeInterface $insertion_date;
+    private \DateTime $insertion_date;
 
     private ?string $formattedStackTrace = null;
 
@@ -179,12 +179,12 @@ class Test
         return $this;
     }
 
-    public function getInsertionDate(): ?\DateTimeInterface
+    public function getInsertionDate(): ?\DateTime
     {
         return $this->insertion_date;
     }
 
-    public function setInsertionDate(\DateTimeInterface $insertion_date): static
+    public function setInsertionDate(\DateTime $insertion_date): static
     {
         $this->insertion_date = $insertion_date;
 

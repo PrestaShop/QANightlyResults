@@ -47,7 +47,7 @@ class ExecutionRepository extends ServiceEntityRepository
         string $version,
         string $platform,
         string $campaign,
-        \DateTime $dateUntil
+        \DateTimeInterface $dateUntil
     ): ?Execution {
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')
@@ -82,6 +82,9 @@ class ExecutionRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function findAllVersions(): array
     {
         $results = ['develop'];
@@ -99,6 +102,9 @@ class ExecutionRepository extends ServiceEntityRepository
         return $results;
     }
 
+    /**
+     * @return array<int, Execution>
+     */
     public function findAllBetweenDates(string $version, string $startDate, string $endDate): array
     {
         $qb = $this->createQueryBuilder('e')

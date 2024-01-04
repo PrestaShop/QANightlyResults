@@ -224,7 +224,7 @@ class ImportController extends AbstractController
         return null;
     }
 
-    private function insertExecutionSuite(Execution $execution, \stdClass $suite, string $dateFormat, int $parentSuiteId = null)
+    private function insertExecutionSuite(Execution $execution, \stdClass $suite, string $dateFormat, int $parentSuiteId = null): void
     {
         $isMocha6 = $dateFormat === self::FORMAT_DATE_MOCHA6;
 
@@ -350,6 +350,10 @@ class ImportController extends AbstractController
 
     private function compareReportData(Execution $execution): Execution
     {
+        if (!$execution->getStartDate()) {
+            return $execution;
+        }
+
         $executionPrevious = $this->executionRepository->findOneByNightlyBefore(
             $execution->getVersion(),
             $execution->getPlatform(),

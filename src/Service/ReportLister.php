@@ -11,6 +11,9 @@ class ReportLister
         $this->url = $nightlyGCPUrl;
     }
 
+    /**
+     * @return array<string, array<string, array<string, string>>>
+     */
     public function get(): array
     {
         $return = file_get_contents($this->url);

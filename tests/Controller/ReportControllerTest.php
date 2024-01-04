@@ -215,6 +215,9 @@ class ReportControllerTest extends WebTestCase
         $this->assertEquals($data, $content);
     }
 
+    /**
+     * @param array<string, string> $item
+     */
     private function partialTestSuite(int $executionId, int $id, array $item, int $idParent = null, bool $hasChildrenData = null): void
     {
         $this->assertIsInt($id);
@@ -293,6 +296,9 @@ class ReportControllerTest extends WebTestCase
         }
     }
 
+    /**
+     * @param array<string, string> $test
+     */
     private function partialTestTest(int $suiteId, array $test): void
     {
         $this->assertArrayHasKey('id', $test);

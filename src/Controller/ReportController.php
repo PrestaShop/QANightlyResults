@@ -100,8 +100,8 @@ class ReportController extends AbstractController
 
         // merge two arrays in one and sort them by date
         usort($reports, function ($dt1, $dt2) {
-            $tm1 = isset($dt1['start_date']) ? $dt1['start_date'] : $dt1['date'];
-            $tm2 = isset($dt2['start_date']) ? $dt2['start_date'] : $dt2['date'];
+            $tm1 = $dt1['start_date'];
+            $tm2 = $dt2['start_date'];
 
             return ($tm1 < $tm2) ? 1 : (($tm1 > $tm2) ? -1 : 0);
         });
@@ -112,7 +112,9 @@ class ReportController extends AbstractController
     #[Route('/reports/{idReport}', methods: ['GET'])]
     public function report(int $idReport, Request $request): JsonResponse
     {
-        $execution = $this->executionRepository->findOneById($idReport);
+        $execution = $this->executionRepository->findOneBy([
+            'id' => $idReport,
+        ]);
         if (!$execution) {
             return new JsonResponse([
                 'message' => 'Execution not found',
@@ -156,7 +158,9 @@ class ReportController extends AbstractController
     #[Route('/reports/{idReport}/suites/{idSuite}', methods: ['GET'])]
     public function reportSuite(int $idReport, int $idSuite, Request $request): JsonResponse
     {
-        $execution = $this->executionRepository->findOneById($idReport);
+        $execution = $this->executionRepository->findOneBy([
+            'id' => $idReport,
+        ]);
         if (!$execution) {
             return new JsonResponse([
                 'message' => 'Execution not found',

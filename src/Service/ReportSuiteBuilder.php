@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Entity\Execution;
 use App\Entity\Suite;
 use App\Entity\Test;
-use App\Repository\SuiteRepository;
 
 class ReportSuiteBuilder
 {
@@ -21,27 +20,21 @@ class ReportSuiteBuilder
         self::FILTER_STATE_PENDING,
     ];
 
+    /** @var array<int, string> */
     private array $filterStates = self::FILTER_STATES;
 
     private ?string $filterSearch = null;
 
     private ?int $filterSuiteId = null;
 
+    /** @var array<int, Suite> */
     private array $suites = [];
 
+    /** @var array<int, array<int, Test>> */
     private array $tests = [];
 
-    /**
-     * @var array<int, array<string, int>>
-     */
+    /** @var array<int, array<string, int>> */
     private array $stats = [];
-
-    private SuiteRepository $suiteRepository;
-
-    public function __construct(SuiteRepository $suiteRepository)
-    {
-        $this->suiteRepository = $suiteRepository;
-    }
 
     public function filterSearch(string $search = null): self
     {
@@ -50,6 +43,9 @@ class ReportSuiteBuilder
         return $this;
     }
 
+    /**
+     * @param array<int, string> $states
+     */
     public function filterStates(array $states = self::FILTER_STATES): self
     {
         $this->filterStates = $states;
@@ -92,11 +88,14 @@ class ReportSuiteBuilder
 
         // Build the recursive tree
         $this->suites = $this->buildTree($mainSuiteId, true);
-        $this->suites = $this->filterTree($this->suites, true);
+        $this->suites = $this->filterTree($this->suites);
 
         return $this;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function toArrayNth(int $nth): array
     {
         $data = array_values($this->toArray());
@@ -104,6 +103,9 @@ class ReportSuiteBuilder
         return $data[$nth] ?? [];
     }
 
+    /**
+     * @return array<int, array<string, string>>
+     */
     public function toArray(): array
     {
         $data = [];
@@ -115,6 +117,9 @@ class ReportSuiteBuilder
         return $data;
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function formatSuite(Suite $suite): array
     {
         $suites = $tests = [];
@@ -157,6 +162,9 @@ class ReportSuiteBuilder
         });
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function formatTest(Test $test): array
     {
         $data = [
@@ -182,6 +190,9 @@ class ReportSuiteBuilder
         return $data;
     }
 
+    /**
+     * @return array<int, array<int, Test>>
+     */
     private function getTests(): array
     {
         $tests = [];
@@ -264,6 +275,9 @@ class ReportSuiteBuilder
         return $tree;
     }
 
+    /**
+     * @param array<int, Suite> $suites
+     */
     private function countStatus(int $basis, array $suites, string $status): int
     {
         $num = $basis;
@@ -282,26 +296,20 @@ class ReportSuiteBuilder
     /**
      * Filter the whole tree when using fulltext search
      *
-     * @param $suites
-     * @param callable|null $function
+     * @param array<int, Suite> $suites
      *
-     * @return array
+     * @return array<int, Suite>
      */
-    private function filterTree(array $suites, bool $isRoot): array
+    private function filterTree(array $suites): array
     {
-        if ($isRoot) {
-            foreach ($suites as $key => &$suite) {
-            }
-        }
-
         foreach ($suites as $key => &$suite) {
             $suiteChildren = $suite->getSuites();
-            $suiteTests = $suite->getTests();
+            $numSuiteTests = $suite->getTests()->count();
             if (!empty($suiteChildren)) {
-                $suite->setSuites($this->filterTree($suiteChildren, false));
+                $suite->setSuites($this->filterTree($suiteChildren));
             }
             if (empty($suiteChildren)
-                && empty($suiteTests)
+                && $numSuiteTests === 0
                 && $this->filterSuiteSearch($suite)
             ) {
                 unset($suites[$key]);

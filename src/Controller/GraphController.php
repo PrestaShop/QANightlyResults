@@ -82,6 +82,8 @@ class GraphController extends AbstractController
 
     /**
      * Format a list of all the parameters to use in all methods
+     *
+     * @return array{'periods': array{'type': string, 'name': string, 'values': array<int, array{'name': string, 'value': string}>, 'default': string}, 'versions': array{'type': string, 'name': string, 'values': array<int, array{'name': string, 'value': string}>, 'default': string}}
      */
     private function getParameters(): array
     {
@@ -126,6 +128,8 @@ class GraphController extends AbstractController
 
     /**
      * Check is the parameter is valid
+     *
+     * @param array<int, array{'name': string, 'value': string}> $values
      */
     private function isValidParameter(string $parameter, array $values): bool
     {
