@@ -23,10 +23,10 @@ class Execution
     private ?string $filename = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $start_date = null;
+    private ?\DateTime $start_date = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $end_date = null;
+    private ?\DateTime $end_date = null;
 
     #[ORM\Column]
     private ?int $duration = null;
@@ -73,6 +73,7 @@ class Execution
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $insertion_end_date;
 
+    /** @var Collection<int, Suite> */
     #[ORM\OneToMany(mappedBy: 'execution', targetEntity: Suite::class)]
     private Collection $suitesCollection;
 
@@ -117,24 +118,24 @@ class Execution
         return $this;
     }
 
-    public function getStartDate(): ?\DateTimeInterface
+    public function getStartDate(): ?\DateTime
     {
         return $this->start_date;
     }
 
-    public function setStartDate(?\DateTimeInterface $start_date): static
+    public function setStartDate(?\DateTime $start_date): static
     {
         $this->start_date = $start_date;
 
         return $this;
     }
 
-    public function getEndDate(): ?\DateTimeInterface
+    public function getEndDate(): ?\DateTime
     {
         return $this->end_date;
     }
 
-    public function setEndDate(?\DateTimeInterface $end_date): static
+    public function setEndDate(?\DateTime $end_date): static
     {
         $this->end_date = $end_date;
 

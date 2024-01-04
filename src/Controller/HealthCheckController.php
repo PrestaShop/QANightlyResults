@@ -31,7 +31,7 @@ class HealthCheckController extends AbstractController
                 'campaign' => 'functional',
                 'platform' => 'chromium',
             ]);
-        } catch (QueryException $e) {
+        } catch (\Exception $e) {
             $data['database'] = false;
         }
 

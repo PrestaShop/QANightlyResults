@@ -68,11 +68,13 @@ class Suite
     private ?int $parent_id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $insertion_date = null;
+    private ?\DateTime $insertion_date = null;
 
+    /** @var Collection<int, Test> */
     #[ORM\OneToMany(mappedBy: 'suite', targetEntity: Test::class, orphanRemoval: true)]
     private Collection $tests;
 
+    /** @var array<int, Suite> */
     private array $suites = [];
 
     public function __construct()
@@ -296,12 +298,12 @@ class Suite
         return $this;
     }
 
-    public function getInsertionDate(): ?\DateTimeInterface
+    public function getInsertionDate(): ?\DateTime
     {
         return $this->insertion_date;
     }
 
-    public function setInsertionDate(\DateTimeInterface $insertion_date): static
+    public function setInsertionDate(\DateTime $insertion_date): static
     {
         $this->insertion_date = $insertion_date;
 
@@ -317,7 +319,7 @@ class Suite
     }
 
     /**
-     * @return Collection<int, Test>
+     * @param array<int, Test> $tests
      */
     public function setTests(array $tests): static
     {
@@ -353,11 +355,17 @@ class Suite
         return $this;
     }
 
+    /**
+     * @return array<int, Suite>
+     */
     public function getSuites(): array
     {
         return $this->suites;
     }
 
+    /**
+     * @param array<int, Suite> $suites
+     */
     public function setSuites(array $suites): static
     {
         $this->suites = $suites;

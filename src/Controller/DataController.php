@@ -69,11 +69,14 @@ class DataController extends AbstractController
         );
     }
 
+    /**
+     * @return array{'branch': string, 'percent': float, 'color': string}|null
+     */
     private function getBadgeData(
         Request $request,
         bool $hexColor
     ): ?array {
-        $branch = $request->query->get('branch', 'develop');
+        $branch = (string) $request->query->get('branch', 'develop');
         $date = $request->query->get('date');
         if ($date) {
             $date = date('Y-m-d', strtotime($date)) == $date ? $date : null;
