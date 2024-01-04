@@ -1,113 +1,101 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Controller;
 
-use Illuminate\Database\Capsule\Manager;
-use Slim\Psr7\Request;
-use Slim\Psr7\Response;
+use App\Repository\ExecutionRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
-class DataController extends BaseController
+class DataController extends AbstractController
 {
-    /**
-     * Display data for a badge in GitHub
-     *
-     * @param Request $request
-     * @param Response $response
-     *
-     * @return Response
-     */
-    public function badge(Request $request, Response $response): Response
+    private ExecutionRepository $executionRepository;
+
+    public function __construct(ExecutionRepository $executionRepository)
     {
-        $badge_data = $this->getBadgeData($request);
-        $badge = [
+        $this->executionRepository = $executionRepository;
+    }
+
+    #[Route('/data/badge', methods: ['GET'])]
+    public function badgeJson(Request $request): JsonResponse
+    {
+        $badge_data = $this->getBadgeData($request, false);
+        if (!$badge_data) {
+            return new JsonResponse([
+                'message' => 'Execution not found',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse([
             'schemaVersion' => 1,
             'label' => $badge_data['branch'],
             'message' => $badge_data['percent'] . '% passed',
-            'color' => 'green',
-        ];
-
-        if ($badge_data['percent'] < 100) {
-            $badge['color'] = 'orange';
-        }
-        if ($badge_data['percent'] < 80) {
-            $badge['color'] = 'red';
-        }
-
-        $response->getBody()->write(json_encode($badge));
-
-        return $response->withHeader('Content-Type', 'application/json');
+            'color' => $badge_data['color'],
+        ]);
     }
 
-    public function svg(Request $request, Response $response): Response
+    #[Route('/data/badge/svg', methods: ['GET'])]
+    public function badgeSvg(Request $request): Response
     {
-        $badge_data = $this->getBadgeData($request);
-        $color = '#76ca00'; //green
-        if ($badge_data['percent'] < 100) {
-            $color = '#eba400'; //orange
-        }
-        if ($badge_data['percent'] < 80) {
-            $color = '#e00707'; //red
+        $badge_data = $this->getBadgeData($request, true);
+        if (!$badge_data) {
+            return new Response('Execution not found', Response::HTTP_NOT_FOUND);
         }
 
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="190" height="20">
-            <g clip-path="url(#a)">
-                <path fill="#444" d="M0 0h58v20H0z"/>
-                <path fill="' . $color . '" d="M58 0h85v20H58z"/>
-            </g>
-            <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="110">
-                <text x="285" y="140" transform="scale(0.1)" textLength="430">' . $badge_data['branch'] . '</text>
-                <text x="1000" y="140" transform="scale(.1)" textLength="750">' . $badge_data['percent'] . '% passed</text>
-            </g>
-        </svg>
-        ';
-        $response->getBody()->write($svg);
+        $content = sprintf(
+            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="190" height="20">'
+            . '<g clip-path="url(#a)">'
+            . '<path fill="#444" d="M0 0h58v20H0z"/>'
+            . '<path fill="%s" d="M58 0h85v20H58z"/>'
+            . '</g>'
+            . '<g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="110">'
+            . '<text x="285" y="140" transform="scale(0.1)" textLength="430">%s</text>'
+            . '<text x="1000" y="140" transform="scale(.1)" textLength="750">%.2f%% passed</text>'
+            . '</g>'
+            . '</svg>',
+            $badge_data['color'],
+            $badge_data['branch'],
+            $badge_data['percent']
+        );
 
-        return $response->withHeader('Content-Type', 'image/svg+xml');
+        return new Response(
+            $content,
+            Response::HTTP_OK,
+            [
+                'content-type' => 'image/svg+xml',
+            ]
+        );
     }
 
-    /**
-     * Get all data for badges
-     */
-    private function getBadgeData(Request $request): ?array
-    {
-        $badge = null;
-        //default values
-        $branch = 'develop';
-        $date = null;
-        //check GET values
-        $get_query_params = $request->getQueryParams();
-        if (isset($get_query_params['branch']) && trim($get_query_params['branch']) != '') {
-            $branch = trim($get_query_params['branch']);
+    private function getBadgeData(
+        Request $request,
+        bool $hexColor
+    ): ?array {
+        $branch = $request->query->get('branch', 'develop');
+        $date = $request->query->get('date');
+        if ($date) {
+            $date = date('Y-m-d', strtotime($date)) == $date ? $date : null;
         }
 
-        if (isset($get_query_params['date']) && trim($get_query_params['date']) != ''
-            && date('Y-m-d', strtotime($get_query_params['date'])) == $get_query_params['date']) {
-            $date = trim($get_query_params['date']);
-        }
-
-        if ($date === null) {
-            $execution = Manager::table('execution')
-                ->where('version', '=', $branch)
-                ->orderBy('start_date', 'DESC')
-                ->limit(1)
-                ->first();
-        } else {
-            $execution = Manager::table('execution')
-                ->where('version', '=', $branch)
-                ->whereRaw('DATE(start_date) = ?', [$date])
-                ->first();
-        }
-
+        $execution = $this->executionRepository->findOneByVersionAndDate($branch, $date);
         if ($execution) {
-            $percent = round($execution->passes * 100 / ($execution->tests - $execution->pending - $execution->skipped), 2);
-            $badge = [
+            $percent = round(($execution->getPasses() * 100) / ($execution->getTests() - $execution->getPending() - $execution->getSkipped()), 2);
+
+            if ($hexColor) {
+                $color = $percent < 80 ? '#e00707' : ($percent == 100 ? '#76ca00' : '#eba400');
+            } else {
+                $color = $percent < 80 ? 'red' : ($percent == 100 ? 'green' : 'orange');
+            }
+
+            return [
                 'branch' => $branch,
                 'percent' => $percent,
+                'color' => $color,
             ];
         }
 
-        return $badge;
+        return null;
     }
 }
