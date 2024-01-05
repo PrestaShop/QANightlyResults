@@ -9,12 +9,6 @@ Its purpose is to :
 2. let people browse a report of a test execution
 3. display some statistics about test failures
 
-## Usage
-
-Create a database following the schema provided in schema.sql at the root of the project.
-
-Don't forget to launch `composer install` to install all dependencies.
-
 ### Configuration
 
 You can create a `.env.local` file at the root of the project. You can also pass the values via environment variables. 
@@ -26,6 +20,11 @@ Here are the main ones:
 | DATABASE_URL      | DSN for MySQL Server                     |
 | QANB_TOKEN        | Token to add JSON data through the Hook  |
 
+## Usage
+
+Install dependencies with a `composer install`.
+
+Create a database with a `php bin/console doctrine:schema:update --dump-sql --force`.
 
 ## Web server configuration
 
