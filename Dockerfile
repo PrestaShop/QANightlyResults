@@ -1,4 +1,4 @@
-FROM php:7.2-apache as builder
+FROM php:8.3-apache as builder
 
 RUN apt-get update && \
     apt-get install -y \
@@ -15,7 +15,7 @@ RUN composer update && \
     composer install
 
 
-FROM php:7.2-apache
+FROM php:8.3-apache
 
 RUN apt-get update && \
     apt-get install -y \ 
