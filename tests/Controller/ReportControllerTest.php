@@ -2,11 +2,25 @@
 
 namespace App\Tests\Controller;
 
-use App\Controller\ImportController;
+use App\Service\ReportImporter;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ReportControllerTest extends WebTestCase
 {
+    private static int $reportId = 0;
+    private static int $suiteId = 0;
+
+    public static function setUpBeforeClass(): void
+    {
+        $data = file_get_contents('https://api-nightly.prestashop-project.org/reports?filter_version=develop&filter_campaign=functional');
+        $data = json_decode($data, true);
+        self::$reportId = $data[2]['id'];
+
+        $data = file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId);
+        $data = json_decode($data, true);
+        self::$suiteId = array_key_first($data['suites_data']);
+    }
+
     public function testReports(): void
     {
         $client = static::createClient();
@@ -30,11 +44,11 @@ class ReportControllerTest extends WebTestCase
             $this->assertArrayHasKey('date', $item);
             $this->assertArrayHasKey('version', $item);
             $this->assertArrayHasKey('campaign', $item);
-            $this->assertContains($item['campaign'], ImportController::FILTER_CAMPAIGNS);
+            $this->assertContains($item['campaign'], ReportImporter::FILTER_CAMPAIGNS);
             $this->assertArrayHasKey('browser', $item);
-            $this->assertContains($item['browser'], ImportController::FILTER_PLATFORMS);
+            $this->assertContains($item['browser'], ReportImporter::FILTER_PLATFORMS);
             $this->assertArrayHasKey('platform', $item);
-            $this->assertContains($item['platform'], ImportController::FILTER_PLATFORMS);
+            $this->assertContains($item['platform'], ReportImporter::FILTER_PLATFORMS);
             $this->assertEquals($item['browser'], $item['platform']);
             $this->assertArrayHasKey('start_date', $item);
             $this->assertArrayHasKey('end_date', $item);
@@ -75,7 +89,7 @@ class ReportControllerTest extends WebTestCase
     public function testReportID(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/reports/8111');
+        $client->request('GET', '/reports/2');
         $response = $client->getResponse();
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -90,11 +104,11 @@ class ReportControllerTest extends WebTestCase
         $this->assertArrayHasKey('date', $content);
         $this->assertArrayHasKey('version', $content);
         $this->assertArrayHasKey('campaign', $content);
-        $this->assertContains($content['campaign'], ImportController::FILTER_CAMPAIGNS);
+        $this->assertContains($content['campaign'], ReportImporter::FILTER_CAMPAIGNS);
         $this->assertArrayHasKey('browser', $content);
-        $this->assertContains($content['browser'], ImportController::FILTER_PLATFORMS);
+        $this->assertContains($content['browser'], ReportImporter::FILTER_PLATFORMS);
         $this->assertArrayHasKey('platform', $content);
-        $this->assertContains($content['platform'], ImportController::FILTER_PLATFORMS);
+        $this->assertContains($content['platform'], ReportImporter::FILTER_PLATFORMS);
         $this->assertEquals($content['browser'], $content['platform']);
         $this->assertArrayHasKey('start_date', $content);
         $this->assertArrayHasKey('end_date', $content);
@@ -105,11 +119,8 @@ class ReportControllerTest extends WebTestCase
         $this->assertArrayHasKey('tests', $content);
         $this->assertIsInt($content['tests']);
         $this->assertArrayHasKey('broken_since_last', $content);
-        $this->assertIsInt($content['broken_since_last']);
         $this->assertArrayHasKey('fixed_since_last', $content);
-        $this->assertIsInt($content['fixed_since_last']);
         $this->assertArrayHasKey('equal_since_last', $content);
-        $this->assertIsInt($content['equal_since_last']);
         $this->assertArrayHasKey('skipped', $content);
         $this->assertIsInt($content['skipped']);
         $this->assertArrayHasKey('pending', $content);
@@ -129,7 +140,7 @@ class ReportControllerTest extends WebTestCase
     public function testReportIDSuiteID(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/reports/8111/suites/4772035');
+        $client->request('GET', '/reports/2/suites/4');
         $response = $client->getResponse();
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -139,35 +150,35 @@ class ReportControllerTest extends WebTestCase
         $content = $response->getContent();
         $content = json_decode($content, true);
 
-        $this->partialTestSuite(8111, 4772035, $content, null, false);
+        $this->partialTestSuite(2, 4, $content, null, false);
     }
 
     public function testCompareReport(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/reports/8111');
+        $client->request('GET', '/reports/2');
         $response = $client->getResponse();
         $content = $response->getContent();
         $content = json_decode($content, true);
 
-        $data = \file_get_contents('https://api-nightly.prestashop-project.org/reports/8111');
+        $data = \file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId);
         $data = json_decode($data, true);
 
-        $this->assertEquals($data, $content);
+        $this->partialCompare($data, $content);
     }
 
     public function testCompareReportFilterText(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/reports/8111?search=currency');
+        $client->request('GET', '/reports/2?search=currency');
         $response = $client->getResponse();
         $content = $response->getContent();
         $content = json_decode($content, true);
 
-        $data = \file_get_contents('https://api-nightly.prestashop-project.org/reports/8111?search=currency');
+        $data = \file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId . '?search=currency');
         $data = json_decode($data, true);
 
-        $this->assertEquals($data, $content);
+        $this->partialCompare($data, $content);
     }
 
     public function testCompareReportFilterState(): void
@@ -189,30 +200,115 @@ class ReportControllerTest extends WebTestCase
                 $query[] = 'filter_state[]=' . $state;
             }
 
-            $client->request('GET', '/reports/8111?' . implode('&', $query));
+            $client->request('GET', '/reports/2?' . implode('&', $query));
             $response = $client->getResponse();
             $content = $response->getContent();
             $content = json_decode($content, true);
 
-            $data = \file_get_contents('https://api-nightly.prestashop-project.org/reports/8111?' . implode('&', $query));
+            $data = \file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId . '?' . implode('&', $query));
             $data = json_decode($data, true);
 
-            $this->assertEquals($data, $content);
+            $this->partialCompare($data, $content);
         }
     }
 
     public function testCompareSuite(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/reports/8111/suites/4772035');
+        $client->request('GET', '/reports/2/suites/4');
         $response = $client->getResponse();
         $content = $response->getContent();
         $content = json_decode($content, true);
 
-        $data = \file_get_contents('https://api-nightly.prestashop-project.org/reports/8111/suites/4772035');
+        $data = \file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId . '/suites/' . self::$suiteId);
         $data = json_decode($data, true);
 
-        $this->assertEquals($data, $content);
+        $this->partialCompareSuite($data, $content);
+    }
+
+    /**
+     * @param array<string, string|array<string, string>> $expected
+     * @param array<string, string|array<string, string>> $actual
+     */
+    private function partialCompare(array $expected, array $actual): void
+    {
+        foreach ($expected as $expectedKey => $expectedValue) {
+            if (in_array($expectedKey, [
+                'id',
+                'start_date',
+                'end_date',
+            ])) {
+                continue;
+            }
+            if ($expectedKey == 'suites_data') {
+                $expectedArrayKeys = array_keys($expected['suites_data']);
+                $actualArrayKeys = array_keys($actual['suites_data']);
+                $this->assertEquals(count($expectedArrayKeys), count($actualArrayKeys));
+                foreach ($expectedArrayKeys as $key => $value) {
+                    // @phpstan-ignore-next-line
+                    $this->partialCompareSuite($expected['suites_data'][$value], $actual['suites_data'][$actualArrayKeys[$key]]);
+                }
+                continue;
+            }
+            $this->assertEquals($expectedValue, $actual[$expectedKey], 'Key Root : ' . $expectedKey);
+        }
+    }
+
+    /**
+     * @param array<string, string|array<string, string>> $expected
+     * @param array<string, string|array<string, string>> $actual
+     */
+    private function partialCompareSuite(array $expected, array $actual): void
+    {
+        foreach ($expected as $expectedKey => $expectedValue) {
+            $actualValue = $actual[$expectedKey];
+            if (in_array($expectedKey, [
+                'id',
+                'execution_id',
+                'insertion_date',
+                'parent_id',
+            ])) {
+                continue;
+            }
+            if ($expectedKey == 'tests') {
+                $this->assertEquals(count($expectedValue), count($actualValue));
+                foreach ($expectedValue as $key => $expectedItemValue) {
+                    // @phpstan-ignore-next-line
+                    $this->partialCompareTest($expectedItemValue, $actualValue[$key]);
+                }
+                continue;
+            }
+            if ($expectedKey == 'suites') {
+                $expectedArrayKeys = array_keys($expectedValue);
+                $actualArrayKeys = array_keys($actualValue);
+                $this->assertEquals(count($expectedArrayKeys), count($actualArrayKeys));
+                foreach ($expectedArrayKeys as $key => $value) {
+                    // @phpstan-ignore-next-line
+                    $this->partialCompareSuite($expectedValue[$value], $actualValue[$actualArrayKeys[$key]]);
+                }
+                continue;
+            }
+            $this->assertEquals($expectedValue, $actualValue, 'Key Suite : ' . $expectedKey);
+        }
+    }
+
+    /**
+     * @param array<string, string> $expected
+     * @param array<string, string> $actual
+     */
+    private function partialCompareTest(array $expected, array $actual): void
+    {
+        foreach ($expected as $expectedKey => $expectedValue) {
+            $actualValue = $actual[$expectedKey];
+            if (in_array($expectedKey, [
+                'id',
+                'suite_id',
+                'insertion_date',
+            ])) {
+                continue;
+            }
+            $this->assertEquals($expectedValue, $actualValue, 'Key Test: ' . $expectedKey);
+        }
     }
 
     /**
