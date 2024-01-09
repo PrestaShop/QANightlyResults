@@ -10,6 +10,7 @@ Its purpose is to :
 2. let people browse a report of a test execution
 3. display some statistics about test failures
 
+
 ## Usage
 
 Create a database following the schema provided in schema.sql at the root of the project.
