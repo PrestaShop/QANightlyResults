@@ -25,8 +25,8 @@ class HealthCheckController extends AbstractController
         ];
 
         // Check database
+        dump(getenv('DATABASE_URL'));
         try {
-            dump(getenv('DATABASE_URL'));
             $this->executionRepository->findOneBy([
                 'version' => 'develop',
                 'campaign' => 'functional',
