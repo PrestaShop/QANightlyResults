@@ -1,7 +1,6 @@
 # QANightlyResults
 
-QANightlyResults is a Symfony app, acting as a backend (via a JSON API) to handle
-and browse tests reports records.
+QANightlyResults is a Symfony app, acting as a backend (via a JSON API) to handle and browse tests reports records.
 
 You can use any frontend app you want to consume this API. We use a [Vue app](https://github.com/PrestaShop/nightly-board).
 
@@ -15,6 +14,10 @@ Its purpose is to :
 Create a database following the schema provided in schema.sql at the root of the project.
 
 Don't forget to launch `composer install` to install all dependencies.
+
+### Configuration
+
+You can create a `.env.local` file at the root of the project.
 
 ### Configuration
 
