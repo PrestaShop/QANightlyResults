@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class IndexControllerTest extends WebTestCase
 {
-    public function testBadgeJson(): void
+    public function testIndex(): void
     {
         $client = static::createClient();
         $client->request('GET', '/');
