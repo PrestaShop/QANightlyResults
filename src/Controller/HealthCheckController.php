@@ -17,7 +17,7 @@ class HealthCheckController extends AbstractController
     }
 
     #[Route('/healthcheck', methods: ['GET'])]
-    public function check(string $nightlyGCPUrl): JsonResponse
+    public function check(string $nightlyGCPUrl, string $databaseURL): JsonResponse
     {
         $data = [
             'database' => true,
@@ -25,6 +25,7 @@ class HealthCheckController extends AbstractController
         ];
 
         // Check database
+        dump($databaseURL);
         dump(getenv('DATABASE_URL'));
         try {
             $this->executionRepository->findOneBy([
