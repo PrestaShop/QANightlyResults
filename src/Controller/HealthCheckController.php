@@ -25,6 +25,8 @@ class HealthCheckController extends AbstractController
         ];
 
         // Check database
+        dump($_ENV);
+        dump($_SERVER);
         dump($databaseURL);
         dump(getenv('DATABASE_URL'));
         try {
