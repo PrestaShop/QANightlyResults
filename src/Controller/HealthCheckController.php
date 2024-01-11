@@ -32,6 +32,7 @@ class HealthCheckController extends AbstractController
                 'platform' => 'chromium',
             ]);
         } catch (\Exception $e) {
+            throw $e;
             $data['database'] = false;
         }
 
