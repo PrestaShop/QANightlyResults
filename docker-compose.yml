@@ -7,8 +7,5 @@ services:
     ports:
       - "80:80"
     environment:
-      QANB_BASEURL: "localhost"
-      QANB_DB_HOST: "localhost" 
-      QANB_DB_USERNAME: "myDBUser"
-      QANB_DB_PASSWORD: "myDBPasswd"
-      QANB_DB_NAME: "myDBName"
+      DATABASE_URL: "mysql://myDBUser:myDBPasswd@127.0.0.1:3306/myDBName?serverVersion=myDBServer&charset=utf8mb4"
+      QANB_TOKEN: "myAPIToken"
