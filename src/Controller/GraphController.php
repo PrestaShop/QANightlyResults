@@ -1,114 +1,104 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Controller;
 
-use App\Model\Execution;
-use Illuminate\Database\Capsule\Manager;
-use Slim\Psr7\Request;
-use Slim\Psr7\Response;
+use App\Repository\ExecutionRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
-class GraphController extends BaseController
+class GraphController extends AbstractController
 {
-    /**
-     * Display statistics data to show in a graph
-     *
-     * @param Request $request
-     * @param Response $response
-     *
-     * @return Response
-     */
-    public function index(Request $request, Response $response): Response
+    private const DEFAULT_PERIOD = 'last_month';
+    private const DEFAULT_VERSION = 'develop';
+
+    private ExecutionRepository $executionRepository;
+
+    public function __construct(ExecutionRepository $executionRepository)
     {
-        //possible values
+        $this->executionRepository = $executionRepository;
+    }
+
+    #[Route('/graph', methods: ['GET'])]
+    public function data(Request $request): JsonResponse
+    {
         $parameters = $this->getParameters();
-        //check GET values
-        $get_query_params = $request->getQueryParams();
-        $period = $parameters['periods']['default'];
-        $version = $parameters['versions']['default'];
-        if (isset($get_query_params['period']) && $this->isValidParameter($get_query_params['period'], $parameters['periods']['values'])) {
-            $period = $get_query_params['period'];
+        $period = $request->query->get('period', self::DEFAULT_PERIOD);
+        if (!$this->isValidParameter($period, $parameters['periods']['values'])) {
+            $period = self::DEFAULT_PERIOD;
         }
-        if (isset($get_query_params['version']) && $this->isValidParameter($get_query_params['version'], $parameters['versions']['values'])) {
-            $version = $get_query_params['version'];
+        $version = $request->query->get('version', self::DEFAULT_VERSION);
+        if (!$this->isValidParameter($version, $parameters['versions']['values'])) {
+            $version = self::DEFAULT_VERSION;
         }
 
         switch ($period) {
             case 'last_two_months':
-                $start_date = date('Y-m-d', strtotime(' -60 days'));
-                $end_date = date('Y-m-d', strtotime(' +1 days'));
+                $dateStartBase = date('Y-m-d', strtotime(' -60 days'));
+                $dateEndBase = date('Y-m-d', strtotime(' +1 days'));
                 break;
             case 'last_year':
-                $start_date = date('Y-m-d', strtotime(' -1 years'));
-                $end_date = date('Y-m-d', strtotime(' +1 days'));
+                $dateStartBase = date('Y-m-d', strtotime(' -1 years'));
+                $dateEndBase = date('Y-m-d', strtotime(' +1 days'));
                 break;
             default:
-                $start_date = date('Y-m-d', strtotime(' -30 days'));
-                $end_date = date('Y-m-d', strtotime(' +1 days'));
+                $dateStartBase = date('Y-m-d', strtotime(' -30 days'));
+                $dateEndBase = date('Y-m-d', strtotime(' +1 days'));
+        }
+        $dateStart = $request->query->get('start_date', $dateStartBase);
+        if (date('Y-m-d', strtotime($dateStart)) !== $dateStart) {
+            $dateStart = $dateStartBase;
+        }
+        $dateEnd = $request->query->get('end_date', $dateEndBase);
+        if (date('Y-m-d', strtotime($dateStart)) !== $dateEnd) {
+            $dateEnd = $dateEndBase;
         }
 
-        if (isset($get_query_params['start_date']) && date('Y-m-d', strtotime($get_query_params['start_date'])) == $get_query_params['start_date']) {
-            $start_date = $get_query_params['start_date'];
+        $executions = [];
+        foreach ($this->executionRepository->findAllBetweenDates($version, $dateStart, $dateEnd) as $execution) {
+            $executions[] = [
+                'id' => $execution->getId(),
+                'start_date' => $execution->getStartDate()->format('Y-m-d H:i:s'),
+                'end_date' => $execution->getEndDate()->format('Y-m-d H:i:s'),
+                'version' => $execution->getVersion(),
+                'suites' => $execution->getSuites(),
+                'tests' => $execution->getTests(),
+                'skipped' => $execution->getSkipped(),
+                'passes' => $execution->getPasses(),
+                'failures' => $execution->getFailures(),
+                'pending' => $execution->getPending(),
+            ];
         }
-        if (isset($get_query_params['end_date']) && date('Y-m-d', strtotime($get_query_params['end_date'])) == $get_query_params['end_date']) {
-            $end_date = $get_query_params['end_date'];
-        }
 
-        //get the data
-        $executions = Execution::getGraphData($version, $start_date, $end_date);
-
-        $response->getBody()->write(json_encode($executions));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return new JsonResponse($executions);
     }
 
-    /**
-     * Retrieve the list of all the available parameters
-     *
-     * @param Request $request
-     * @param Response $response
-     *
-     * @return Response
-     */
-    public function parameters(Request $request, Response $response): Response
+    #[Route('/graph/parameters', methods: ['GET'])]
+    public function parameters(Request $request): JsonResponse
     {
-        $response->getBody()->write(json_encode($this->getParameters()));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return new JsonResponse($this->getParameters());
     }
 
     /**
      * Format a list of all the parameters to use in all methods
+     *
+     * @return array{'periods': array{'type': string, 'name': string, 'values': array<int, array{'name': string, 'value': string}>, 'default': string}, 'versions': array{'type': string, 'name': string, 'values': array<int, array{'name': string, 'value': string}>, 'default': string}}
      */
     private function getParameters(): array
     {
-        //versions
-        $versions_possible_values = ['develop'];
-        $versions_possible_values_from_base = Manager::table('execution')
-            ->select('version')
-            ->groupBy('version')
-            ->get();
-
-        if (!empty($versions_possible_values_from_base)) {
-            foreach ($versions_possible_values_from_base as $v) {
-                if (!in_array($v->version, $versions_possible_values)) {
-                    $versions_possible_values[] = $v->version;
-                }
-            }
-        }
-        $versions_values = [];
-        foreach ($versions_possible_values as $v) {
-            $versions_values[] = [
-                'name' => ucfirst($v),
-                'value' => $v,
+        $versions = [];
+        foreach (array_merge([self::DEFAULT_VERSION], $this->executionRepository->findAllVersions()) as $version) {
+            $versions[] = [
+                'name' => ucfirst($version),
+                'value' => $version,
             ];
         }
-        //periods
-        $periods_values = [
+
+        $periods = [
             [
                 'name' => 'Last 30 days',
-                'value' => 'last_month',
+                'value' => self::DEFAULT_PERIOD,
             ],
             [
                 'name' => 'Last 60 days',
@@ -124,25 +114,27 @@ class GraphController extends BaseController
             'periods' => [
                 'type' => 'select',
                 'name' => 'period',
-                'values' => $periods_values,
-                'default' => $periods_values[0]['value'],
+                'values' => $periods,
+                'default' => self::DEFAULT_PERIOD,
             ],
             'versions' => [
                 'type' => 'select',
                 'name' => 'version',
-                'values' => $versions_values,
-                'default' => $versions_values[0]['value'],
+                'values' => $versions,
+                'default' => self::DEFAULT_VERSION,
             ],
         ];
     }
 
     /**
      * Check is the parameter is valid
+     *
+     * @param array<int, array{'name': string, 'value': string}> $values
      */
     private function isValidParameter(string $parameter, array $values): bool
     {
         foreach ($values as $value) {
-            if ($parameter == $value['value']) {
+            if ($parameter === $value['value']) {
                 return true;
             }
         }

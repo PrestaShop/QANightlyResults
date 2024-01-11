@@ -1,25 +1,23 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Controller;
 
-use Illuminate\Database\Capsule\Manager;
-use Illuminate\Database\QueryException;
-use Slim\Psr7\Request;
-use Slim\Psr7\Response;
+use App\Repository\ExecutionRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
-class HealthCheckController extends BaseController
+class HealthCheckController extends AbstractController
 {
-    /**
-     * Display data for a badge in GitHub
-     *
-     * @param Request $request
-     * @param Response $response
-     *
-     * @return Response
-     */
-    public function check(Request $request, Response $response): Response
+    private ExecutionRepository $executionRepository;
+
+    public function __construct(ExecutionRepository $executionRepository)
+    {
+        $this->executionRepository = $executionRepository;
+    }
+
+    #[Route('/healthcheck', methods: ['GET'])]
+    public function check(string $nightlyGCPUrl): JsonResponse
     {
         $data = [
             'database' => true,
@@ -28,19 +26,21 @@ class HealthCheckController extends BaseController
 
         // Check database
         try {
-            Manager::table('settings')->first();
-        } catch (QueryException $e) {
+            $this->executionRepository->findOneBy([
+                'version' => 'develop',
+                'campaign' => 'functional',
+                'platform' => 'chromium',
+            ]);
+        } catch (\Exception $e) {
             $data['database'] = false;
         }
 
         // Check GCP
-        $gcpCall = file_get_contents(QANB_GCPURL);
+        $gcpCall = @file_get_contents($nightlyGCPUrl);
         if (!$gcpCall) {
             $data['gcp'] = false;
         }
 
-        $response->getBody()->write(json_encode($data));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return $this->json($data);
     }
 }

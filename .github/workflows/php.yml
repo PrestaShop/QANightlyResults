@@ -1,0 +1,118 @@
+name: PHP
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php-cs-fixer:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+    name: PHP CS Fixer
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: ci
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+
+      - name: Config
+        run: cp .env.dist .env
+
+      - name: Validate composer config
+        run: composer validate --strict
+
+      - name: Composer Install
+        run: composer install --ansi --prefer-dist --no-interaction --no-progress
+
+      - name: Run PHPCSFixer
+        run: ./vendor/bin/php-cs-fixer fix --dry-run --diff
+
+      - name: Run ergebnis/composer-normalize
+        run: composer normalize --dry-run --no-check-lock
+  phpstan:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+    name: PHP Static Analysis
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: ci
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v3
+
+      - name: Config
+        run: cp .env.dist .env
+
+      - name: Composer Install
+        run: composer install --ansi --prefer-dist --no-interaction --no-progress
+
+      - name: Run phpstan
+        run: ./vendor/bin/phpstan analyse
+  phpunit:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+    name: PHPUnit
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: test
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql version: '8.0'
+          mysql database: 'qanightlyresults'
+          mysql root password: 'password'
+
+      - uses: actions/checkout@v3
+
+      - name: Config
+        run: cp .env.dist .env
+
+      - name: Composer Install
+        run: composer install --ansi --prefer-dist --no-interaction --no-progress
+
+      - name: Change MySQL authentication method
+        run: sleep 15 && mysql -h127.0.0.1 -uroot -ppassword -e "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'password'; FLUSH PRIVILEGES;"
+
+      - name: Setup database
+        run: php bin/console doctrine:schema:update --dump-sql --force --env=test
+
+      - name: Inject data for AutoUpgrade
+        run: |
+          DATE=$(date -d "2 days ago" +"%Y-%m-%d")
+          php bin/console nightly:import autoupgrade_$DATE-develop.json\
+            -p cli \
+            -c autoupgrade \
+            --env test
+
+      - name: Inject data for Core
+        run: |
+          DATE=$(date -d "2 days ago" +"%Y-%m-%d")
+          php bin/console nightly:import $DATE-develop.json\
+           -p chromium \
+           -c functional \
+           --env test
+
+      - name: Run phpunit
+        run: ./vendor/bin/phpunit

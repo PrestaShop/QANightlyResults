@@ -1,4 +1,4 @@
-FROM php:7.2-apache as builder
+FROM php:8.3-apache as builder
 
 RUN apt-get update && \
     apt-get install -y \
@@ -15,7 +15,7 @@ RUN composer update && \
     composer install
 
 
-FROM php:7.2-apache
+FROM php:8.3-apache
 
 RUN apt-get update && \
     apt-get install -y \ 
@@ -42,4 +42,5 @@ RUN mv /var/www/html/vhost.conf /etc/apache2/sites-enabled/000-default.conf && \
     a2enmod headers
 
 RUN sed -i 's/^max_execution_time = .*/max_execution_time = 300/'  /usr/local/etc/php/php.ini-production && \ 
+    sed -i 's/variables_order = "GPCS"/variables_order = "EGPCS"/' /usr/local/etc/php/php.ini-production && \ 
     mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
