@@ -21,6 +21,17 @@ class ReportControllerTest extends WebTestCase
         self::$suiteId = array_key_first($data['suites_data']);
     }
 
+    public function testCorsReports(): void
+    {
+        $client = static::createClient();
+        $client->request('OPTIONS', '/reports');
+        $response = $client->getResponse();
+        $this->assertEquals($response->getStatusCode(), 200);
+        $this->assertEquals($response->headers->get('access-control-allow-methods'), 'GET');
+        $this->assertEquals($response->headers->get('access-control-max-age'), 3600);
+        $this->assertEquals($response->headers->get('access-control-allow-origin'), '*');
+    }
+
     public function testReports(): void
     {
         $client = static::createClient();
@@ -84,6 +95,17 @@ class ReportControllerTest extends WebTestCase
         $content = json_decode($content, true);
         $this->assertArrayHasKey('message', $content);
         $this->assertEquals('Execution not found', $content['message']);
+    }
+
+    public function testCorsReportID(): void
+    {
+        $client = static::createClient();
+        $client->request('OPTIONS', '/reports/2');
+        $response = $client->getResponse();
+        $this->assertEquals($response->getStatusCode(), 200);
+        $this->assertEquals($response->headers->get('access-control-allow-methods'), 'GET');
+        $this->assertEquals($response->headers->get('access-control-max-age'), 3600);
+        $this->assertEquals($response->headers->get('access-control-allow-origin'), '*');
     }
 
     public function testReportID(): void
@@ -210,6 +232,17 @@ class ReportControllerTest extends WebTestCase
 
             $this->partialCompare($data, $content);
         }
+    }
+
+    public function testCorsReportSuite(): void
+    {
+        $client = static::createClient();
+        $client->request('OPTIONS', '/reports/2/suites/4');
+        $response = $client->getResponse();
+        $this->assertEquals($response->getStatusCode(), 200);
+        $this->assertEquals($response->headers->get('access-control-allow-methods'), 'GET');
+        $this->assertEquals($response->headers->get('access-control-max-age'), 3600);
+        $this->assertEquals($response->headers->get('access-control-allow-origin'), '*');
     }
 
     public function testCompareSuite(): void
