@@ -6,6 +6,13 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ImportControllerTest extends WebTestCase
 {
+    private static string $date = '';
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$date = date('Y-m-d', strtotime('yesterday'));
+    }
+
     public function testOldReportWithNoParameters(): void
     {
         $client = static::createClient();
@@ -41,7 +48,7 @@ class ImportControllerTest extends WebTestCase
     public function testOldReportWithParameterFilename(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=2023-01-01-develop.json');
+        $client->request('GET', '/hook/add?filename=' . self::$date . '-develop.json');
         $response = $client->getResponse();
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -57,7 +64,7 @@ class ImportControllerTest extends WebTestCase
     public function testOldReportWithParameterFilenameAndBakToken(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=2023-01-01-develop.json&token=BAD');
+        $client->request('GET', '/hook/add?filename=' . self::$date . '-develop.json&token=BAD');
         $response = $client->getResponse();
 
         $this->assertEquals(401, $response->getStatusCode());
@@ -73,7 +80,7 @@ class ImportControllerTest extends WebTestCase
     public function testOldReportWithNoVersionInFilename(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=2023-01-01.json&token=AZERTY');
+        $client->request('GET', '/hook/add?filename=' . self::$date . '.json&token=AZERTY');
         $response = $client->getResponse();
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -89,7 +96,7 @@ class ImportControllerTest extends WebTestCase
     public function testOldReportWithBadVersionInFilename(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=2023-01-01-.json&token=AZERTY');
+        $client->request('GET', '/hook/add?filename=' . self::$date . '-.json&token=AZERTY');
         $response = $client->getResponse();
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -99,13 +106,13 @@ class ImportControllerTest extends WebTestCase
         $content = $response->getContent();
         $content = json_decode($content, true);
         $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('Version found not correct () from filename 2023-01-01-.json', $content['message']);
+        $this->assertEquals('Version found not correct () from filename ' . self::$date . '-.json', $content['message']);
     }
 
     public function testOldReportWithNotExistingFilename(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=2023-01-01-truc.json&token=AZERTY');
+        $client->request('GET', '/hook/add?filename=' . self::$date . '-truc.json&token=AZERTY');
         $response = $client->getResponse();
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -121,7 +128,7 @@ class ImportControllerTest extends WebTestCase
     public function testOldReportOk(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=autoupgrade_2024-01-01-develop.json&token=AZERTY&campaign=autoupgrade&platform=cli');
+        $client->request('GET', '/hook/add?filename=autoupgrade_' . self::$date . '-develop.json&token=AZERTY&campaign=autoupgrade&platform=cli');
         $response = $client->getResponse();
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -139,7 +146,7 @@ class ImportControllerTest extends WebTestCase
     public function testOldReportAlreadyExisting(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=autoupgrade_2024-01-01-develop.json&token=AZERTY&campaign=autoupgrade&platform=cli');
+        $client->request('GET', '/hook/add?filename=autoupgrade_' . self::$date . '-develop.json&token=AZERTY&campaign=autoupgrade&platform=cli');
         $response = $client->getResponse();
 
         $this->assertEquals(403, $response->getStatusCode());
@@ -149,7 +156,7 @@ class ImportControllerTest extends WebTestCase
         $content = $response->getContent();
         $content = json_decode($content, true);
         $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('A similar entry was found (criteria: version develop, platform cli, campaign autoupgrade, date 2024-01-01).', $content['message']);
+        $this->assertEquals('A similar entry was found (criteria: version develop, platform cli, campaign autoupgrade, date ' . self::$date . ').', $content['message']);
     }
 
     public function testReportWithNoParameters(): void
@@ -187,7 +194,7 @@ class ImportControllerTest extends WebTestCase
     public function testReportWithParameterFilename(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/reports/import?filename=2023-01-01-develop.json');
+        $client->request('GET', '/hook/reports/import?filename=' . self::$date . '-develop.json');
         $response = $client->getResponse();
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -203,7 +210,7 @@ class ImportControllerTest extends WebTestCase
     public function testReportWithParameterFilenameAndBakToken(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/reports/import?filename=2023-01-01-develop.json&token=BAD');
+        $client->request('GET', '/hook/reports/import?filename=' . self::$date . '-develop.json&token=BAD');
         $response = $client->getResponse();
 
         $this->assertEquals(401, $response->getStatusCode());
@@ -219,7 +226,7 @@ class ImportControllerTest extends WebTestCase
     public function testReportWithNoVersionInFilename(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/reports/import?filename=2023-01-01.json&token=AZERTY');
+        $client->request('GET', '/hook/reports/import?filename=' . self::$date . '.json&token=AZERTY');
         $response = $client->getResponse();
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -235,7 +242,7 @@ class ImportControllerTest extends WebTestCase
     public function testReportWithBadVersionInFilename(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/reports/import?filename=2023-01-01-.json&token=AZERTY');
+        $client->request('GET', '/hook/reports/import?filename=' . self::$date . '-.json&token=AZERTY');
         $response = $client->getResponse();
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -245,13 +252,13 @@ class ImportControllerTest extends WebTestCase
         $content = $response->getContent();
         $content = json_decode($content, true);
         $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('Version found not correct () from filename 2023-01-01-.json', $content['message']);
+        $this->assertEquals('Version found not correct () from filename ' . self::$date . '-.json', $content['message']);
     }
 
     public function testReportWithNotExistingFilename(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/reports/import?filename=2023-01-01-truc.json&token=AZERTY');
+        $client->request('GET', '/hook/reports/import?filename=' . self::$date . '-truc.json&token=AZERTY');
         $response = $client->getResponse();
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -267,7 +274,7 @@ class ImportControllerTest extends WebTestCase
     public function testReportOk(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/reports/import?filename=2024-01-01-develop.json&token=AZERTY');
+        $client->request('GET', '/hook/reports/import?filename=' . self::$date . '-develop.json&token=AZERTY');
         $response = $client->getResponse();
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -285,7 +292,7 @@ class ImportControllerTest extends WebTestCase
     public function testReportAlreadyExisting(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/reports/import?filename=2024-01-01-develop.json&token=AZERTY');
+        $client->request('GET', '/hook/reports/import?filename=' . self::$date . '-develop.json&token=AZERTY');
         $response = $client->getResponse();
 
         $this->assertEquals(403, $response->getStatusCode());
@@ -295,6 +302,6 @@ class ImportControllerTest extends WebTestCase
         $content = $response->getContent();
         $content = json_decode($content, true);
         $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('A similar entry was found (criteria: version develop, platform chromium, campaign functional, date 2024-01-01).', $content['message']);
+        $this->assertEquals('A similar entry was found (criteria: version develop, platform chromium, campaign functional, date ' . self::$date . ').', $content['message']);
     }
 }
