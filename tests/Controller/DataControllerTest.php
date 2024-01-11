@@ -6,6 +6,17 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DataControllerTest extends WebTestCase
 {
+    public function testCorsBadgeJson(): void
+    {
+        $client = static::createClient();
+        $client->request('OPTIONS', '/data/badge');
+        $response = $client->getResponse();
+        $this->assertEquals($response->getStatusCode(), 200);
+        $this->assertEquals($response->headers->get('access-control-allow-methods'), 'GET');
+        $this->assertEquals($response->headers->get('access-control-max-age'), 3600);
+        $this->assertEquals($response->headers->get('access-control-allow-origin'), '*');
+    }
+
     public function testBadgeJson(): void
     {
         $client = static::createClient();
@@ -42,6 +53,17 @@ class DataControllerTest extends WebTestCase
         $content = json_decode($content, true);
         $this->assertArrayHasKey('message', $content);
         $this->assertEquals('Execution not found', $content['message']);
+    }
+
+    public function testCorsBadgeSvg(): void
+    {
+        $client = static::createClient();
+        $client->request('OPTIONS', '/data/badge/svg');
+        $response = $client->getResponse();
+        $this->assertEquals($response->getStatusCode(), 200);
+        $this->assertEquals($response->headers->get('access-control-allow-methods'), 'GET');
+        $this->assertEquals($response->headers->get('access-control-max-age'), 3600);
+        $this->assertEquals($response->headers->get('access-control-allow-origin'), '*');
     }
 
     public function testBadgeSvg(): void

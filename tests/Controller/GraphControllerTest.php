@@ -6,6 +6,17 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class GraphControllerTest extends WebTestCase
 {
+    public function testCorsGraph(): void
+    {
+        $client = static::createClient();
+        $client->request('OPTIONS', '/graph');
+        $response = $client->getResponse();
+        $this->assertEquals($response->getStatusCode(), 200);
+        $this->assertEquals($response->headers->get('access-control-allow-methods'), 'GET');
+        $this->assertEquals($response->headers->get('access-control-max-age'), 3600);
+        $this->assertEquals($response->headers->get('access-control-allow-origin'), '*');
+    }
+
     public function testGraph(): void
     {
         $client = static::createClient();
@@ -38,6 +49,17 @@ class GraphControllerTest extends WebTestCase
             $this->assertArrayHasKey('pending', $item);
             $this->assertIsInt($item['pending']);
         }
+    }
+
+    public function testCorsGraphParameters(): void
+    {
+        $client = static::createClient();
+        $client->request('OPTIONS', '/graph/parameters');
+        $response = $client->getResponse();
+        $this->assertEquals($response->getStatusCode(), 200);
+        $this->assertEquals($response->headers->get('access-control-allow-methods'), 'GET');
+        $this->assertEquals($response->headers->get('access-control-max-age'), 3600);
+        $this->assertEquals($response->headers->get('access-control-allow-origin'), '*');
     }
 
     public function testParameters(): void
