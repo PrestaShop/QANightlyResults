@@ -9,30 +9,22 @@ Its purpose is to :
 2. let people browse a report of a test execution
 3. display some statistics about test failures
 
+### Configuration
+
+You can create a `.env.local` file at the root of the project. You can also pass the values via environment variables. 
+
+Here are the main ones:
+
+| Variables         |                                          |
+|-------------------|------------------------------------------|
+| DATABASE_URL      | DSN for MySQL Server                     |
+| QANB_TOKEN        | Token to add JSON data through the Hook  |
+
 ## Usage
 
-Create a database following the schema provided in schema.sql at the root of the project.
+Install dependencies with a `composer install`.
 
-Don't forget to launch `composer install` to install all dependencies.
-
-### Configuration
-
-You can create a `.env.local` file at the root of the project.
-
-### Configuration
-
-You can edit the `settings.php` file in the `src/` folder (no recommended). You can also pass the values via environment variables. Here are the main ones:
-
-|Variables          |   |
-|-------------------|---|
-| QANB_ENV          | Environment (will display errors only if set to `staging` or `testing`)  |
-| QANB_DB_HOST      | Database host address  |
-| QANB_DB_USERNAME  | Database username  |
-| QANB_DB_PASSWORD  | Database password  |
-| QANB_DB_NAME      | Database name  |
-| QANB_TOKEN        | Token to add JSON data through the Hook  |
-| QANB_GCPURL       | URL to the GCP repository (must ends with a `/`)  |
-
+Create a database with a `php bin/console doctrine:schema:update --dump-sql --force`.
 
 ## Web server configuration
 
@@ -40,7 +32,7 @@ Set up a vhost that points to the `/public` folder (example in the `vhost.conf` 
 
 ## Inserting new data
 
-Use the hook provided in the `Hook` controller. You need to call this URL: `BASE_URL/hook/add` with the following GET 
+Use the hook provided in the `Hook` controller. You need to call this URL: `BASE_URL/hook/reports/import` with the following GET 
 parameters:
 - `token`: the token set in the environment variable `QANB_TOKEN` (e.g.: `IpBzOmwXQUrW5Hn`)
 - `filename` : the complete filename to look for in the Google Cloud Storage (e.g.: `2019-07-22-develop.json`). The 
@@ -51,12 +43,11 @@ Optional:
 - `browser`: to specify the browser. Possible values are 'chromium' (default), 'firefox', and 'edge'.
 - `campaign`: to specify the campaign. Possible values are 'functional' (default), 'sanity', 'e2e', and 'regression'.
 
-EG : `api.mysite.com/hook/add?token=IpBzOmwXQUrW5Hn&filename=2019-07-22-develop.json`
+EG : `api.mysite.com/hook/reports/import?token=IpBzOmwXQUrW5Hn&filename=2019-07-22-develop.json`
 
 The files in the Google Cloud Storage might be huge, so be sure your server is properly configured to handle large files.
 
-Files will be taken from `https://storage.googleapis.com/prestashop-core-nightly/reports/` (unless specified otherwise 
-in the environment variable `QANB_GCPURL`).
+Files will be taken from `https://storage.googleapis.com/prestashop-core-nightly/reports/`.
 
 
 ## Containers
