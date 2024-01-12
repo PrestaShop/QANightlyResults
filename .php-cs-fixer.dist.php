@@ -2,12 +2,11 @@
 
 ini_set('memory_limit','256M');
 
-$finder = PhpCsFixer\Finder::create()->in([
-    __DIR__.'/src',
-    __DIR__.'/migrations',
-    __DIR__.'/public',
-    __DIR__.'/tests',
-]);
+$finder = PhpCsFixer\Finder::create()
+    ->in(__DIR__)
+    ->exclude([
+        'var',
+    ]);
 
 return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
