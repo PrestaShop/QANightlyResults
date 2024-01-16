@@ -19,11 +19,16 @@ jobs:
         id: branch
         uses: tj-actions/branch-names@v7.0.7
 
+      - name: Get tag
+        shell: bash
+        id: get_tag
+        run: echo TAG=$PREFIX_TAG$(echo $GITHUB_REF | cut -d / -f 3) >> $GITHUB_OUTPUT
+
       - name: Trigger CI / CD
         uses: aurelien-baudet/workflow-dispatch@v2
         with:
           workflow: production-cd.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "project": "api-nightly", "repository": "PrestaShop/QANightlyResults", "commit": "$GITHUB_SHA"}'
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "project": "api-nightly", "repository": "PrestaShop/QANightlyResults", "tag": "${{ steps.get_tag.outputs.TAG }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
           ref: 'refs/heads/main'
