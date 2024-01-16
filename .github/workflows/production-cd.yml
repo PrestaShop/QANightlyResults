@@ -29,6 +29,6 @@ jobs:
         with:
           workflow: production-cd.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "project": "api-nightly", "repository": "PrestaShop/QANightlyResults", "tag": "${{ steps.get_tag.outputs.TAG }}"}'
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "project": "api-nightly", "repository": "PrestaShop/QANightlyResults", "tag": "${{ steps.get_tag.outputs.TAG }}", "commit": "${{ github.sha }}"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
           ref: 'refs/heads/main'
