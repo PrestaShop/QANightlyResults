@@ -33,6 +33,6 @@ jobs:
         with:
           workflow: integration-cd.yml
           repo: PrestaShopCorp/qanightlyresults-cd
-          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "bulle": "${{ steps.get_bulle.outputs.BULLE }}", "project": "api-nightly", "repository": "PrestaShop/QANightlyResults"}'
+          inputs: '{ "branch": "${{ steps.branch.outputs.current_branch }}", "bulle": "${{ steps.get_bulle.outputs.BULLE }}", "project": "api-nightly", "repository": "PrestaShop/QANightlyResults", "commit": "$GITHUB_SHA"}'
           token: ${{ secrets.TERRAFORM_ACCESS_TOKEN }}
           ref: 'refs/heads/main'
