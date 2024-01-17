@@ -63,6 +63,7 @@ class ReportImporter
         ;
         $this->entityManager->persist($execution);
         $this->entityManager->flush();
+        $executionId = $execution->getId();
 
         if ($dateformat == self::FORMAT_DATE_MOCHA5) {
             $this->insertExecutionSuite($execution, $jsonContent->suites, $dateformat);
@@ -71,12 +72,16 @@ class ReportImporter
                 if ($suite->root) {
                     foreach ($suite->suites as $suiteChild) {
                         $this->insertExecutionSuite($execution, $suiteChild, $dateformat);
+                        // Reload of execution (bcz insertExecutionSuite make a Doctrine Clear)
+                        $execution = $this->executionRepository->findOneBy(['id' => $executionId]);
                     }
                 } else {
                     $this->insertExecutionSuite($execution, $suite, $dateformat);
                 }
             }
         }
+        // Reload of execution (bcz insertExecutionSuite make a Doctrine Clear)
+        $execution = $this->executionRepository->findOneBy(['id' => $executionId]);
 
         // Calculate comparison with last execution
         $execution = $this->compareReportData($execution);
@@ -143,6 +148,9 @@ class ReportImporter
         // Insert children suites
         foreach ($suite->suites as $suiteChildren) {
             $this->insertExecutionSuite($execution, $suiteChildren, $dateFormat, $executionSuite->getId());
+        }
+        if (!$parentSuiteId) {
+            $this->entityManager->clear();
         }
     }
 

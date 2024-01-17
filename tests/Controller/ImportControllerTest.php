@@ -10,7 +10,7 @@ class ImportControllerTest extends WebTestCase
 
     public static function setUpBeforeClass(): void
     {
-        self::$date = date('Y-m-d', strtotime('yesterday'));
+        self::$date = date('Y-m-d', strtotime('today'));
     }
 
     public function testOldReportWithNoParameters(): void
