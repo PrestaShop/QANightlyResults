@@ -100,7 +100,7 @@ jobs:
 
       - name: Inject data for AutoUpgrade
         run: |
-          DATE=$(date -d "2 days ago" +"%Y-%m-%d")
+          DATE=$(date -d "1 day ago" +"%Y-%m-%d")
           php bin/console nightly:import \
             -p cli \
             -c autoupgrade \
@@ -109,7 +109,7 @@ jobs:
 
       - name: Inject data for Core
         run: |
-          DATE=$(date -d "2 days ago" +"%Y-%m-%d")
+          DATE=$(date -d "1 day ago" +"%Y-%m-%d")
           php bin/console nightly:import \
            -p chromium \
            -c functional \
