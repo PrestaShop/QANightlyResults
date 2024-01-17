@@ -14,7 +14,7 @@ class ReportControllerTest extends WebTestCase
     {
         $data = file_get_contents('https://api-nightly.prestashop-project.org/reports?filter_version=develop&filter_campaign=functional');
         $data = json_decode($data, true);
-        self::$reportId = $data[2]['id'];
+        self::$reportId = $data[1]['id'];
 
         $data = file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId);
         $data = json_decode($data, true);
