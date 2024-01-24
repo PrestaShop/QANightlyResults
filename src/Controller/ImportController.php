@@ -44,36 +44,10 @@ class ImportController extends AbstractController
         $this->nightlyGCPUrl = $nightlyGCPUrl;
     }
 
-    #[Route('/hook/add', methods: ['GET'])]
-    /** Used in 1.7.7 & autoupgrade */
-    public function importReportOld(Request $request): JsonResponse
-    {
-        $response = $this->checkAuth($request, ReportImporter::FORMAT_DATE_MOCHA5);
-        if ($response instanceof JsonResponse) {
-            return $response;
-        }
-
-        $execution = $this->reportImporter->import(
-            $this->filename,
-            $this->platform,
-            $this->campaign,
-            $this->version,
-            $this->startDate,
-            $this->jsonContent,
-            ReportImporter::FORMAT_DATE_MOCHA5
-        );
-
-        return new JsonResponse([
-            'status' => 'ok',
-            'report' => $execution->getId(),
-        ]);
-    }
-
     #[Route('/hook/reports/import', methods: ['GET'])]
-    /** Used in 1.7.8+ */
     public function importReport(Request $request): JsonResponse
     {
-        $response = $this->checkAuth($request, ReportImporter::FORMAT_DATE_MOCHA6);
+        $response = $this->checkAuth($request);
         if ($response instanceof JsonResponse) {
             return $response;
         }
@@ -94,7 +68,7 @@ class ImportController extends AbstractController
         ]);
     }
 
-    private function checkAuth(Request $request, string $dateFormat): ?JsonResponse
+    private function checkAuth(Request $request): ?JsonResponse
     {
         $token = $request->query->get('token');
         $this->filename = $request->query->get('filename');
@@ -153,7 +127,7 @@ class ImportController extends AbstractController
         $this->campaign = $request->query->has('campaign') ? $request->query->get('campaign') : null;
         $this->campaign = in_array($this->campaign, ReportImporter::FILTER_CAMPAIGNS) ? $this->campaign : ReportImporter::FILTER_CAMPAIGNS[0];
 
-        $this->startDate = \DateTime::createFromFormat($dateFormat, $this->jsonContent->stats->start);
+        $this->startDate = \DateTime::createFromFormat(ReportImporter::FORMAT_DATE_MOCHA6, $this->jsonContent->stats->start);
 
         // Check if there is no similar entry
         if (!$force && $this->executionRepository->findOneByNightly($this->version, $this->platform, $this->campaign, $this->startDate->format('Y-m-d'))) {

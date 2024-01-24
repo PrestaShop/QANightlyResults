@@ -13,122 +13,11 @@ class ImportControllerTest extends WebTestCase
         self::$date = date('Y-m-d', strtotime('today'));
     }
 
-    public function testOldReportWithNoParameters(): void
+    public function testReportOkAutoupgrade(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/hook/add');
-        $response = $client->getResponse();
+        $client->request('GET', '/hook/reports/import?filename=autoupgrade_' . self::$date . '-develop.json&token=AZERTY&campaign=autoupgrade&platform=cli');
 
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertTrue($response->headers->has('content-type'));
-        $this->assertEquals('application/json', $response->headers->get('content-type'));
-
-        $content = $response->getContent();
-        $content = json_decode($content, true);
-        $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('No enough parameters', $content['message']);
-    }
-
-    public function testOldReportWithParameterToken(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/hook/add?token=AZERTY');
-        $response = $client->getResponse();
-
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertTrue($response->headers->has('content-type'));
-        $this->assertEquals('application/json', $response->headers->get('content-type'));
-
-        $content = $response->getContent();
-        $content = json_decode($content, true);
-        $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('No enough parameters', $content['message']);
-    }
-
-    public function testOldReportWithParameterFilename(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=' . self::$date . '-develop.json');
-        $response = $client->getResponse();
-
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertTrue($response->headers->has('content-type'));
-        $this->assertEquals('application/json', $response->headers->get('content-type'));
-
-        $content = $response->getContent();
-        $content = json_decode($content, true);
-        $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('No enough parameters', $content['message']);
-    }
-
-    public function testOldReportWithParameterFilenameAndBakToken(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=' . self::$date . '-develop.json&token=BAD');
-        $response = $client->getResponse();
-
-        $this->assertEquals(401, $response->getStatusCode());
-        $this->assertTrue($response->headers->has('content-type'));
-        $this->assertEquals('application/json', $response->headers->get('content-type'));
-
-        $content = $response->getContent();
-        $content = json_decode($content, true);
-        $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('Invalid token', $content['message']);
-    }
-
-    public function testOldReportWithNoVersionInFilename(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=' . self::$date . '.json&token=AZERTY');
-        $response = $client->getResponse();
-
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertTrue($response->headers->has('content-type'));
-        $this->assertEquals('application/json', $response->headers->get('content-type'));
-
-        $content = $response->getContent();
-        $content = json_decode($content, true);
-        $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('Could not retrieve version from filename', $content['message']);
-    }
-
-    public function testOldReportWithBadVersionInFilename(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=' . self::$date . '-.json&token=AZERTY');
-        $response = $client->getResponse();
-
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertTrue($response->headers->has('content-type'));
-        $this->assertEquals('application/json', $response->headers->get('content-type'));
-
-        $content = $response->getContent();
-        $content = json_decode($content, true);
-        $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('Version found not correct () from filename ' . self::$date . '-.json', $content['message']);
-    }
-
-    public function testOldReportWithNotExistingFilename(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=' . self::$date . '-truc.json&token=AZERTY');
-        $response = $client->getResponse();
-
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertTrue($response->headers->has('content-type'));
-        $this->assertEquals('application/json', $response->headers->get('content-type'));
-
-        $content = $response->getContent();
-        $content = json_decode($content, true);
-        $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('Unable to retrieve content from GCP URL', $content['message']);
-    }
-
-    public function testOldReportOk(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=autoupgrade_' . self::$date . '-develop.json&token=AZERTY&campaign=autoupgrade&platform=cli');
         $response = $client->getResponse();
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -141,22 +30,6 @@ class ImportControllerTest extends WebTestCase
         $this->assertEquals('ok', $content['status']);
         $this->assertArrayHasKey('report', $content);
         $this->assertIsInt($content['report']);
-    }
-
-    public function testOldReportAlreadyExisting(): void
-    {
-        $client = static::createClient();
-        $client->request('GET', '/hook/add?filename=autoupgrade_' . self::$date . '-develop.json&token=AZERTY&campaign=autoupgrade&platform=cli');
-        $response = $client->getResponse();
-
-        $this->assertEquals(403, $response->getStatusCode());
-        $this->assertTrue($response->headers->has('content-type'));
-        $this->assertEquals('application/json', $response->headers->get('content-type'));
-
-        $content = $response->getContent();
-        $content = json_decode($content, true);
-        $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('A similar entry was found (criteria: version develop, platform cli, campaign autoupgrade, date ' . self::$date . ').', $content['message']);
     }
 
     public function testReportWithNoParameters(): void
