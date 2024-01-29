@@ -103,9 +103,9 @@ class ReportSuiteBuilder
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, string|array<string, string>>
      */
-    public function toArrayNth(int $nth): array
+    public function toArrayNth(int $nth): iterable
     {
         $data = array_values($this->toArray());
 
@@ -113,7 +113,7 @@ class ReportSuiteBuilder
     }
 
     /**
-     * @return array<int, array<string, string>>
+     * @return array<int, array<string, string|array<string, string>>>
      */
     public function toArray(): array
     {
@@ -127,7 +127,7 @@ class ReportSuiteBuilder
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, string|array<string, string>>
      */
     private function formatSuite(Suite $suite): array
     {
