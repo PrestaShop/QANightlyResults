@@ -11,8 +11,8 @@ RUN curl --insecure https://getcomposer.org/composer.phar -o /usr/bin/composer &
 
 COPY . /var/www/html
 
-RUN composer update && \
-    composer install
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer install
 
 
 FROM php:8.3-apache

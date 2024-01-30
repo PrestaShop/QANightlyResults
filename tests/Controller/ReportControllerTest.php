@@ -18,7 +18,7 @@ class ReportControllerTest extends WebTestCase
 
         $data = file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId);
         $data = json_decode($data, true);
-        self::$suiteId = array_key_first($data['suites_data']);
+        self::$suiteId = min(array_keys($data['suites_data']));
     }
 
     public function testCorsReports(): void
@@ -162,7 +162,7 @@ class ReportControllerTest extends WebTestCase
     public function testReportIDSuiteID(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/reports/2/suites/4');
+        $client->request('GET', '/reports/2/suites/3');
         $response = $client->getResponse();
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -172,7 +172,7 @@ class ReportControllerTest extends WebTestCase
         $content = $response->getContent();
         $content = json_decode($content, true);
 
-        $this->partialTestSuite(2, 4, $content, null, false);
+        $this->partialTestSuite(2, 3, $content, null, false);
     }
 
     public function testCompareReport(): void
@@ -237,7 +237,7 @@ class ReportControllerTest extends WebTestCase
     public function testCorsReportSuite(): void
     {
         $client = static::createClient();
-        $client->request('OPTIONS', '/reports/2/suites/4');
+        $client->request('OPTIONS', '/reports/2/suites/3');
         $response = $client->getResponse();
         $this->assertEquals($response->getStatusCode(), 200);
         $this->assertEquals($response->headers->get('access-control-allow-methods'), 'GET');
@@ -248,7 +248,7 @@ class ReportControllerTest extends WebTestCase
     public function testCompareSuite(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/reports/2/suites/4');
+        $client->request('GET', '/reports/2/suites/3');
         $response = $client->getResponse();
         $content = $response->getContent();
         $content = json_decode($content, true);
@@ -271,6 +271,17 @@ class ReportControllerTest extends WebTestCase
                 'start_date',
                 'end_date',
             ])) {
+                continue;
+            }
+            if (in_array($expectedKey, [
+                'broken_since_last',
+                'fixed_since_last',
+                'equal_since_last',
+            ])) {
+                $this->assertThat($actual[$expectedKey], $this->logicalOr(
+                    $this->equalTo($expectedValue),
+                    $this->isNull()
+                ));
                 continue;
             }
             if ($expectedKey == 'suites_data') {

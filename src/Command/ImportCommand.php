@@ -61,11 +61,8 @@ class ImportCommand extends Command
             return Command::FAILURE;
         }
 
-        $dateformat = $input->getOption('campaign') === 'autoupgrade'
-            ? ReportImporter::FORMAT_DATE_MOCHA5
-            : ReportImporter::FORMAT_DATE_MOCHA6;
         $startDate = \DateTime::createFromFormat(
-            $dateformat,
+            ReportImporter::FORMAT_DATE_MOCHA6,
             $jsonContent->stats->start
         );
 
@@ -76,7 +73,7 @@ class ImportCommand extends Command
             $matchesVersion[1],
             $startDate,
             $jsonContent,
-            $dateformat
+            ReportImporter::FORMAT_DATE_MOCHA6
         );
 
         return Command::SUCCESS;
