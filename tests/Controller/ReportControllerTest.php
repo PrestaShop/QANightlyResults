@@ -3,6 +3,7 @@
 namespace App\Tests\Controller;
 
 use App\Service\ReportMochaImporter;
+use App\Service\ReportPlaywrightImporter;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ReportControllerTest extends WebTestCase
@@ -61,7 +62,10 @@ class ReportControllerTest extends WebTestCase
             $this->assertArrayHasKey('date', $item);
             $this->assertArrayHasKey('version', $item);
             $this->assertArrayHasKey('campaign', $item);
-            $this->assertContains($item['campaign'], ReportMochaImporter::FILTER_CAMPAIGNS);
+            $this->assertContains($item['campaign'], array_merge(
+                ReportMochaImporter::FILTER_CAMPAIGNS,
+                ReportPlaywrightImporter::FILTER_CAMPAIGNS
+            ));
             $this->assertArrayHasKey('browser', $item);
             $this->assertContains($item['browser'], ReportMochaImporter::FILTER_PLATFORMS);
             $this->assertArrayHasKey('platform', $item);
