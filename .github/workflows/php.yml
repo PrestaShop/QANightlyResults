@@ -74,6 +74,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
+          coverage: 'xdebug'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -115,4 +116,12 @@ jobs:
            2024-01-25-develop.json
 
       - name: Run phpunit
-        run: ./vendor/bin/phpunit
+        run: XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-clover build/clover.xml
+
+      - name: Upload coverage results to Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          wget https://github.com/php-coveralls/php-coveralls/releases/download/v2.4.3/php-coveralls.phar
+          chmod +x php-coveralls.phar
+          php php-coveralls.phar --coverage_clover=build/clover.xml --json_path=build/coveralls-upload.json -vvv
