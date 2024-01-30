@@ -11,6 +11,7 @@ RUN curl --insecure https://getcomposer.org/composer.phar -o /usr/bin/composer &
 
 COPY . /var/www/html
 
+ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer install
 
 
