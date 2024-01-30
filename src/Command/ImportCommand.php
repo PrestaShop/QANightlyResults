@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\Service\ReportImporter;
+use App\Service\ReportMochaImporter;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,27 +10,27 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-#[AsCommand(name: 'nightly:import')]
+#[AsCommand(name: 'nightly:import:mocha')]
 class ImportCommand extends Command
 {
-    private ReportImporter $reportImporter;
+    private ReportMochaImporter $reportImporter;
 
-    private string $nightlyGCPUrl;
+    private string $nightlyReportPath;
 
-    public function __construct(ReportImporter $reportImporter, string $nightlyGCPUrl)
+    public function __construct(ReportMochaImporter $reportImporter, string $nightlyReportPath)
     {
         parent::__construct();
 
         $this->reportImporter = $reportImporter;
-        $this->nightlyGCPUrl = $nightlyGCPUrl;
+        $this->nightlyReportPath = $nightlyReportPath;
     }
 
     protected function configure(): void
     {
         $this
             ->addArgument('filename', InputArgument::REQUIRED)
-            ->addOption('platform', 'p', InputOption::VALUE_REQUIRED, '', ReportImporter::FILTER_PLATFORMS[0], ReportImporter::FILTER_PLATFORMS)
-            ->addOption('campaign', 'c', InputOption::VALUE_REQUIRED, '', ReportImporter::FILTER_CAMPAIGNS[0], ReportImporter::FILTER_CAMPAIGNS)
+            ->addOption('platform', 'p', InputOption::VALUE_REQUIRED, '', ReportMochaImporter::FILTER_PLATFORMS[0], ReportMochaImporter::FILTER_PLATFORMS)
+            ->addOption('campaign', 'c', InputOption::VALUE_REQUIRED, '', ReportMochaImporter::FILTER_CAMPAIGNS[0], ReportMochaImporter::FILTER_CAMPAIGNS)
         ;
     }
 
@@ -47,7 +47,7 @@ class ImportCommand extends Command
             return Command::FAILURE;
         }
 
-        $fileContent = @file_get_contents($this->nightlyGCPUrl . 'reports/' . $input->getArgument('filename'));
+        $fileContent = @file_get_contents($this->nightlyReportPath . 'reports/' . $input->getArgument('filename'));
         if (!$fileContent) {
             $output->writeln('<error>Unable to retrieve content from GCP URL</error>');
 
@@ -62,7 +62,7 @@ class ImportCommand extends Command
         }
 
         $startDate = \DateTime::createFromFormat(
-            ReportImporter::FORMAT_DATE_MOCHA6,
+            ReportMochaImporter::FORMAT_DATE_MOCHA6,
             $jsonContent->stats->start
         );
 
@@ -73,7 +73,7 @@ class ImportCommand extends Command
             $matchesVersion[1],
             $startDate,
             $jsonContent,
-            ReportImporter::FORMAT_DATE_MOCHA6
+            ReportMochaImporter::FORMAT_DATE_MOCHA6
         );
 
         return Command::SUCCESS;

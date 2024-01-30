@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\ExecutionRepository;
-use App\Service\ReportImporter;
+use App\Service\ReportMochaImporter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,11 +14,11 @@ class ImportController extends AbstractController
 {
     private ExecutionRepository $executionRepository;
 
-    private ReportImporter $reportImporter;
+    private ReportMochaImporter $reportImporter;
 
     private string $nightlyToken;
 
-    private string $nightlyGCPUrl;
+    private string $nightlyReportPath;
 
     private ?string $filename;
 
@@ -34,14 +34,14 @@ class ImportController extends AbstractController
 
     public function __construct(
         ExecutionRepository $executionRepository,
-        ReportImporter $reportImporter,
+        ReportMochaImporter $reportImporter,
         string $nightlyToken,
-        string $nightlyGCPUrl
+        string $nightlyReportPath
     ) {
         $this->executionRepository = $executionRepository;
         $this->reportImporter = $reportImporter;
         $this->nightlyToken = $nightlyToken;
-        $this->nightlyGCPUrl = $nightlyGCPUrl;
+        $this->nightlyReportPath = $nightlyReportPath;
     }
 
     #[Route('/hook/reports/import', methods: ['GET'])]
@@ -59,7 +59,7 @@ class ImportController extends AbstractController
             $this->version,
             $this->startDate,
             $this->jsonContent,
-            ReportImporter::FORMAT_DATE_MOCHA6
+            ReportMochaImporter::FORMAT_DATE_MOCHA6
         );
 
         return new JsonResponse([
@@ -102,7 +102,7 @@ class ImportController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $fileContent = @file_get_contents($this->nightlyGCPUrl . 'reports/' . $this->filename);
+        $fileContent = @file_get_contents($this->nightlyReportPath . 'reports/' . $this->filename);
         if (!$fileContent) {
             return new JsonResponse([
                 'message' => 'Unable to retrieve content from GCP URL',
@@ -122,12 +122,12 @@ class ImportController extends AbstractController
         $this->platform = $request->query->has('platform') ? $request->query->get('platform') : (
             $request->query->has('browser') ? $request->query->get('browser') : null
         );
-        $this->platform = in_array($this->platform, ReportImporter::FILTER_PLATFORMS) ? $this->platform : ReportImporter::FILTER_PLATFORMS[0];
+        $this->platform = in_array($this->platform, ReportMochaImporter::FILTER_PLATFORMS) ? $this->platform : ReportMochaImporter::FILTER_PLATFORMS[0];
 
         $this->campaign = $request->query->has('campaign') ? $request->query->get('campaign') : null;
-        $this->campaign = in_array($this->campaign, ReportImporter::FILTER_CAMPAIGNS) ? $this->campaign : ReportImporter::FILTER_CAMPAIGNS[0];
+        $this->campaign = in_array($this->campaign, ReportMochaImporter::FILTER_CAMPAIGNS) ? $this->campaign : ReportMochaImporter::FILTER_CAMPAIGNS[0];
 
-        $this->startDate = \DateTime::createFromFormat(ReportImporter::FORMAT_DATE_MOCHA6, $this->jsonContent->stats->start);
+        $this->startDate = \DateTime::createFromFormat(ReportMochaImporter::FORMAT_DATE_MOCHA6, $this->jsonContent->stats->start);
 
         // Check if there is no similar entry
         if (!$force && $this->executionRepository->findOneByNightly($this->version, $this->platform, $this->campaign, $this->startDate->format('Y-m-d'))) {
