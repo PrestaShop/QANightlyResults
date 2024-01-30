@@ -17,11 +17,11 @@ class HealthCheckController extends AbstractController
     }
 
     #[Route('/healthcheck', methods: ['GET'])]
-    public function check(string $nightlyGCPUrl): JsonResponse
+    public function check(string $nightlyReportPath): JsonResponse
     {
         $data = [
             'database' => true,
-            'gcp' => true,
+            'gcp' => false,
         ];
 
         // Check database
@@ -36,9 +36,9 @@ class HealthCheckController extends AbstractController
         }
 
         // Check GCP
-        $gcpCall = @file_get_contents($nightlyGCPUrl);
-        if (!$gcpCall) {
-            $data['gcp'] = false;
+        $gcpCall = @file_get_contents($nightlyReportPath);
+        if ($gcpCall || is_dir($nightlyReportPath)) {
+            $data['gcp'] = true;
         }
 
         return $this->json($data);

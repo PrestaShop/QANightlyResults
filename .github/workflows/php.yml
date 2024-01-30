@@ -100,21 +100,19 @@ jobs:
 
       - name: Inject data for AutoUpgrade
         run: |
-          DATE=$(date -d "1 day ago" +"%Y-%m-%d")
-          php bin/console nightly:import \
+          php bin/console nightly:import:mocha \
             -p cli \
             -c autoupgrade \
             --env test \
-            autoupgrade_$DATE-develop.json
+            autoupgrade_2024-01-25-develop.json
 
       - name: Inject data for Core
         run: |
-          DATE=$(date -d "1 day ago" +"%Y-%m-%d")
-          php bin/console nightly:import \
+          php bin/console nightly:import:mocha \
            -p chromium \
            -c functional \
            --env test \
-           $DATE-develop.json
+           2024-01-25-develop.json
 
       - name: Run phpunit
         run: ./vendor/bin/phpunit

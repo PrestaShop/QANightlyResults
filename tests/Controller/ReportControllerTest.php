@@ -2,11 +2,12 @@
 
 namespace App\Tests\Controller;
 
-use App\Service\ReportImporter;
+use App\Service\ReportMochaImporter;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ReportControllerTest extends WebTestCase
 {
+    private const DATE_RESOURCE = '2024-01-25';
     private static int $reportId = 0;
     private static int $suiteId = 0;
 
@@ -14,7 +15,12 @@ class ReportControllerTest extends WebTestCase
     {
         $data = file_get_contents('https://api-nightly.prestashop-project.org/reports?filter_version=develop&filter_campaign=functional');
         $data = json_decode($data, true);
-        self::$reportId = $data[1]['id'];
+        foreach ($data as $datum) {
+            if ($datum['date'] === self::DATE_RESOURCE) {
+                self::$reportId = $datum['id'];
+                break;
+            }
+        }
 
         $data = file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId);
         $data = json_decode($data, true);
@@ -55,11 +61,11 @@ class ReportControllerTest extends WebTestCase
             $this->assertArrayHasKey('date', $item);
             $this->assertArrayHasKey('version', $item);
             $this->assertArrayHasKey('campaign', $item);
-            $this->assertContains($item['campaign'], ReportImporter::FILTER_CAMPAIGNS);
+            $this->assertContains($item['campaign'], ReportMochaImporter::FILTER_CAMPAIGNS);
             $this->assertArrayHasKey('browser', $item);
-            $this->assertContains($item['browser'], ReportImporter::FILTER_PLATFORMS);
+            $this->assertContains($item['browser'], ReportMochaImporter::FILTER_PLATFORMS);
             $this->assertArrayHasKey('platform', $item);
-            $this->assertContains($item['platform'], ReportImporter::FILTER_PLATFORMS);
+            $this->assertContains($item['platform'], ReportMochaImporter::FILTER_PLATFORMS);
             $this->assertEquals($item['browser'], $item['platform']);
             $this->assertArrayHasKey('start_date', $item);
             $this->assertArrayHasKey('end_date', $item);
@@ -126,11 +132,11 @@ class ReportControllerTest extends WebTestCase
         $this->assertArrayHasKey('date', $content);
         $this->assertArrayHasKey('version', $content);
         $this->assertArrayHasKey('campaign', $content);
-        $this->assertContains($content['campaign'], ReportImporter::FILTER_CAMPAIGNS);
+        $this->assertContains($content['campaign'], ReportMochaImporter::FILTER_CAMPAIGNS);
         $this->assertArrayHasKey('browser', $content);
-        $this->assertContains($content['browser'], ReportImporter::FILTER_PLATFORMS);
+        $this->assertContains($content['browser'], ReportMochaImporter::FILTER_PLATFORMS);
         $this->assertArrayHasKey('platform', $content);
-        $this->assertContains($content['platform'], ReportImporter::FILTER_PLATFORMS);
+        $this->assertContains($content['platform'], ReportMochaImporter::FILTER_PLATFORMS);
         $this->assertEquals($content['browser'], $content['platform']);
         $this->assertArrayHasKey('start_date', $content);
         $this->assertArrayHasKey('end_date', $content);

@@ -4,11 +4,11 @@ namespace App\Service;
 
 class ReportLister
 {
-    public string $url;
+    public string $nightlyReportPath;
 
-    public function __construct(string $nightlyGCPUrl)
+    public function __construct(string $nightlyReportPath)
     {
-        $this->url = $nightlyGCPUrl;
+        $this->nightlyReportPath = $nightlyReportPath;
     }
 
     /**
@@ -16,8 +16,8 @@ class ReportLister
      */
     public function get(): array
     {
-        $return = file_get_contents($this->url);
-        if (!$return) {
+        $return = @file_get_contents($this->nightlyReportPath);
+        if (!$return || !is_dir($this->nightlyReportPath)) {
             return [];
         }
 
