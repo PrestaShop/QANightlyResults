@@ -58,8 +58,7 @@ class ImportController extends AbstractController
             $this->campaign,
             $this->version,
             $this->startDate,
-            $this->jsonContent,
-            ReportMochaImporter::FORMAT_DATE_MOCHA6
+            $this->jsonContent
         );
 
         return new JsonResponse([
@@ -127,7 +126,7 @@ class ImportController extends AbstractController
         $this->campaign = $request->query->has('campaign') ? $request->query->get('campaign') : null;
         $this->campaign = in_array($this->campaign, ReportMochaImporter::FILTER_CAMPAIGNS) ? $this->campaign : ReportMochaImporter::FILTER_CAMPAIGNS[0];
 
-        $this->startDate = \DateTime::createFromFormat(ReportMochaImporter::FORMAT_DATE_MOCHA6, $this->jsonContent->stats->start);
+        $this->startDate = \DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $this->jsonContent->stats->start);
 
         // Check if there is no similar entry
         if (!$force && $this->executionRepository->findOneByNightly($this->version, $this->platform, $this->campaign, $this->startDate->format('Y-m-d'))) {
