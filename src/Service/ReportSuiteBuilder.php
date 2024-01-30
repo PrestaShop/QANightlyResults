@@ -155,8 +155,8 @@ class ReportSuiteBuilder
             'totalPending' => $suite->getTotalPending(),
             'totalPasses' => $suite->getTotalPasses(),
             'totalFailures' => $suite->getTotalFailures(),
-            'hasSuites' => $suite->getHasSuites(),
-            'hasTests' => $suite->getHasTests(),
+            'hasSuites' => $suite->getHasSuites() ? 1 : 0,
+            'hasTests' => $suite->getHasTests() ? 1 : 0,
             'parent_id' => $suite->getParentId(),
             'insertion_date' => $suite->getInsertionDate()
                 ->setTimezone(new \DateTimeZone('-01:00'))
@@ -241,7 +241,7 @@ class ReportSuiteBuilder
                 continue;
             }
 
-            if ($suite->getHasTests() == 1 && isset($this->tests[$suite->getId()])) {
+            if ($suite->getHasTests() && isset($this->tests[$suite->getId()])) {
                 $suite->setTests($this->tests[$suite->getId()]);
             }
 
@@ -298,7 +298,7 @@ class ReportSuiteBuilder
         foreach ($suites as $suite) {
             $num += $suite->{'getTotal' . ucfirst($status)}();
 
-            if ($suite->getHasSuites() == 1) {
+            if ($suite->getHasSuites()) {
                 $num += $this->countStatus(0, $suite->getSuites(), $status);
             }
         }

@@ -62,7 +62,7 @@ class ImportCommand extends Command
         }
 
         $startDate = \DateTime::createFromFormat(
-            ReportMochaImporter::FORMAT_DATE_MOCHA6,
+            \DateTime::RFC3339_EXTENDED,
             $jsonContent->stats->start
         );
 
@@ -72,8 +72,7 @@ class ImportCommand extends Command
             $input->getOption('campaign'),
             $matchesVersion[1],
             $startDate,
-            $jsonContent,
-            ReportMochaImporter::FORMAT_DATE_MOCHA6
+            $jsonContent
         );
 
         return Command::SUCCESS;

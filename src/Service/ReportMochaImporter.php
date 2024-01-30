@@ -15,9 +15,6 @@ class ReportMochaImporter
 
     public const FILTER_CAMPAIGNS = ['functional', 'sanity', 'e2e', 'regression', 'autoupgrade'];
 
-    public const FORMAT_DATE_MOCHA5 = 'Y-m-d H:i:s';
-    public const FORMAT_DATE_MOCHA6 = \DateTime::RFC3339_EXTENDED;
-
     private EntityManagerInterface $entityManager;
 
     private ExecutionRepository $executionRepository;
@@ -40,8 +37,7 @@ class ReportMochaImporter
         string $campaign,
         string $version,
         \DateTime $startDate,
-        \stdClass $jsonContent,
-        string $dateformat
+        \stdClass $jsonContent
     ): Execution {
         $execution = new Execution();
         $execution
@@ -50,7 +46,7 @@ class ReportMochaImporter
             ->setPlatform($platform)
             ->setCampaign($campaign)
             ->setStartDate($startDate)
-            ->setEndDate(\DateTime::createFromFormat($dateformat, $jsonContent->stats->end))
+            ->setEndDate(\DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $jsonContent->stats->end))
             ->setDuration($jsonContent->stats->duration)
             ->setVersion($version)
             ->setSuites($jsonContent->stats->suites)
@@ -65,19 +61,15 @@ class ReportMochaImporter
         $this->entityManager->flush();
         $executionId = $execution->getId();
 
-        if ($dateformat == self::FORMAT_DATE_MOCHA5) {
-            $this->insertExecutionSuite($execution, $jsonContent->suites, $dateformat);
-        } else {
-            foreach ($jsonContent->results as $suite) {
-                if ($suite->root) {
-                    foreach ($suite->suites as $suiteChild) {
-                        $this->insertExecutionSuite($execution, $suiteChild, $dateformat);
-                        // Reload of execution (bcz insertExecutionSuite make a Doctrine Clear)
-                        $execution = $this->executionRepository->findOneBy(['id' => $executionId]);
-                    }
-                } else {
-                    $this->insertExecutionSuite($execution, $suite, $dateformat);
+        foreach ($jsonContent->results as $suite) {
+            if ($suite->root) {
+                foreach ($suite->suites as $suiteChild) {
+                    $this->insertExecutionSuite($execution, $suiteChild);
+                    // Reload of execution (bcz insertExecutionSuite make a Doctrine Clear)
+                    $execution = $this->executionRepository->findOneBy(['id' => $executionId]);
                 }
+            } else {
+                $this->insertExecutionSuite($execution, $suite);
             }
         }
         // Reload of execution (bcz insertExecutionSuite make a Doctrine Clear)
@@ -93,26 +85,24 @@ class ReportMochaImporter
         return $execution;
     }
 
-    private function insertExecutionSuite(Execution $execution, \stdClass $suite, string $dateFormat, int $parentSuiteId = null): void
+    private function insertExecutionSuite(Execution $execution, \stdClass $suite, int $parentSuiteId = null): void
     {
-        $isMocha6 = $dateFormat === self::FORMAT_DATE_MOCHA6;
-
         $executionSuite = new Suite();
         $executionSuite
             ->setExecution($execution)
             ->setUuid($suite->uuid)
             ->setTitle($suite->title)
             ->setDuration($suite->duration)
-            ->setHasSkipped($isMocha6 ? (!empty($suite->skipped)) : ($suite->hasSkipped ? 1 : 0))
-            ->setHasPending($isMocha6 ? (!empty($suite->pending)) : ($suite->hasPending ? 1 : 0))
-            ->setHasPasses($isMocha6 ? (!empty($suite->passes)) : ($suite->hasPasses ? 1 : 0))
-            ->setHasFailures($isMocha6 ? (!empty($suite->failures)) : ($suite->hasFailures ? 1 : 0))
-            ->setHasSuites($isMocha6 ? (!empty($suite->suites)) : ($suite->hasSuites ? 1 : 0))
-            ->setHasTests($isMocha6 ? (!empty($suite->tests)) : ($suite->hasTests ? 1 : 0))
-            ->setTotalSkipped($isMocha6 ? (count($suite->skipped)) : ($suite->totalSkipped))
-            ->setTotalPending($isMocha6 ? (count($suite->pending)) : ($suite->totalPending))
-            ->setTotalPasses($isMocha6 ? (count($suite->passes)) : ($suite->totalPasses))
-            ->setTotalFailures($isMocha6 ? (count($suite->failures)) : ($suite->totalFailures))
+            ->setHasSkipped(!empty($suite->skipped))
+            ->setHasPending(!empty($suite->pending))
+            ->setHasPasses(!empty($suite->passes))
+            ->setHasFailures(!empty($suite->failures))
+            ->setHasSuites(!empty($suite->suites))
+            ->setHasTests(!empty($suite->tests))
+            ->setTotalSkipped(count($suite->skipped))
+            ->setTotalPending(count($suite->pending))
+            ->setTotalPasses(count($suite->passes))
+            ->setTotalFailures(count($suite->failures))
             ->setParentId($parentSuiteId)
             ->setCampaign($this->extractDataFromFile($suite->file, 'campaign'))
             ->setFile($this->extractDataFromFile($suite->file, 'file'))
@@ -147,7 +137,7 @@ class ReportMochaImporter
 
         // Insert children suites
         foreach ($suite->suites as $suiteChildren) {
-            $this->insertExecutionSuite($execution, $suiteChildren, $dateFormat, $executionSuite->getId());
+            $this->insertExecutionSuite($execution, $suiteChildren, $executionSuite->getId());
         }
         if (!$parentSuiteId) {
             $this->entityManager->clear();
