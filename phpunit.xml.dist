@@ -16,6 +16,12 @@
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.6" />
     </php>
 
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
+
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>tests</directory>

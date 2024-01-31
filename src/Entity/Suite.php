@@ -59,10 +59,10 @@ class Suite
     private ?int $totalFailures = null;
 
     #[ORM\Column(name: 'hasSuites', nullable: true)]
-    private ?int $hasSuites = null;
+    private ?bool $hasSuites = null;
 
     #[ORM\Column(name: 'hasTests', nullable: true)]
-    private ?int $hasTests = null;
+    private ?bool $hasTests = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $parent_id = null;
@@ -262,24 +262,24 @@ class Suite
         return $this;
     }
 
-    public function getHasSuites(): ?int
+    public function getHasSuites(): ?bool
     {
         return $this->hasSuites;
     }
 
-    public function setHasSuites(?int $hasSuites): static
+    public function setHasSuites(?bool $hasSuites): static
     {
         $this->hasSuites = $hasSuites;
 
         return $this;
     }
 
-    public function getHasTests(): ?int
+    public function getHasTests(): ?bool
     {
         return $this->hasTests;
     }
 
-    public function setHasTests(?int $hasTests): static
+    public function setHasTests(?bool $hasTests): static
     {
         $this->hasTests = $hasTests;
 

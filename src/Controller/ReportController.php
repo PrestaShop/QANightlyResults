@@ -19,18 +19,18 @@ class ReportController extends AbstractController
 
     private ReportSuiteBuilder $reportSuiteBuilder;
 
-    private string $nightlyGCPUrl;
+    private string $nightlyReportPath;
 
     public function __construct(
         ExecutionRepository $executionRepository,
         ReportLister $reportLister,
         ReportSuiteBuilder $reportSuiteBuilder,
-        string $nightlyGCPUrl
+        string $nightlyReportPath
     ) {
         $this->executionRepository = $executionRepository;
         $this->reportLister = $reportLister;
         $this->reportSuiteBuilder = $reportSuiteBuilder;
-        $this->nightlyGCPUrl = $nightlyGCPUrl;
+        $this->nightlyReportPath = $nightlyReportPath;
     }
 
     #[Route('/reports', methods: ['GET'])]
@@ -66,10 +66,10 @@ class ReportController extends AbstractController
             $date = $execution->getStartDate()->format('Y-m-d');
 
             if (isset($reportListing[$date][$execution->getVersion()]['zip'])) {
-                $download = $this->nightlyGCPUrl . $reportListing[$date][$execution->getVersion()]['zip'];
+                $download = $this->nightlyReportPath . $reportListing[$date][$execution->getVersion()]['zip'];
             }
             if (isset($reportListing[$date][$execution->getVersion()]['xml'])) {
-                $xml = $this->nightlyGCPUrl . $reportListing[$date][$execution->getVersion()]['xml'];
+                $xml = $this->nightlyReportPath . $reportListing[$date][$execution->getVersion()]['xml'];
             }
 
             $reports[] = [

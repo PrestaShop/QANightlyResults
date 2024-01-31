@@ -1,5 +1,8 @@
 # QANightlyResults
 
+[![Github Action PHP](https://github.com/PrestaShop/QANightlyResults/actions/workflows/php.yml/badge.svg)](https://github.com/PrestaShop/QANightlyResults/actions/workflows/php.yml)
+[![Coverage Status](https://coveralls.io/repos/github/PrestaShop/QANightlyResults/badge.svg?branch=develop)](https://coveralls.io/github/PrestaShop/QANightlyResults?branch=develop)
+
 QANightlyResults is a Symfony app, acting as a backend (via a JSON API) to handle and browse tests reports records.
 
 You can use any frontend app you want to consume this API. We use a [Vue app](https://github.com/PrestaShop/nightly-board).
