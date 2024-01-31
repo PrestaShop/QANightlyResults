@@ -9,26 +9,19 @@ use App\Repository\ExecutionRepository;
 use App\Repository\TestRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-class ReportMochaImporter
+class ReportMochaImporter extends AbstractReportImporter
 {
-    public const FILTER_PLATFORMS = ['chromium', 'firefox', 'webkit', 'cli'];
-
     public const FILTER_CAMPAIGNS = ['functional', 'sanity', 'e2e', 'regression', 'autoupgrade'];
 
     private EntityManagerInterface $entityManager;
-
-    private ExecutionRepository $executionRepository;
-
-    private TestRepository $testRepository;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         ExecutionRepository $executionRepository,
         TestRepository $testRepository
     ) {
+        parent::__construct($executionRepository, $testRepository);
         $this->entityManager = $entityManager;
-        $this->executionRepository = $executionRepository;
-        $this->testRepository = $testRepository;
     }
 
     public function import(
@@ -144,10 +137,25 @@ class ReportMochaImporter
         }
     }
 
+    private function extractTestState(\stdClass $test): string
+    {
+        if (isset($test->state)) {
+            return $test->state;
+        }
+        if ($test->skipped == true) {
+            return 'skipped';
+        }
+        if ($test->pending == true) {
+            return 'pending';
+        }
+
+        return 'unknown';
+    }
+
     /**
      * Extract campaign name and file name from json data
      */
-    private function extractDataFromFile(string $filename, string $type): string
+    protected function extractDataFromFile(string $filename, string $type): string
     {
         if (strlen($filename) == 0) {
             return '';
@@ -177,21 +185,6 @@ class ReportMochaImporter
         return '';
     }
 
-    private function extractTestState(\stdClass $test): string
-    {
-        if (isset($test->state)) {
-            return $test->state;
-        }
-        if ($test->skipped == true) {
-            return 'skipped';
-        }
-        if ($test->pending == true) {
-            return 'pending';
-        }
-
-        return 'unknown';
-    }
-
     /**
      * Sanitize text by removing weird characters
      */
@@ -210,47 +203,5 @@ class ReportMochaImporter
         }
 
         return $result;
-    }
-
-    private function compareReportData(Execution $execution): Execution
-    {
-        if (!$execution->getStartDate()) {
-            return $execution;
-        }
-
-        $executionPrevious = $this->executionRepository->findOneByNightlyBefore(
-            $execution->getVersion(),
-            $execution->getPlatform(),
-            $execution->getCampaign(),
-            $execution->getStartDate()
-        );
-        if (!$executionPrevious) {
-            return $execution;
-        }
-
-        $data = $this->testRepository->findComparisonDate($execution, $executionPrevious);
-        if (empty($data)) {
-            return $execution;
-        }
-
-        // Reset
-        $execution
-            ->setFixedSinceLast(0)
-            ->setBrokenSinceLast(0)
-            ->setEqualSinceLast(0)
-        ;
-        foreach ($data as $datum) {
-            if ($datum['old_test_state'] == 'failed' && $datum['current_test_state'] == 'failed') {
-                $execution->setEqualSinceLast($execution->getEqualSinceLast() + 1);
-            }
-            if ($datum['old_test_state'] == 'passed' && $datum['current_test_state'] == 'failed') {
-                $execution->setBrokenSinceLast($execution->getBrokenSinceLast() + 1);
-            }
-            if ($datum['old_test_state'] == 'failed' && $datum['current_test_state'] == 'passed') {
-                $execution->setFixedSinceLast($execution->getFixedSinceLast() + 1);
-            }
-        }
-
-        return $execution;
     }
 }

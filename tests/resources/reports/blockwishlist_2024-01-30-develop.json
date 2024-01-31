@@ -1,0 +1,666 @@
+{
+  "config": {
+    "configFile": "/home/flefevre/projects/blockwishlist/tests/UI/playwright.config.ts",
+    "rootDir": "/home/flefevre/projects/blockwishlist/tests/UI",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        {
+          "printSteps": true
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "report.json"
+        }
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "reports"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/home/flefevre/projects/blockwishlist/tests/UI/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/home/flefevre/projects/blockwishlist/tests/UI",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.40.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+      "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Wishlist module - Statistics tab settings",
+          "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+          "line": 24,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should login in BO",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2153,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:26.446Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2xvZ2luQk8="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-a7715960ec6b0550f4df",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 36,
+              "column": 7
+            },
+            {
+              "title": "should go to 'Modules > Module Manager' page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 4460,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:28.919Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2dvVG9Nb2R1bGVNYW5hZ2VyUGFnZQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-ba68ed93e64820f22b11",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 46,
+              "column": 7
+            },
+            {
+              "title": "should search the module Wishlist",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 920,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:33.380Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX3NlYXJjaE1vZHVsZQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-25a2f08927ca2f43af30",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 61,
+              "column": 7
+            },
+            {
+              "title": "should go to the configuration page of the module 'Wishlist'",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2594,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:34.301Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2dvVG9Db25maWd1cmF0aW9uUGFnZQ=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-2bc88a6e5b6b79976d91",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 68,
+              "column": 7
+            },
+            {
+              "title": "should go on Statistics Tab",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 1035,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:36.897Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2dvVG9TdGF0aXN0aWNzVGFi"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-b2d889f1b3e891c6f2bc",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 83,
+              "column": 7
+            },
+            {
+              "title": "should go to the FO",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 1899,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:37.934Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2dvVG9GTw=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-ebdc0a6f7b6731c8ff57",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 95,
+              "column": 7
+            },
+            {
+              "title": "should go to login page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 712,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:39.834Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2dvVG9Mb2dpblBhZ2U="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-9a47efb5421740a6590b",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 105,
+              "column": 7
+            },
+            {
+              "title": "should sign in with default customer",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 625,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:40.547Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX3NpZ2hJbkZv"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-e7b1ddad6b53cd8f21e2",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 114,
+              "column": 7
+            },
+            {
+              "title": "should go to all products page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 857,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:41.174Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2dvVG9BbGxQcm9kdWN0cw=="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-939c7a571f26404a04b9",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 123,
+              "column": 7
+            },
+            {
+              "title": "should add product #1 to wishlist",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2037,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:42.032Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2FkZFRvRmF2b3JpdGUx"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-f1874d0c9fa91a5d07c1",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 134,
+              "column": 11
+            },
+            {
+              "title": "should add product #2 to wishlist",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2036,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:44.070Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2FkZFRvRmF2b3JpdGUy"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-882066c814c2de92c0f6",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 134,
+              "column": 11
+            },
+            {
+              "title": "should add product #3 to wishlist",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2046,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:46.107Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2FkZFRvRmF2b3JpdGUz"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-956b9cc12aba87711a34",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 134,
+              "column": 11
+            },
+            {
+              "title": "should logout",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 1245,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:48.155Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2ZvTG9nb3V0"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-b3135f2314b14035c8e3",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 145,
+              "column": 7
+            },
+            {
+              "title": "should go to BO",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 17,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:49.401Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2dvVG9Cb0JhY2s="
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-5fca82fb8a99ed9779f0",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 154,
+              "column": 7
+            },
+            {
+              "title": "should click on the refresh button",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "https://github.com/PrestaShop/PrestaShop/issues/33374"
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "skipped",
+                      "duration": 10,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-01-30T14:53:49.419Z",
+                      "attachments": [
+                        {
+                          "name": "testIdentifier",
+                          "contentType": "text/plain",
+                          "body": "bW9kdWxlc19ibG9ja3dpc2hsaXN0X2NvbmZpZ3VyYXRpb25fc3RhdGlzdGljc1RhYlNldHRpbmdzX2NsaWNrT25SZWZyZXNoQnV0dG9u"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "bccdbfd5ae7685eb301d-d3975a8ebb75729294c6",
+              "file": "campaigns/02_configuration/02_statisticsTabSettings.spec.ts",
+              "line": 164,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2024-01-30T14:53:23.270Z",
+    "duration": 26257.127,
+    "expected": 14,
+    "skipped": 1,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

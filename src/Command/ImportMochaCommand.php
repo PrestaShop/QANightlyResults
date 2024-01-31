@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(name: 'nightly:import:mocha')]
-class ImportCommand extends Command
+class ImportMochaCommand extends Command
 {
     private ReportMochaImporter $reportImporter;
 

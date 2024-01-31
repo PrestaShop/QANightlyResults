@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\ExecutionRepository;
 use App\Service\ReportMochaImporter;
+use App\Service\ReportPlaywrightImporter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +15,9 @@ class ImportController extends AbstractController
 {
     private ExecutionRepository $executionRepository;
 
-    private ReportMochaImporter $reportImporter;
+    private ReportMochaImporter $reportMochaImporter;
+
+    private ReportPlaywrightImporter $reportPlaywrightImporter;
 
     private string $nightlyToken;
 
@@ -34,25 +37,27 @@ class ImportController extends AbstractController
 
     public function __construct(
         ExecutionRepository $executionRepository,
-        ReportMochaImporter $reportImporter,
+        ReportMochaImporter $reportMochaImporter,
+        ReportPlaywrightImporter $reportPlaywrightImporter,
         string $nightlyToken,
         string $nightlyReportPath
     ) {
         $this->executionRepository = $executionRepository;
-        $this->reportImporter = $reportImporter;
+        $this->reportMochaImporter = $reportMochaImporter;
+        $this->reportPlaywrightImporter = $reportPlaywrightImporter;
         $this->nightlyToken = $nightlyToken;
         $this->nightlyReportPath = $nightlyReportPath;
     }
 
     #[Route('/hook/reports/import', methods: ['GET'])]
-    public function importReport(Request $request): JsonResponse
+    public function importReportMocha(Request $request): JsonResponse
     {
-        $response = $this->checkAuth($request);
+        $response = $this->checkAuth($request, ReportMochaImporter::FILTER_CAMPAIGNS);
         if ($response instanceof JsonResponse) {
             return $response;
         }
 
-        $execution = $this->reportImporter->import(
+        $execution = $this->reportMochaImporter->import(
             $this->filename,
             $this->platform,
             $this->campaign,
@@ -67,7 +72,33 @@ class ImportController extends AbstractController
         ]);
     }
 
-    private function checkAuth(Request $request): ?JsonResponse
+    #[Route('/import/report/playwright', methods: ['GET'])]
+    public function importReportPlaywright(Request $request): JsonResponse
+    {
+        $response = $this->checkAuth($request, ReportPlaywrightImporter::FILTER_CAMPAIGNS);
+        if ($response instanceof JsonResponse) {
+            return $response;
+        }
+
+        $execution = $this->reportPlaywrightImporter->import(
+            $this->filename,
+            $this->platform,
+            $this->campaign,
+            $this->version,
+            $this->startDate,
+            $this->jsonContent
+        );
+
+        return new JsonResponse([
+            'status' => 'ok',
+            'report' => $execution->getId(),
+        ]);
+    }
+
+    /**
+     * @param array<string> $allowedCampaigns
+     */
+    private function checkAuth(Request $request, array $allowedCampaigns): ?JsonResponse
     {
         $token = $request->query->get('token');
         $this->filename = $request->query->get('filename');
@@ -124,9 +155,9 @@ class ImportController extends AbstractController
         $this->platform = in_array($this->platform, ReportMochaImporter::FILTER_PLATFORMS) ? $this->platform : ReportMochaImporter::FILTER_PLATFORMS[0];
 
         $this->campaign = $request->query->has('campaign') ? $request->query->get('campaign') : null;
-        $this->campaign = in_array($this->campaign, ReportMochaImporter::FILTER_CAMPAIGNS) ? $this->campaign : ReportMochaImporter::FILTER_CAMPAIGNS[0];
+        $this->campaign = in_array($this->campaign, $allowedCampaigns) ? $this->campaign : $allowedCampaigns[0];
 
-        $this->startDate = \DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $this->jsonContent->stats->start);
+        $this->startDate = \DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $this->jsonContent->stats->start ?? $this->jsonContent->stats->startTime);
 
         // Check if there is no similar entry
         if (!$force && $this->executionRepository->findOneByNightly($this->version, $this->platform, $this->campaign, $this->startDate->format('Y-m-d'))) {
