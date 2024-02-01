@@ -17,7 +17,7 @@ class ReportLister
     public function get(): array
     {
         $return = @file_get_contents($this->nightlyReportPath);
-        if (!$return || !is_dir($this->nightlyReportPath)) {
+        if (!$return) {
             return [];
         }
 
