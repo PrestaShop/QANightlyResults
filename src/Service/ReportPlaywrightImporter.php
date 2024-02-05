@@ -84,7 +84,7 @@ class ReportPlaywrightImporter extends AbstractReportImporter
         return $execution;
     }
 
-    protected function insertExecutionSuite(Execution $execution, \stdClass $suite, int $parentSuiteId = null): Suite
+    protected function insertExecutionSuite(Execution $execution, \stdClass $suite, ?int $parentSuiteId = null): Suite
     {
         $executionSuite = new Suite();
         $executionSuite
