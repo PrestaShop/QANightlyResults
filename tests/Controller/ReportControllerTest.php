@@ -368,7 +368,7 @@ class ReportControllerTest extends WebTestCase
     /**
      * @param array<string, string> $item
      */
-    private function partialTestSuite(int $executionId, int $id, array $item, int $idParent = null, bool $hasChildrenData = null): void
+    private function partialTestSuite(int $executionId, int $id, array $item, ?int $idParent = null, ?bool $hasChildrenData = null): void
     {
         $this->assertIsInt($id);
 

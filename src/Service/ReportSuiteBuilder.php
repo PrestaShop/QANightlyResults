@@ -45,7 +45,7 @@ class ReportSuiteBuilder
         return $this;
     }
 
-    public function filterSearch(string $search = null): self
+    public function filterSearch(?string $search = null): self
     {
         $this->filterSearch = $search;
 
@@ -62,7 +62,7 @@ class ReportSuiteBuilder
         return $this;
     }
 
-    public function filterSuite(int $suiteId = null): self
+    public function filterSuite(?int $suiteId = null): self
     {
         $this->filterSuiteId = $suiteId;
 

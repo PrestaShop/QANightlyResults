@@ -78,7 +78,7 @@ class ReportMochaImporter extends AbstractReportImporter
         return $execution;
     }
 
-    private function insertExecutionSuite(Execution $execution, \stdClass $suite, int $parentSuiteId = null): void
+    private function insertExecutionSuite(Execution $execution, \stdClass $suite, ?int $parentSuiteId = null): void
     {
         $executionSuite = new Suite();
         $executionSuite
