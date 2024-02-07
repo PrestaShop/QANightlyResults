@@ -37,17 +37,18 @@ class ReportController extends AbstractController
     public function reports(Request $request): JsonResponse
     {
         $executionFilters = [];
+        $requestParams = $request->query->all();
 
-        if ($request->query->has('filter_platform')) {
-            $executionFilters['platform'] = $request->query->get('filter_platform');
-        } elseif ($request->query->has('filter_browser')) {
-            $executionFilters['platform'] = $request->query->get('filter_browser');
+        if (isset($requestParams['filter_platform'])) {
+            $executionFilters['platform'] = $requestParams['filter_platform'];
+        } elseif (isset($requestParams['filter_browser'])) {
+            $executionFilters['platform'] = $requestParams['filter_browser'];
         }
-        if ($request->query->has('filter_campaign')) {
-            $executionFilters['campaign'] = $request->query->get('filter_campaign');
+        if (isset($requestParams['filter_campaign'])) {
+            $executionFilters['campaign'] = $requestParams['filter_campaign'];
         }
-        if ($request->query->has('filter_version')) {
-            $executionFilters['version'] = $request->query->get('filter_version');
+        if (isset($requestParams['filter_version'])) {
+            $executionFilters['version'] = $requestParams['filter_version'];
         }
         $executions = $this->executionRepository->findBy($executionFilters, [
             'start_date' => 'DESC',
