@@ -78,7 +78,7 @@ class ReportMochaImporter extends AbstractReportImporter
         return $execution;
     }
 
-    private function insertExecutionSuite(Execution $execution, \stdClass $suite, ?int $parentSuiteId = null): void
+    private function insertExecutionSuite(Execution $execution, \stdClass $suite, ?Suite $parentSuite = null): void
     {
         $executionSuite = new Suite();
         $executionSuite
@@ -96,7 +96,7 @@ class ReportMochaImporter extends AbstractReportImporter
             ->setTotalPending(count($suite->pending))
             ->setTotalPasses(count($suite->passes))
             ->setTotalFailures(count($suite->failures))
-            ->setParentId($parentSuiteId)
+            ->setParent($parentSuite)
             ->setCampaign($this->extractDataFromFile($suite->file, 'campaign'))
             ->setFile($this->extractDataFromFile($suite->file, 'file'))
             ->setInsertionDate(new \DateTime())
@@ -130,9 +130,9 @@ class ReportMochaImporter extends AbstractReportImporter
 
         // Insert children suites
         foreach ($suite->suites as $suiteChildren) {
-            $this->insertExecutionSuite($execution, $suiteChildren, $executionSuite->getId());
+            $this->insertExecutionSuite($execution, $suiteChildren, $executionSuite);
         }
-        if (!$parentSuiteId) {
+        if (!$parentSuite) {
             $this->entityManager->clear();
         }
     }
