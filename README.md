@@ -35,8 +35,12 @@ Set up a vhost that points to the `/public` folder (example in the `vhost.conf` 
 
 ## Inserting new data
 
-Use the hook provided in the `Hook` controller. You need to call this URL: `BASE_URL/hook/reports/import` with the following GET 
-parameters:
+Use the hook provided in the `Hook` controller. 
+You need to call one of these URLs with the method `GET`: 
+- `BASE_URL/hook/reports/import` (for a Mocha Import)
+- `BASE_URL/import/report/playwright` (for a Playwright Import)
+
+You can add these parameters in the query:
 - `token`: the token set in the environment variable `QANB_TOKEN` (e.g.: `IpBzOmwXQUrW5Hn`)
 - `filename` : the complete filename to look for in the Google Cloud Storage (e.g.: `2019-07-22-develop.json`). The 
 name must follow this pattern: `/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/`
@@ -47,6 +51,7 @@ Optional:
 - `campaign`: to specify the campaign. Possible values are 'functional' (default), 'sanity', 'e2e', and 'regression'.
 
 EG : `api.mysite.com/hook/reports/import?token=IpBzOmwXQUrW5Hn&filename=2019-07-22-develop.json`
+EG : `api.mysite.com/import/report/playwright?token=IpBzOmwXQUrW5Hn&filename=2019-07-22-develop.json`
 
 The files in the Google Cloud Storage might be huge, so be sure your server is properly configured to handle large files.
 
