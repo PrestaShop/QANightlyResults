@@ -39,10 +39,15 @@ class ReportControllerTest extends WebTestCase
         $this->assertEquals($response->headers->get('access-control-allow-origin'), '*');
     }
 
-    public function testReports(): void
+    /**
+     * @dataProvider dataProviderReportFilters
+     *
+     * @param array<string, string> $query
+     */
+    public function testReportsFilters(array $query, int $count): void
     {
         $client = static::createClient();
-        $client->request('GET', '/reports');
+        $client->request('GET', '/reports' . ($query ? '?' . http_build_query($query) : ''));
         $response = $client->getResponse();
 
         $this->assertTrue($response->isSuccessful());
@@ -50,7 +55,7 @@ class ReportControllerTest extends WebTestCase
         $this->assertEquals('application/json', $response->headers->get('content-type'));
 
         $content = json_decode($response->getContent(), true);
-        $this->assertGreaterThan(0, count($content));
+        $this->assertEquals($count, count($content));
         $datePrevious = null;
         foreach ($content as $item) {
             if ($datePrevious) {
@@ -61,16 +66,28 @@ class ReportControllerTest extends WebTestCase
             $this->assertIsInt($item['id']);
             $this->assertArrayHasKey('date', $item);
             $this->assertArrayHasKey('version', $item);
+            if (isset($query['filter_version'])) {
+                $this->assertEquals($item['version'], $query['filter_version']);
+            }
             $this->assertArrayHasKey('campaign', $item);
             $this->assertContains($item['campaign'], array_merge(
                 ReportMochaImporter::FILTER_CAMPAIGNS,
                 ReportPlaywrightImporter::FILTER_CAMPAIGNS
             ));
+            if (isset($query['filter_campaign[0]'])) {
+                $this->assertEquals($item['campaign'], $query['filter_campaign[0]']);
+            }
             $this->assertArrayHasKey('browser', $item);
             $this->assertContains($item['browser'], ReportMochaImporter::FILTER_PLATFORMS);
             $this->assertArrayHasKey('platform', $item);
             $this->assertContains($item['platform'], ReportMochaImporter::FILTER_PLATFORMS);
             $this->assertEquals($item['browser'], $item['platform']);
+            if (isset($query['filter_platform'])) {
+                $this->assertEquals($item['platform'], $query['filter_platform']);
+            }
+            if (isset($query['filter_browser'])) {
+                $this->assertEquals($item['platform'], $query['filter_browser']);
+            }
             $this->assertArrayHasKey('start_date', $item);
             $this->assertArrayHasKey('end_date', $item);
             $this->assertArrayHasKey('duration', $item);
@@ -89,6 +106,20 @@ class ReportControllerTest extends WebTestCase
             $this->assertArrayHasKey('download', $item);
             $this->assertArrayHasKey('xml', $item);
         }
+    }
+
+    /**
+     * @return array<array<array<string, string>|int>>
+     */
+    public static function dataProviderReportFilters(): array
+    {
+        return [
+            [[], 6],
+            [['filter_campaign[0]' => 'functional'], 2],
+            [['filter_platform' => 'chromium'], 3],
+            [['filter_browser' => 'chromium'], 3],
+            [['filter_version' => 'develop'], 6],
+        ];
     }
 
     public function testReportNotFound(): void
@@ -368,7 +399,7 @@ class ReportControllerTest extends WebTestCase
     /**
      * @param array<string, string> $item
      */
-    private function partialTestSuite(int $executionId, int $id, array $item, int $idParent = null, bool $hasChildrenData = null): void
+    private function partialTestSuite(int $executionId, int $id, array $item, ?int $idParent = null, ?bool $hasChildrenData = null): void
     {
         $this->assertIsInt($id);
 

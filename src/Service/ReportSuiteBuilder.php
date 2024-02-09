@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Execution;
 use App\Entity\Suite;
 use App\Entity\Test;
+use Doctrine\Common\Collections\Collection;
 
 class ReportSuiteBuilder
 {
@@ -45,7 +46,7 @@ class ReportSuiteBuilder
         return $this;
     }
 
-    public function filterSearch(string $search = null): self
+    public function filterSearch(?string $search = null): self
     {
         $this->filterSearch = $search;
 
@@ -62,7 +63,7 @@ class ReportSuiteBuilder
         return $this;
     }
 
-    public function filterSuite(int $suiteId = null): self
+    public function filterSuite(?int $suiteId = null): self
     {
         $this->filterSuiteId = $suiteId;
 
@@ -77,7 +78,7 @@ class ReportSuiteBuilder
         $hasOnlyOneMainSuite = false;
         $mainSuiteId = null;
         foreach ($this->suites as $suite) {
-            if ($suite->getParentId()) {
+            if ($suite->getParent()) {
                 continue;
             }
 
@@ -157,7 +158,7 @@ class ReportSuiteBuilder
             'totalFailures' => $suite->getTotalFailures(),
             'hasSuites' => $suite->getHasSuites() ? 1 : 0,
             'hasTests' => $suite->getHasTests() ? 1 : 0,
-            'parent_id' => $suite->getParentId(),
+            'parent_id' => $suite->getParent()?->getId(),
             'insertion_date' => $suite->getInsertionDate()
                 ->setTimezone(new \DateTimeZone('-01:00'))
                 ->format('Y-m-d H:i:s'),
@@ -237,7 +238,7 @@ class ReportSuiteBuilder
                 && $suite->getId() !== $this->filterSuiteId) {
                 continue;
             }
-            if ($suite->getParentId() !== $parentId) {
+            if ($suite->getParent()?->getId() !== $parentId) {
                 continue;
             }
 
@@ -289,9 +290,9 @@ class ReportSuiteBuilder
     }
 
     /**
-     * @param array<int, Suite> $suites
+     * @param Collection<int, Suite> $suites
      */
-    private function countStatus(int $basis, array $suites, string $status): int
+    private function countStatus(int $basis, Collection $suites, string $status): int
     {
         $num = $basis;
 
@@ -316,7 +317,7 @@ class ReportSuiteBuilder
     private function filterTree(array $suites): array
     {
         foreach ($suites as $key => &$suite) {
-            $suiteChildren = $suite->getSuites();
+            $suiteChildren = $suite->getSuites()->toArray();
             $numSuiteTests = $suite->getTests()->count();
             if (!empty($suiteChildren)) {
                 $suite->setSuites($this->filterTree($suiteChildren));
