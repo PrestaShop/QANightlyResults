@@ -84,7 +84,7 @@ class ReportPlaywrightImporter extends AbstractReportImporter
         return $execution;
     }
 
-    protected function insertExecutionSuite(Execution $execution, \stdClass $suite): Suite
+    protected function insertExecutionSuite(Execution $execution, \stdClass $suite, ?int $parentSuiteId = null): Suite
     {
         $executionSuite = new Suite();
         $executionSuite
@@ -94,7 +94,7 @@ class ReportPlaywrightImporter extends AbstractReportImporter
             ->setTitle($suite->title)
             ->setHasSuites(false)
             ->setHasTests(!empty($suite->specs))
-            ->setParent(null)
+            ->setParentId($parentSuiteId)
             ->setCampaign($this->extractDataFromFile('/' . $suite->file, 'campaign'))
             ->setFile($this->extractDataFromFile('/' . $suite->file, 'file'))
             ->setInsertionDate(new \DateTime())

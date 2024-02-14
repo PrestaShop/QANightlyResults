@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Entity\Execution;
 use App\Entity\Suite;
 use App\Entity\Test;
-use Doctrine\Common\Collections\Collection;
 
 class ReportSuiteBuilder
 {
@@ -78,7 +77,7 @@ class ReportSuiteBuilder
         $hasOnlyOneMainSuite = false;
         $mainSuiteId = null;
         foreach ($this->suites as $suite) {
-            if ($suite->getParent()) {
+            if ($suite->getParentId()) {
                 continue;
             }
 
@@ -158,7 +157,7 @@ class ReportSuiteBuilder
             'totalFailures' => $suite->getTotalFailures(),
             'hasSuites' => $suite->getHasSuites() ? 1 : 0,
             'hasTests' => $suite->getHasTests() ? 1 : 0,
-            'parent_id' => $suite->getParent()?->getId(),
+            'parent_id' => $suite->getParentId(),
             'insertion_date' => $suite->getInsertionDate()
                 ->setTimezone(new \DateTimeZone('-01:00'))
                 ->format('Y-m-d H:i:s'),
@@ -238,7 +237,7 @@ class ReportSuiteBuilder
                 && $suite->getId() !== $this->filterSuiteId) {
                 continue;
             }
-            if ($suite->getParent()?->getId() !== $parentId) {
+            if ($suite->getParentId() !== $parentId) {
                 continue;
             }
 
@@ -290,9 +289,9 @@ class ReportSuiteBuilder
     }
 
     /**
-     * @param Collection<int, Suite> $suites
+     * @param array<int, Suite> $suites
      */
-    private function countStatus(int $basis, Collection $suites, string $status): int
+    private function countStatus(int $basis, array $suites, string $status): int
     {
         $num = $basis;
 
@@ -317,7 +316,7 @@ class ReportSuiteBuilder
     private function filterTree(array $suites): array
     {
         foreach ($suites as $key => &$suite) {
-            $suiteChildren = $suite->getSuites()->toArray();
+            $suiteChildren = $suite->getSuites();
             $numSuiteTests = $suite->getTests()->count();
             if (!empty($suiteChildren)) {
                 $suite->setSuites($this->filterTree($suiteChildren));
