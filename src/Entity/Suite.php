@@ -64,8 +64,8 @@ class Suite
     #[ORM\Column(name: 'hasTests', nullable: true)]
     private ?bool $hasTests = null;
 
-    #[ORM\ManyToOne(inversedBy: 'suites')]
-    private ?Suite $parent = null;
+    #[ORM\Column(nullable: true)]
+    private ?int $parent_id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTime $insertion_date = null;
@@ -74,14 +74,12 @@ class Suite
     #[ORM\OneToMany(mappedBy: 'suite', targetEntity: Test::class, orphanRemoval: true)]
     private Collection $tests;
 
-    /** @var Collection<int, Suite> */
-    #[ORM\OneToMany(mappedBy: 'parent', targetEntity: Suite::class)]
-    private Collection $suites;
+    /** @var array<int, Suite> */
+    private array $suites = [];
 
     public function __construct()
     {
         $this->tests = new ArrayCollection();
-        $this->suites = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -288,14 +286,14 @@ class Suite
         return $this;
     }
 
-    public function getParent(): ?Suite
+    public function getParentId(): ?int
     {
-        return $this->parent;
+        return $this->parent_id;
     }
 
-    public function setParent(?Suite $parent): static
+    public function setParentId(?int $parent_id): static
     {
-        $this->parent = $parent;
+        $this->parent_id = $parent_id;
 
         return $this;
     }
@@ -358,9 +356,9 @@ class Suite
     }
 
     /**
-     * @return Collection<int, Suite>
+     * @return array<int, Suite>
      */
-    public function getSuites(): Collection
+    public function getSuites(): array
     {
         return $this->suites;
     }
@@ -370,34 +368,7 @@ class Suite
      */
     public function setSuites(array $suites): static
     {
-        foreach ($this->suites as $suite) {
-            $this->removeSuite($suite);
-        }
-        foreach ($suites as $suite) {
-            $this->addSuite($suite);
-        }
-
-        return $this;
-    }
-
-    public function addSuite(Suite $suite): static
-    {
-        if (!$this->suites->contains($suite)) {
-            $this->suites->add($suite);
-            $suite->setParent($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSuite(Suite $suite): static
-    {
-        if ($this->suites->removeElement($suite)) {
-            // set the owning side to null (unless already changed)
-            if ($suite->getParent() === $this) {
-                $suite->setParent(null);
-            }
-        }
+        $this->suites = $suites;
 
         return $this;
     }
