@@ -16,7 +16,7 @@ class ImportPlaywrightCommandTest extends KernelTestCase
         $command = $application->find('nightly:import:playwright');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            '--platform' => 'cli',
+            '--platform' => 'chromium',
             '--campaign' => 'blockwishlist',
             'filename' => 'blockwishlist_2024-01-25-develop.json',
         ]);
