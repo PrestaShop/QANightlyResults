@@ -116,8 +116,8 @@ class ReportControllerTest extends WebTestCase
         return [
             [[], 6],
             [['filter_campaign[0]' => 'functional'], 2],
-            [['filter_platform' => 'chromium'], 3],
-            [['filter_browser' => 'chromium'], 3],
+            [['filter_platform' => 'chromium'], 4],
+            [['filter_browser' => 'chromium'], 4],
             [['filter_version' => 'develop'], 6],
         ];
     }
@@ -149,10 +149,15 @@ class ReportControllerTest extends WebTestCase
         $this->assertEquals($response->headers->get('access-control-allow-origin'), '*');
     }
 
-    public function testReportID(): void
+    /**
+     * @dataProvider dataProviderReportID
+     *
+     * @param array<string> $campaigns
+     */
+    public function testReportID(int $reportId, array $campaigns): void
     {
         $client = static::createClient();
-        $client->request('GET', '/reports/2');
+        $client->request('GET', '/reports/' . $reportId);
         $response = $client->getResponse();
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -167,7 +172,7 @@ class ReportControllerTest extends WebTestCase
         $this->assertArrayHasKey('date', $content);
         $this->assertArrayHasKey('version', $content);
         $this->assertArrayHasKey('campaign', $content);
-        $this->assertContains($content['campaign'], ReportMochaImporter::FILTER_CAMPAIGNS);
+        $this->assertContains($content['campaign'], $campaigns);
         $this->assertArrayHasKey('browser', $content);
         $this->assertContains($content['browser'], ReportMochaImporter::FILTER_PLATFORMS);
         $this->assertArrayHasKey('platform', $content);
@@ -195,9 +200,25 @@ class ReportControllerTest extends WebTestCase
 
         $this->assertArrayHasKey('suites_data', $content);
         $this->assertIsArray($content['suites_data']);
+        $this->assertNotEmpty($content['suites_data']);
         foreach ($content['suites_data'] as $suiteId => $suiteItem) {
             $this->partialTestSuite($content['id'], $suiteId, $suiteItem, null, true);
         }
+    }
+
+    /**
+     * @return array<array<int>>
+     */
+    public static function dataProviderReportID(): array
+    {
+        return [
+            // autoupgrade
+            [1, ReportMochaImporter::FILTER_CAMPAIGNS],
+            // functional
+            [2, ReportMochaImporter::FILTER_CAMPAIGNS],
+            // blockwishlist
+            [3, ReportPlaywrightImporter::FILTER_CAMPAIGNS],
+        ];
     }
 
     public function testReportIDSuiteID(): void
