@@ -71,32 +71,13 @@ class ReportSuiteBuilder
 
     public function build(Execution $execution): self
     {
+        // Fetch suites
         $this->suites = $execution->getSuitesCollection()->toArray();
-
-        // Find if there is main suite id
-        $hasOnlyOneMainSuite = false;
-        $mainSuiteId = null;
-        foreach ($this->suites as $suite) {
-            if ($suite->getParentId()) {
-                continue;
-            }
-
-            if ($hasOnlyOneMainSuite) {
-                // There is another suite with null, so not only one is used
-                // Used for legacy purpose
-                $hasOnlyOneMainSuite = false;
-                $mainSuiteId = null;
-                break;
-            }
-
-            $hasOnlyOneMainSuite = true;
-            $mainSuiteId = $suite->getId();
-        }
         // Extract tests
         $this->tests = $this->getTests();
 
         // Build the recursive tree
-        $this->suites = $this->buildTree($mainSuiteId, true);
+        $this->suites = $this->buildTree(null, true);
         $this->suites = $this->filterTree($this->suites);
 
         return $this;
