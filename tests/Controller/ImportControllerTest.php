@@ -285,6 +285,22 @@ class ImportControllerTest extends WebTestCase
         $this->assertEquals('Unable to retrieve content from GCP URL', $content['message']);
     }
 
+    public function testReportPlaywrightWithNoValidCampaign(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/import/report/playwright?filename=blockwishlist_' . self::DATE_RESOURCE . '-develop.json&token=AZERTY&campaign=ps_notAllowedCampaign&platform=chromium');
+        $response = $client->getResponse();
+
+        $this->assertEquals(403, $response->getStatusCode());
+        $this->assertTrue($response->headers->has('content-type'));
+        $this->assertEquals('application/json', $response->headers->get('content-type'));
+
+        $content = $response->getContent();
+        $content = json_decode($content, true);
+        $this->assertArrayHasKey('message', $content);
+        $this->assertEquals('The campaign "ps_notAllowedCampaign" is not allowed (blockwishlist, ps_cashondelivery).', $content['message']);
+    }
+
     public function testReportPlaywrightOk(): void
     {
         $client = static::createClient();
