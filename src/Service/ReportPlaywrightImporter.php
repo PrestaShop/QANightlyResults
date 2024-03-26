@@ -11,7 +11,10 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ReportPlaywrightImporter extends AbstractReportImporter
 {
-    public const FILTER_CAMPAIGNS = ['blockwishlist'];
+    public const FILTER_CAMPAIGNS = [
+        'blockwishlist',
+        'ps_cashondelivery',
+    ];
 
     private EntityManagerInterface $entityManager;
 

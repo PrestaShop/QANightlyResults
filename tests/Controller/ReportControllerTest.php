@@ -4,6 +4,7 @@ namespace App\Tests\Controller;
 
 use App\Service\ReportMochaImporter;
 use App\Service\ReportPlaywrightImporter;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ReportControllerTest extends WebTestCase
@@ -40,10 +41,9 @@ class ReportControllerTest extends WebTestCase
     }
 
     /**
-     * @dataProvider dataProviderReportFilters
-     *
      * @param array<string, string> $query
      */
+    #[DataProvider('dataProviderReportFilters')]
     public function testReportsFilters(array $query, int $count): void
     {
         $client = static::createClient();
@@ -150,10 +150,9 @@ class ReportControllerTest extends WebTestCase
     }
 
     /**
-     * @dataProvider dataProviderReportID
-     *
      * @param array<string> $campaigns
      */
+    #[DataProvider('dataProviderReportID')]
     public function testReportID(int $reportId, array $campaigns): void
     {
         $client = static::createClient();

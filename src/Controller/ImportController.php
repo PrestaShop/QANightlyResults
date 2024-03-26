@@ -52,7 +52,7 @@ class ImportController extends AbstractController
     #[Route('/hook/reports/import', methods: ['GET'])]
     public function importReportMocha(Request $request): JsonResponse
     {
-        $response = $this->checkAuth($request, ReportMochaImporter::FILTER_CAMPAIGNS);
+        $response = $this->checkAuth($request, ReportMochaImporter::FILTER_CAMPAIGNS, true);
         if ($response instanceof JsonResponse) {
             return $response;
         }
@@ -75,7 +75,7 @@ class ImportController extends AbstractController
     #[Route('/import/report/playwright', methods: ['GET'])]
     public function importReportPlaywright(Request $request): JsonResponse
     {
-        $response = $this->checkAuth($request, ReportPlaywrightImporter::FILTER_CAMPAIGNS);
+        $response = $this->checkAuth($request, ReportPlaywrightImporter::FILTER_CAMPAIGNS, false);
         if ($response instanceof JsonResponse) {
             return $response;
         }
@@ -98,7 +98,7 @@ class ImportController extends AbstractController
     /**
      * @param array<string> $allowedCampaigns
      */
-    private function checkAuth(Request $request, array $allowedCampaigns): ?JsonResponse
+    private function checkAuth(Request $request, array $allowedCampaigns, bool $forceCampaign): ?JsonResponse
     {
         $token = $request->query->get('token');
         $this->filename = $request->query->get('filename');
@@ -155,7 +155,19 @@ class ImportController extends AbstractController
         $this->platform = in_array($this->platform, ReportMochaImporter::FILTER_PLATFORMS) ? $this->platform : ReportMochaImporter::FILTER_PLATFORMS[0];
 
         $this->campaign = $request->query->has('campaign') ? $request->query->get('campaign') : null;
-        $this->campaign = in_array($this->campaign, $allowedCampaigns) ? $this->campaign : $allowedCampaigns[0];
+        if (!in_array($this->campaign, $allowedCampaigns)) {
+            if ($forceCampaign) {
+                $this->campaign = $allowedCampaigns[0];
+            } else {
+                return new JsonResponse([
+                    'message' => sprintf(
+                        'The campaign "%s" is not allowed (%s).',
+                        $this->campaign,
+                        implode(', ', $allowedCampaigns),
+                    ),
+                ], Response::HTTP_FORBIDDEN);
+            }
+        }
 
         $this->startDate = \DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $this->jsonContent->stats->start ?? $this->jsonContent->stats->startTime);
 
