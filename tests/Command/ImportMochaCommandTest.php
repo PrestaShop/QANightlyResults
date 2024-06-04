@@ -18,6 +18,7 @@ class ImportMochaCommandTest extends KernelTestCase
         $commandTester->execute([
             '--platform' => 'cli',
             '--campaign' => 'autoupgrade',
+            '--database' => 'mysql',
             'filename' => 'autoupgrade_2024-01-25-develop.json',
         ]);
 
@@ -37,6 +38,7 @@ class ImportMochaCommandTest extends KernelTestCase
         $commandTester->execute([
             '--platform' => 'chromium',
             '--campaign' => 'functional',
+            '--database' => 'mysql',
             'filename' => '2024-01-25-develop.json',
         ]);
 

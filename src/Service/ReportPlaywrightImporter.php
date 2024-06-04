@@ -30,6 +30,7 @@ class ReportPlaywrightImporter extends AbstractReportImporter
     public function import(
         string $filename,
         string $platform,
+        string $database,
         string $campaign,
         string $version,
         \DateTime $startDate,
@@ -43,6 +44,7 @@ class ReportPlaywrightImporter extends AbstractReportImporter
             ->setRef(date('YmdHis'))
             ->setFilename($filename)
             ->setPlatform($platform)
+            ->setDatabase($database)
             ->setCampaign($campaign)
             ->setStartDate($startDate)
             ->setEndDate($endDate)

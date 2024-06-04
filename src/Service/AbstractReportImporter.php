@@ -11,6 +11,7 @@ abstract class AbstractReportImporter
     abstract public function import(
         string $filename,
         string $platform,
+        string $database,
         string $campaign,
         string $version,
         \DateTime $startDate,
@@ -18,6 +19,10 @@ abstract class AbstractReportImporter
     ): Execution;
 
     public const FILTER_PLATFORMS = ['chromium', 'firefox', 'webkit', 'cli'];
+
+    public const FILTER_DATABASES = ['mysql', 'mariadb'];
+
+    public const REGEX_FILE = '/[0-9]{4}-[0-9]{2}-[0-9]{2}-([^-]*)[-]?(.*)]?\.json/';
 
     protected ExecutionRepository $executionRepository;
 
@@ -39,6 +44,7 @@ abstract class AbstractReportImporter
             $execution->getVersion(),
             $execution->getPlatform(),
             $execution->getCampaign(),
+            $execution->getDatabase(),
             $execution->getStartDate()
         );
         if (!$executionPrevious) {

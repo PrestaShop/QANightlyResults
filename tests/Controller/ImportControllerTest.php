@@ -170,7 +170,7 @@ class ImportControllerTest extends WebTestCase
         $content = $response->getContent();
         $content = json_decode($content, true);
         $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('A similar entry was found (criteria: version develop, platform chromium, campaign functional, date ' . self::DATE_RESOURCE . ').', $content['message']);
+        $this->assertEquals('A similar entry was found (criteria: version develop, platform chromium, campaign functional, database mysql, date ' . self::DATE_RESOURCE . ').', $content['message']);
     }
 
     public function testReportPlaywrightWithNoParameters(): void
@@ -332,6 +332,6 @@ class ImportControllerTest extends WebTestCase
         $content = $response->getContent();
         $content = json_decode($content, true);
         $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('A similar entry was found (criteria: version develop, platform chromium, campaign blockwishlist, date ' . self::DATE_RESOURCE . ').', $content['message']);
+        $this->assertEquals('A similar entry was found (criteria: version develop, platform chromium, campaign blockwishlist, database mysql, date ' . self::DATE_RESOURCE . ').', $content['message']);
     }
 }
