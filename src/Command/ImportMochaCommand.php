@@ -31,12 +31,13 @@ class ImportMochaCommand extends Command
             ->addArgument('filename', InputArgument::REQUIRED)
             ->addOption('platform', 'p', InputOption::VALUE_REQUIRED, '', ReportMochaImporter::FILTER_PLATFORMS[0], ReportMochaImporter::FILTER_PLATFORMS)
             ->addOption('campaign', 'c', InputOption::VALUE_REQUIRED, '', ReportMochaImporter::FILTER_CAMPAIGNS[0], ReportMochaImporter::FILTER_CAMPAIGNS)
+            ->addOption('database', 'd', InputOption::VALUE_REQUIRED, '', ReportMochaImporter::FILTER_DATABASES[0], ReportMochaImporter::FILTER_DATABASES)
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/', $input->getArgument('filename'), $matchesVersion);
+        preg_match(ReportMochaImporter::REGEX_FILE, $input->getArgument('filename'), $matchesVersion);
         if (!isset($matchesVersion[1]) || strlen($matchesVersion[1]) < 1) {
             $output->writeln(sprintf(
                 '<error>Version found not correct (%s) from filename %s</error>',
@@ -69,6 +70,7 @@ class ImportMochaCommand extends Command
         $this->reportImporter->import(
             $input->getArgument('filename'),
             $input->getOption('platform'),
+            $input->getOption('database'),
             $input->getOption('campaign'),
             $matchesVersion[1],
             $startDate,

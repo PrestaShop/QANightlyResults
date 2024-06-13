@@ -27,6 +27,7 @@ class ReportMochaImporter extends AbstractReportImporter
     public function import(
         string $filename,
         string $platform,
+        string $database,
         string $campaign,
         string $version,
         \DateTime $startDate,
@@ -37,6 +38,7 @@ class ReportMochaImporter extends AbstractReportImporter
             ->setRef(date('YmdHis'))
             ->setFilename($filename)
             ->setPlatform($platform)
+            ->setDatabase($database)
             ->setCampaign($campaign)
             ->setStartDate($startDate)
             ->setEndDate(\DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $jsonContent->stats->end))

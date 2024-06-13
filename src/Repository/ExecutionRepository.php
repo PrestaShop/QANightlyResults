@@ -25,16 +25,19 @@ class ExecutionRepository extends ServiceEntityRepository
         string $version,
         string $platform,
         string $campaign,
+        string $database,
         string $date
     ): ?Execution {
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')
             ->andWhere('e.platform = :platform')
             ->andWhere('e.campaign = :campaign')
+            ->andWhere('e.database = :database')
             ->andWhere('DATE(e.start_date) = :date')
             ->setParameter('version', $version)
             ->setParameter('platform', $platform)
             ->setParameter('campaign', $campaign)
+            ->setParameter('database', $database)
             ->setParameter('date', $date)
             ->orderBy('e.start_date', 'DESC');
 
@@ -47,16 +50,19 @@ class ExecutionRepository extends ServiceEntityRepository
         string $version,
         string $platform,
         string $campaign,
+        string $database,
         \DateTimeInterface $dateUntil
     ): ?Execution {
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')
             ->andWhere('e.platform = :platform')
             ->andWhere('e.campaign = :campaign')
+            ->andWhere('e.database = :database')
             ->andWhere('e.start_date < :dateUntil')
             ->setParameter('version', $version)
             ->setParameter('platform', $platform)
             ->setParameter('campaign', $campaign)
+            ->setParameter('database', $database)
             ->setParameter('dateUntil', $dateUntil)
             ->orderBy('e.start_date', 'DESC');
 

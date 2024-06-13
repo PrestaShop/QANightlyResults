@@ -82,6 +82,8 @@ class ReportControllerTest extends WebTestCase
             $this->assertArrayHasKey('platform', $item);
             $this->assertContains($item['platform'], ReportMochaImporter::FILTER_PLATFORMS);
             $this->assertEquals($item['browser'], $item['platform']);
+            $this->assertArrayHasKey('database', $item);
+            $this->assertContains($item['database'], ReportMochaImporter::FILTER_DATABASES);
             if (isset($query['filter_platform'])) {
                 $this->assertEquals($item['platform'], $query['filter_platform']);
             }
@@ -177,6 +179,8 @@ class ReportControllerTest extends WebTestCase
         $this->assertArrayHasKey('platform', $content);
         $this->assertContains($content['platform'], ReportMochaImporter::FILTER_PLATFORMS);
         $this->assertEquals($content['browser'], $content['platform']);
+        $this->assertArrayHasKey('database', $content);
+        $this->assertContains($content['database'], ReportMochaImporter::FILTER_DATABASES);
         $this->assertArrayHasKey('start_date', $content);
         $this->assertArrayHasKey('end_date', $content);
         $this->assertArrayHasKey('duration', $content);

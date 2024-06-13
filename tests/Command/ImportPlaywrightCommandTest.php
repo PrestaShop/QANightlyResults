@@ -18,6 +18,7 @@ class ImportPlaywrightCommandTest extends KernelTestCase
         $commandTester->execute([
             '--platform' => 'chromium',
             '--campaign' => 'blockwishlist',
+            '--database' => 'mysql',
             'filename' => 'blockwishlist_2024-01-25-develop.json',
         ]);
 

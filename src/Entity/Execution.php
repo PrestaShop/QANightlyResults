@@ -40,6 +40,9 @@ class Execution
     #[ORM\Column(length: 50, nullable: false)]
     private string $platform = 'chromium';
 
+    #[ORM\Column(name: '`database`', length: 50, nullable: false)]
+    private string $database = 'mysql';
+
     #[ORM\Column(nullable: true)]
     private ?int $suites = null;
 
@@ -82,9 +85,21 @@ class Execution
         $this->suitesCollection = new ArrayCollection();
     }
 
+    public function getDatabase(): ?string
+    {
+        return $this->database;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setDatabase(string $database): static
+    {
+        $this->database = $database;
+
+        return $this;
     }
 
     public function setId(int $id): static
