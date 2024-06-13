@@ -80,6 +80,7 @@ class ReportController extends AbstractController
                 'campaign' => $execution->getCampaign(),
                 'browser' => $execution->getPlatform(), // retro-compatibility
                 'platform' => $execution->getPlatform(),
+                'database' => $execution->getDatabase(),
                 'start_date' => $execution->getStartDate()->format('Y-m-d H:i:s'),
                 'end_date' => $execution->getEndDate()->format('Y-m-d H:i:s'),
                 'duration' => $execution->getDuration(),
@@ -134,6 +135,7 @@ class ReportController extends AbstractController
             'campaign' => $execution->getCampaign(),
             'browser' => $execution->getPlatform(), // retro-compatibility
             'platform' => $execution->getPlatform(),
+            'database' => $execution->getDatabase(),
             'start_date' => $execution->getStartDate()->setTimezone(new \DateTimeZone('-01:00'))->format('Y-m-d H:i:s'),
             'end_date' => $execution->getEndDate()->setTimezone(new \DateTimeZone('-01:00'))->format('Y-m-d H:i:s'),
             'duration' => $execution->getDuration(),

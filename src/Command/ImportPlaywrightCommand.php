@@ -31,12 +31,13 @@ class ImportPlaywrightCommand extends Command
             ->addArgument('filename', InputArgument::REQUIRED)
             ->addOption('platform', 'p', InputOption::VALUE_REQUIRED, '', ReportPlaywrightImporter::FILTER_PLATFORMS[0], ReportPlaywrightImporter::FILTER_PLATFORMS)
             ->addOption('campaign', 'c', InputOption::VALUE_REQUIRED, '', ReportPlaywrightImporter::FILTER_CAMPAIGNS[0], ReportPlaywrightImporter::FILTER_CAMPAIGNS)
+            ->addOption('database', 'd', InputOption::VALUE_REQUIRED, '', ReportPlaywrightImporter::FILTER_DATABASES[0], ReportPlaywrightImporter::FILTER_DATABASES)
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/', $input->getArgument('filename'), $matchesVersion);
+        preg_match(ReportPlaywrightImporter::REGEX_FILE, $input->getArgument('filename'), $matchesVersion);
         if (!isset($matchesVersion[1]) || strlen($matchesVersion[1]) < 1) {
             $output->writeln(sprintf(
                 '<error>Version found not correct (%s) from filename %s</error>',
@@ -69,6 +70,7 @@ class ImportPlaywrightCommand extends Command
         $this->reportImporter->import(
             $input->getArgument('filename'),
             $input->getOption('platform'),
+            $input->getOption('database'),
             $input->getOption('campaign'),
             $matchesVersion[1],
             $startDate,

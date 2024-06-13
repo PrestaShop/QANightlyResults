@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\ExecutionRepository;
+use App\Service\AbstractReportImporter;
 use App\Service\ReportMochaImporter;
 use App\Service\ReportPlaywrightImporter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,6 +31,8 @@ class ImportController extends AbstractController
     private ?\stdClass $jsonContent;
 
     private ?string $platform;
+
+    private ?string $database;
 
     private ?string $campaign;
 
@@ -60,6 +63,7 @@ class ImportController extends AbstractController
         $execution = $this->reportMochaImporter->import(
             $this->filename,
             $this->platform,
+            $this->database,
             $this->campaign,
             $this->version,
             $this->startDate,
@@ -83,6 +87,7 @@ class ImportController extends AbstractController
         $execution = $this->reportPlaywrightImporter->import(
             $this->filename,
             $this->platform,
+            $this->database,
             $this->campaign,
             $this->version,
             $this->startDate,
@@ -114,7 +119,7 @@ class ImportController extends AbstractController
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        preg_match('/[0-9]{4}-[0-9]{2}-[0-9]{2}-(.*)?\.json/', $this->filename, $matchesVersion);
+        preg_match(AbstractReportImporter::REGEX_FILE, $this->filename, $matchesVersion);
         if (!isset($matchesVersion[1])) {
             return new JsonResponse([
                 'message' => 'Could not retrieve version from filename',
@@ -154,6 +159,9 @@ class ImportController extends AbstractController
         );
         $this->platform = in_array($this->platform, ReportMochaImporter::FILTER_PLATFORMS) ? $this->platform : ReportMochaImporter::FILTER_PLATFORMS[0];
 
+        $this->database = $request->query->has('database') ? $request->query->get('database') : null;
+        $this->database = in_array($this->database, ReportMochaImporter::FILTER_DATABASES) ? $this->database : ReportMochaImporter::FILTER_DATABASES[0];
+
         $this->campaign = $request->query->has('campaign') ? $request->query->get('campaign') : null;
         if (!in_array($this->campaign, $allowedCampaigns)) {
             if ($forceCampaign) {
@@ -172,13 +180,20 @@ class ImportController extends AbstractController
         $this->startDate = \DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $this->jsonContent->stats->start ?? $this->jsonContent->stats->startTime);
 
         // Check if there is no similar entry
-        if (!$force && $this->executionRepository->findOneByNightly($this->version, $this->platform, $this->campaign, $this->startDate->format('Y-m-d'))) {
+        if (!$force && $this->executionRepository->findOneByNightly(
+            $this->version,
+            $this->platform,
+            $this->campaign,
+            $this->database,
+            $this->startDate->format('Y-m-d')
+        )) {
             return new JsonResponse([
                 'message' => sprintf(
-                    'A similar entry was found (criteria: version %s, platform %s, campaign %s, date %s).',
+                    'A similar entry was found (criteria: version %s, platform %s, campaign %s, database %s, date %s).',
                     $this->version,
                     $this->platform,
                     $this->campaign,
+                    $this->database,
                     $this->startDate->format('Y-m-d')
                 ),
             ], Response::HTTP_FORBIDDEN);
