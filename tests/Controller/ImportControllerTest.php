@@ -298,7 +298,7 @@ class ImportControllerTest extends WebTestCase
         $content = $response->getContent();
         $content = json_decode($content, true);
         $this->assertArrayHasKey('message', $content);
-        $this->assertEquals('The campaign "ps_notAllowedCampaign" is not allowed (blockwishlist, ps_cashondelivery).', $content['message']);
+        $this->assertEquals('The campaign "ps_notAllowedCampaign" is not allowed (blockwishlist, ps_cashondelivery, autoupgrade).', $content['message']);
     }
 
     public function testReportPlaywrightOk(): void
