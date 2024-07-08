@@ -14,6 +14,7 @@ class ReportPlaywrightImporter extends AbstractReportImporter
     public const FILTER_CAMPAIGNS = [
         'blockwishlist',
         'ps_cashondelivery',
+        'autoupgrade',
     ];
 
     private EntityManagerInterface $entityManager;
