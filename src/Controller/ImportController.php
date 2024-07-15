@@ -126,7 +126,7 @@ class ImportController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->version = $matchesVersion[1];
+        $this->version = \str_replace('_', ' ', $matchesVersion[1]);
         if (strlen($this->version) < 1) {
             return new JsonResponse([
                 'message' => sprintf(
