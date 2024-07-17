@@ -19,7 +19,7 @@ class Execution
     #[ORM\Column(type: Types::BIGINT)]
     private ?string $ref = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $filename = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
