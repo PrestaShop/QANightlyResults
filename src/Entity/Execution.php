@@ -31,7 +31,7 @@ class Execution
     #[ORM\Column]
     private ?int $duration = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 255)]
     private ?string $version = null;
 
     #[ORM\Column(length: 50)]
