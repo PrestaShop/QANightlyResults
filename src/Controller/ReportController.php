@@ -25,7 +25,7 @@ class ReportController extends AbstractController
         ExecutionRepository $executionRepository,
         ReportLister $reportLister,
         ReportSuiteBuilder $reportSuiteBuilder,
-        string $nightlyReportPath
+        string $nightlyReportPath,
     ) {
         $this->executionRepository = $executionRepository;
         $this->reportLister = $reportLister;

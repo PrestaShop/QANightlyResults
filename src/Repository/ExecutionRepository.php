@@ -26,7 +26,7 @@ class ExecutionRepository extends ServiceEntityRepository
         string $platform,
         string $campaign,
         string $database,
-        string $date
+        string $date,
     ): ?Execution {
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')
@@ -51,7 +51,7 @@ class ExecutionRepository extends ServiceEntityRepository
         string $platform,
         string $campaign,
         string $database,
-        \DateTimeInterface $dateUntil
+        \DateTimeInterface $dateUntil,
     ): ?Execution {
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')

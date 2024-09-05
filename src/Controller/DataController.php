@@ -74,7 +74,7 @@ class DataController extends AbstractController
      */
     private function getBadgeData(
         Request $request,
-        bool $hexColor
+        bool $hexColor,
     ): ?array {
         $branch = (string) $request->query->get('branch', 'develop');
         $date = $request->query->get('date');
