@@ -43,7 +43,7 @@ class ImportController extends AbstractController
         ReportMochaImporter $reportMochaImporter,
         ReportPlaywrightImporter $reportPlaywrightImporter,
         string $nightlyToken,
-        string $nightlyReportPath
+        string $nightlyReportPath,
     ) {
         $this->executionRepository = $executionRepository;
         $this->reportMochaImporter = $reportMochaImporter;

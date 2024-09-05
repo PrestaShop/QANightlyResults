@@ -15,7 +15,7 @@ abstract class AbstractReportImporter
         string $campaign,
         string $version,
         \DateTime $startDate,
-        \stdClass $jsonContent
+        \stdClass $jsonContent,
     ): Execution;
 
     public const FILTER_PLATFORMS = ['chromium', 'firefox', 'webkit', 'cli'];
