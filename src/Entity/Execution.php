@@ -330,7 +330,7 @@ class Execution
         return $this->insertion_end_date;
     }
 
-    public function setInsertionEndDate(\DateTimeInterface $insertion_end_date): static
+    public function setInsertionEndDate(?\DateTimeInterface $insertion_end_date): static
     {
         $this->insertion_end_date = $insertion_end_date;
 
