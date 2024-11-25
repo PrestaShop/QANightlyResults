@@ -1,4 +1,4 @@
-FROM php:8.3-apache as builder
+FROM php:8.4-apache as builder
 
 RUN apt-get update && \
     apt-get install -y \
@@ -15,7 +15,7 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer install
 
 
-FROM php:8.3-apache
+FROM php:8.4-apache
 
 RUN apt-get update && \
     apt-get install -y \ 
