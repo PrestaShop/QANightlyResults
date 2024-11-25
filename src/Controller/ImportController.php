@@ -26,7 +26,7 @@ class ImportController extends AbstractController
 
     private ?string $filename;
 
-    private ?string $version;
+    private string $version;
 
     private ?\stdClass $jsonContent;
 
@@ -36,7 +36,7 @@ class ImportController extends AbstractController
 
     private ?string $campaign;
 
-    private ?\DateTime $startDate;
+    private \DateTime $startDate;
 
     public function __construct(
         ExecutionRepository $executionRepository,

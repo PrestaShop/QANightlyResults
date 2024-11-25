@@ -210,7 +210,7 @@ class ReportControllerTest extends WebTestCase
     }
 
     /**
-     * @return array<array<int>>
+     * @return array<int, list<int|list<string>>>
      */
     public static function dataProviderReportID(): array
     {
@@ -421,12 +421,10 @@ class ReportControllerTest extends WebTestCase
     }
 
     /**
-     * @param array<string, string> $item
+     * @param array<string, string|int> $item
      */
     private function partialTestSuite(int $executionId, int $id, array $item, ?int $idParent = null, ?bool $hasChildrenData = null): void
     {
-        $this->assertIsInt($id);
-
         $this->assertArrayHasKey('id', $item);
         $this->assertIsInt($item['id']);
         $this->assertEquals($item['id'], $id);
@@ -465,15 +463,18 @@ class ReportControllerTest extends WebTestCase
 
         if ($item['hasSuites']) {
             $this->assertArrayHasKey('suites', $item);
+            // @phpstan-ignore-next-line : https://github.com/phpstan/phpstan/issues/8438
             $this->assertIsArray($item['suites']);
             $this->assertGreaterThan(0, count($item['suites']));
             foreach ($item['suites'] as $suiteChildId => $suiteChild) {
+                // @phpstan-ignore-next-line : https://github.com/phpstan/phpstan/issues/8438
                 $this->assertIsInt($suiteChildId);
                 $this->partialTestSuite($executionId, $suiteChildId, $suiteChild, $id);
             }
         }
         if ($item['hasTests']) {
             $this->assertArrayHasKey('tests', $item);
+            // @phpstan-ignore-next-line : https://github.com/phpstan/phpstan/issues/8438
             $this->assertIsArray($item['tests']);
             $this->assertGreaterThan(0, count($item['tests']));
             foreach ($item['tests'] as $testItem) {
@@ -483,6 +484,7 @@ class ReportControllerTest extends WebTestCase
 
         if (is_bool($hasChildrenData) && $hasChildrenData) {
             $this->assertArrayHasKey('childrenData', $item);
+            // @phpstan-ignore-next-line : https://github.com/phpstan/phpstan/issues/8438
             $this->assertIsArray($item['childrenData']);
             $this->assertArrayHasKey('totalPasses', $item['childrenData']);
             $this->assertIsInt($item['childrenData']['totalPasses']);
@@ -502,7 +504,7 @@ class ReportControllerTest extends WebTestCase
     }
 
     /**
-     * @param array<string, string> $test
+     * @param array<string, string|int> $test
      */
     private function partialTestTest(int $suiteId, array $test): void
     {
