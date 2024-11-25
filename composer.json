@@ -22,7 +22,7 @@
     "require-dev": {
         "ergebnis/composer-normalize": "^2.41",
         "friendsofphp/php-cs-fixer": "^3.45",
-        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^11.0",
         "symfony/browser-kit": "~7.1.0",
         "symfony/css-selector": "~7.1.0",
