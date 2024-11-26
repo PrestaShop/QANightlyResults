@@ -108,7 +108,7 @@ class ReportSuiteBuilder
     }
 
     /**
-     * @return array<string, string|array<string, string>>
+     * @return array<string, array<int|string, array<string, array<string, string>|string>|int>|int|string|null>
      */
     private function formatSuite(Suite $suite): array
     {
@@ -157,7 +157,7 @@ class ReportSuiteBuilder
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, int|string|null>
      */
     private function formatTest(Test $test): array
     {

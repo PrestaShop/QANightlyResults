@@ -10,9 +10,9 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<Execution>
  *
  * @method Execution|null find($id, $lockMode = null, $lockVersion = null)
- * @method Execution|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Execution|null findOneBy(array<string, mixed> $criteria, array<string, mixed> $orderBy = null)
  * @method Execution[] findAll()
- * @method Execution[] findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Execution[] findBy(array<string, mixed> $criteria, array<string, mixed> $orderBy = null, $limit = null, $offset = null)
  */
 class ExecutionRepository extends ServiceEntityRepository
 {
@@ -26,7 +26,7 @@ class ExecutionRepository extends ServiceEntityRepository
         string $platform,
         string $campaign,
         string $database,
-        string $date
+        string $date,
     ): ?Execution {
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')
@@ -51,7 +51,7 @@ class ExecutionRepository extends ServiceEntityRepository
         string $platform,
         string $campaign,
         string $database,
-        \DateTimeInterface $dateUntil
+        \DateTimeInterface $dateUntil,
     ): ?Execution {
         $qb = $this->createQueryBuilder('e')
             ->andWhere('e.version = :version')

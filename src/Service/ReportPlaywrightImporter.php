@@ -22,7 +22,7 @@ class ReportPlaywrightImporter extends AbstractReportImporter
     public function __construct(
         EntityManagerInterface $entityManager,
         ExecutionRepository $executionRepository,
-        TestRepository $testRepository
+        TestRepository $testRepository,
     ) {
         parent::__construct($executionRepository, $testRepository);
         $this->entityManager = $entityManager;
@@ -35,7 +35,7 @@ class ReportPlaywrightImporter extends AbstractReportImporter
         string $campaign,
         string $version,
         \DateTime $startDate,
-        \stdClass $jsonContent
+        \stdClass $jsonContent,
     ): Execution {
         $endDate = clone $startDate;
         $endDate->modify('+ ' . (int) $jsonContent->stats->duration . ' milliseconds');

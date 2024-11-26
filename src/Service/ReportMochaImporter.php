@@ -18,7 +18,7 @@ class ReportMochaImporter extends AbstractReportImporter
     public function __construct(
         EntityManagerInterface $entityManager,
         ExecutionRepository $executionRepository,
-        TestRepository $testRepository
+        TestRepository $testRepository,
     ) {
         parent::__construct($executionRepository, $testRepository);
         $this->entityManager = $entityManager;
@@ -31,7 +31,7 @@ class ReportMochaImporter extends AbstractReportImporter
         string $campaign,
         string $version,
         \DateTime $startDate,
-        \stdClass $jsonContent
+        \stdClass $jsonContent,
     ): Execution {
         $execution = new Execution();
         $execution
