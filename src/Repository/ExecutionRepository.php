@@ -124,4 +124,27 @@ class ExecutionRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function count(array $criteria = []): int
+    {
+        $qb = $this->createQueryBuilder('e');
+        $qb->select($qb->expr()->count('e'));
+        if (isset($criteria['platform'])) {
+            $qb
+                ->andWhere('e.platform = :platform')
+                ->setParameter('platform', $criteria['platform']);
+        }
+        if (isset($criteria['campaign'])) {
+            $qb
+                ->andWhere('e.campaign = :campaign')
+                ->setParameter('campaign', $criteria['campaign']);
+        }
+        if (isset($criteria['version'])) {
+            $qb
+                ->andWhere('e.version = :version')
+                ->setParameter('version', $criteria['version']);
+        }
+
+        return $qb->getQuery()->getSingleScalarResult();
+    }
 }

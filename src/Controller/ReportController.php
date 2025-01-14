@@ -38,6 +38,9 @@ class ReportController extends AbstractController
     {
         $executionFilters = [];
         $requestParams = $request->query->all();
+        $paramPage = $requestParams['page'] ?? 1;
+        $paramLimit = $requestParams['limit'] ?? 20;
+        $paramLimit = $paramLimit > 100 ? 100 : $paramLimit;
 
         if (isset($requestParams['filter_platform'])) {
             $executionFilters['platform'] = $requestParams['filter_platform'];
@@ -52,7 +55,9 @@ class ReportController extends AbstractController
         }
         $executions = $this->executionRepository->findBy($executionFilters, [
             'start_date' => 'DESC',
-        ]);
+        ], $paramLimit, ($paramPage - 1) * $paramLimit);
+
+        $numExecutions = $this->executionRepository->count($executionFilters);
 
         $reportListing = [];
         if (!isset($executionFilters['platform']) && !isset($executionFilters['campaign'])) {
@@ -108,7 +113,10 @@ class ReportController extends AbstractController
             return ($tm1 < $tm2) ? 1 : (($tm1 > $tm2) ? -1 : 0);
         });
 
-        return new JsonResponse($reports);
+        $response = new JsonResponse(['count' => $numExecutions, 'reports' => $reports]);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+
+        return $response;
     }
 
     #[Route('/reports/{idReport}', methods: ['GET'])]

@@ -55,9 +55,12 @@ class ReportControllerTest extends WebTestCase
         $this->assertEquals('application/json', $response->headers->get('content-type'));
 
         $content = json_decode($response->getContent(), true);
-        $this->assertEquals($count, count($content));
+        $this->assertArrayHasKey('count', $content);
+        $this->assertGreaterThan(0, $content['count']);
+        $this->assertArrayHasKey('reports', $content);
+        $this->assertEquals($count, count($content['reports']));
         $datePrevious = null;
-        foreach ($content as $item) {
+        foreach ($content['reports'] as $item) {
             if ($datePrevious) {
                 $this->assertGreaterThanOrEqual($item['start_date'], $datePrevious);
             }
