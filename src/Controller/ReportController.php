@@ -186,12 +186,6 @@ class ReportController extends AbstractController
             ->toArrayNth(0);
 
         unset($return['childrenData']);
-        foreach ($return['suites'] as &$returnSuite) {
-            if (!is_array($returnSuite)) {
-                continue;
-            }
-            unset($returnSuite['childrenData']);
-        }
 
         return new JsonResponse($return);
     }
