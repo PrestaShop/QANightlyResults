@@ -151,8 +151,7 @@ class ImportController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $force = $request->query->get('force', false);
-        $force = is_bool($force) ? $force : false;
+        $force = $request->query->getBoolean('force', false);
 
         $this->platform = $request->query->has('platform') ? $request->query->get('platform') : (
             $request->query->has('browser') ? $request->query->get('browser') : null
