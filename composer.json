@@ -15,7 +15,7 @@
         "symfony/console": "~8.0.1",
         "symfony/dotenv": "~8.0.0",
         "symfony/flex": "^2",
-        "symfony/framework-bundle": "~7.3.0",
+        "symfony/framework-bundle": "~8.0.1",
         "symfony/runtime": "~8.0.1",
         "symfony/yaml": "~8.0.1"
     },
