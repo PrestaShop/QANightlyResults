@@ -82,11 +82,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
+        uses: shogo82148/actions-setup-mysql@v1
         with:
-          mysql version: '8.0'
-          mysql database: 'qanightlyresults'
-          mysql root password: 'root'
+          mysql-version: '8.0'
+          root-password: 'root'
+
+      - name: Create database
+        run: mysql -h127.0.0.1 -uroot -proot -e "create schema qanightlyresults;"
 
       - uses: actions/checkout@v3
 
@@ -95,9 +97,6 @@ jobs:
 
       - name: Composer Install
         run: composer install --ansi --prefer-dist --no-interaction --no-progress
-
-      - name: Change MySQL authentication method
-        run: sleep 15 && mysql -h127.0.0.1 -uroot -proot -e "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'root'; FLUSH PRIVILEGES;"
 
       - name: Setup database
         run: php bin/console doctrine:schema:update --dump-sql --force --env=test

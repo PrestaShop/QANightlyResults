@@ -17,7 +17,7 @@ class ReportControllerTest extends WebTestCase
     {
         $numPage = 1;
         do {
-            $data = file_get_contents('https://api-nightly.prestashop-project.org/reports?filter_version=develop&filter_campaign=functional&limit=100&page=' . $numPage);
+            $data = self::getContents('https://api-nightly.prestashop-project.org/reports?filter_version=develop&filter_campaign=functional&limit=100&page=' . $numPage);
             $data = json_decode($data, true);
             foreach ($data['reports'] as $datum) {
                 if ($datum['date'] === self::DATE_RESOURCE) {
@@ -28,9 +28,25 @@ class ReportControllerTest extends WebTestCase
             ++$numPage;
         } while (self::$reportId == 0);
 
-        $data = file_get_contents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId);
+        $data = self::getContents('https://api-nightly.prestashop-project.org/reports/' . self::$reportId);
         $data = json_decode($data, true);
         self::$suiteId = min(array_keys($data['suites_data']));
+    }
+
+    private static function getContents(string $url): string
+    {
+        $hCurl = curl_init();
+
+        curl_setopt($hCurl, CURLOPT_URL, $url);
+        curl_setopt($hCurl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($hCurl, CURLOPT_TIMEOUT, 120);
+        curl_setopt($hCurl, CURLOPT_CONNECTTIMEOUT, 120);
+
+        $result = curl_exec($hCurl);
+
+        curl_close($hCurl);
+
+        return $result;
     }
 
     public function testCorsReports(): void
