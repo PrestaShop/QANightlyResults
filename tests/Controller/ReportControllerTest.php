@@ -38,14 +38,14 @@ class ReportControllerTest extends WebTestCase
         $hCurl = curl_init();
 
         curl_setopt($hCurl, CURLOPT_URL, $url);
-        curl_setopt($hCurl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($hCurl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($hCurl, CURLOPT_TIMEOUT, 120);
         curl_setopt($hCurl, CURLOPT_CONNECTTIMEOUT, 120);
 
         $result = curl_exec($hCurl);
 
         curl_close($hCurl);
-        
+
         return $result;
     }
 
